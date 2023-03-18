@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: xplatj.xplatj-commonj.xplatj-commonj">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/commonj/build/libs/xplatj-commonj.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
