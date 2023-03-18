@@ -1,0 +1,4 @@
+
+cfg.targetPlatform="win-x86-64"
+//cfg.targetPlatform="win-i686"
+//cfg.targetPlatform="common-headless"
