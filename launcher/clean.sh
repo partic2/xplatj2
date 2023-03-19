@@ -1,3 +1,1 @@
-rm -R build dist
-
-mkdir dist
+rm -R build
