@@ -1,0 +1,9 @@
+# '#' mean comment.
+
+#SKIP_ANDROID_BUILD=False
+
+#SKIP_NATIVE_BUILD=False
+
+#ANDROID_ABI=['armeabi-v7a','arm64-v8a']
+
+#ANDROID_NATIVE_API_LEVEL='21'
