@@ -93,8 +93,8 @@ def BuildAndroidRelease():
         sodir=sourceroot+'/launcher/build/android/'+abi
         shutil.copy(sodir+'/libSDLLoader.so',\
                 dstsodir+'/libSDLLoader.so')
-
-    shutil.rmtree(sourceroot+'/android-project/src/main/java/org/libsdl')
+    if os.path.exists(sourceroot+'/android-project/src/main/java/org/libsdl'):
+        shutil.rmtree(sourceroot+'/android-project/src/main/java/org/libsdl')
     shutil.copytree(sourceroot+'/SDL/android-project/app/src/main/java/org/libsdl',\
         sourceroot+'/android-project/src/main/java/org/libsdl')
     os.chdir(sourceroot+'/android-project')
@@ -122,16 +122,17 @@ def BuildNativeRelease():
     assert gradle!=None
     PrintAndRun(gradle+' distZip')
     os.chdir(sourceroot+'/launcher')
-    os.makedirs(sourceroot+'/launcher/build/xplatj-native-release',exist_ok=True)
+    outdir=sourceroot+'/launcher/build/xplatj-native-release'
+    os.makedirs(outdir,exist_ok=True)
     # TODO: what should I copy on linux?
     copyFiles=['launcher','launcher.exe','build-sdl/SDL2.dll','SDLLoader.exe','build-sdl/libSDL2.so','SDLLoader']
     for t1 in copyFiles:
         if os.path.exists(builddir+'/'+t1):
             shutil.copy(builddir+'/'+t1,\
-        sourceroot+'/launcher/build/xplatj-native-release/'+t1.split('/')[-1])
-
+        outdir+'/'+t1.split('/')[-1])
     shutil.unpack_archive(sourceroot+'/javase-project/build/distributions/xplatj.zip',\
-        sourceroot+'/launcher/build/xplatj-native-release')
+        sourceroot+'launcher/build/native/jse')
+    shutil.copytree(sourceroot+'launcher/build/native/jse/xplatj',outdir,dirs_exist_ok=True)
         
     os.chdir(sourceroot+'/launcher')
 
