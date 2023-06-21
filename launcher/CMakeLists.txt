@@ -4,13 +4,15 @@ if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif()
 
-
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 project(xplat-launcher)
 
+set(PWART_SYSLIB_ENABLED ON)
+get_filename_component(DEPS_SOURCE_DIRS ../ ABSOLUTE)
 
 add_subdirectory(../SDL ./build-sdl)
-add_subdirectory(../tinycc-build ./build-tcc)
+add_subdirectory(../pwart ./build-pwart)
 
 
 if(ANDROID)
@@ -29,7 +31,7 @@ if(WIN32)
 endif()
 
 
-list(APPEND link_list tcc SDL2main SDL2)
+list(APPEND link_list pwart pwart_syslib SDL2main SDL2)
 
 target_link_libraries(SDLLoader ${link_list})
 

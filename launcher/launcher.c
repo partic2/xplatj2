@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 	free(currentDir);
   }
   
-
+  mkdir("./data");
   do {
     flatConfigFile = fopen("./res/flat", "r");
     if (flatConfigFile == NULL) {
@@ -61,9 +61,9 @@ int main(int argc, char *argv[]) {
       fclose(flatConfigFile);
 	  
 #ifdef __WIN32
-      system(".\\bin\\SDLLoader");
+      system(".\\SDLLoader");
 #elif defined __linux
-      system("./bin/SDLLoader");
+      system("./SDLLoader");
 #endif
     } else {
 	  free(buf);
