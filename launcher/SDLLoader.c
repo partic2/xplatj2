@@ -18,10 +18,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <libtcc.h>
+#include <pwart.h>
+#include <pwart_syslib.h>
 #include <string.h>
 
-#include "sljit_allocator.c"
 
 
 
@@ -44,88 +44,81 @@ int log3(const char *str){
 	return 0;
 }
 
-struct c_symbol initSym[]={
-    //memory
-    add_symbol(malloc),add_symbol(realloc),add_symbol(free),add_symbol(memmove),add_symbol(memcpy),
-    //basic IO 
-    add_symbol(fopen),add_symbol(fclose),add_symbol(fread),add_symbol(fwrite),add_symbol(fseek),add_symbol(log3),
-    //environ
-    add_symbol(getenv),add_symbol(putenv),
-    //TinyCC API
-    add_symbol(tcc_new),add_symbol(tcc_delete),add_symbol(tcc_set_lib_path),
-    add_symbol(tcc_set_error_func),add_symbol(tcc_get_error_func),add_symbol(tcc_get_error_opaque),
-    add_symbol(tcc_set_options),add_symbol(tcc_add_include_path),add_symbol(tcc_add_sysinclude_path),
-    add_symbol(tcc_define_symbol),add_symbol(tcc_undefine_symbol),add_symbol(tcc_add_file),
-    add_symbol(tcc_compile_string),add_symbol(tcc_set_output_type),add_symbol(tcc_add_library_path),
-    add_symbol(tcc_add_symbol),add_symbol(tcc_output_file),
-    add_symbol(tcc_relocate),add_symbol(tcc_get_symbol),add_symbol(tcc_list_symbols),
-    //SLJIT allocator
-    add_symbol(sljit_malloc_exec),add_symbol(sljit_free_exec),add_symbol(sljit_free_unused_memory_exec),
-    //SDL
-    add_symbol(SDL_LoadFunction),add_symbol(SDL_LoadObject),add_symbol(SDL_UnloadObject),
-    //end
-    {"",NULL}
-};
 
 typedef void *(*entry_func)(void *);
 
 
 int SDL_main(int argc,char *argv[]){
 	
-    struct stat fileStat;
-    int boot0;
+    pwart_namespace ns=NULL;
+    FILE *boot0=NULL;
+    void *wasmbuf=NULL;
+    void *stackbase=NULL;
+    int nread=0;
+    char *errmsg=NULL;
+    pwart_module_state modstat=NULL;
+    pwart_wasm_function startfn=NULL;
 	
 	log3("SDLLoader startup\n");
 	FILE *redirecterr=freopen(DATA_DIR"/stderr.txt","ab+",stderr);
 	
-    boot0=open(BOOT_DIR"/boot0.c",O_RDONLY);
-	
 	fflush(stdout);
-    #if DEBUG == 1
-	log3("open file..."BOOT_DIR"/boot0.c\n");
-    #endif
-    if(boot0>=0){
-        close(boot0);
-        TCCState *tccStat=tcc_new();
-        tcc_set_options(tccStat,"-nostdlib");
-        tcc_add_file(tccStat,BOOT_DIR"/boot0.c");
-        tcc_set_output_type(tccStat,TCC_OUTPUT_OBJ);
-        tcc_output_file(tccStat,DATA_DIR"/boot0.o");
-        tcc_delete(tccStat);
-    }else{
-		log3("failed\n");
-	}
-	log3("open file..."DATA_DIR"/boot0.o\n");
-    boot0=open(DATA_DIR"/boot0.o",O_RDONLY);
-    if(boot0>0){
-        close(boot0);
-        TCCState *tccStat=tcc_new();
-        tcc_add_file(tccStat,DATA_DIR"/boot0.o");
-        tcc_set_output_type(tccStat,TCC_OUTPUT_MEMORY);
-        tcc_set_options(tccStat,"-nostdlib");
-		log3("register symbol...\n");
-		for(struct c_symbol *p=initSym;p->val!=NULL;p++){
-            tcc_add_symbol(tccStat,p->name,p->val);
+	
+    {
+        char *modpath=BOOT_DIR"/boot0.wasm";
+        void *stackbase = pwart_allocate_stack(64 * 1024);
+        char *err=NULL;
+        void *sp;
+        long filesize;
+        FILE *f;
+        int len;
+        int returncode;
+
+        pwart_wasi_module_set_wasiargs(argc,argv);
+        f = fopen(modpath, "rb");
+
+        fseek(f,0,SEEK_END);
+        filesize=ftell(f);
+
+        if(filesize>1024*1024*1024){
+            log3(".wasm file too large(>1GB)\n");
+            return 1;
         }
-		log3("allocate executable memory...\n");
-        int memRequire=tcc_relocate(tccStat,NULL);
-        void *mem=sljit_malloc_exec(memRequire);
-		log3("relocate elf...\n");
-        tcc_relocate(tccStat,mem);
-		log3("find entry function _start");
-		entry_func entry=(entry_func)tcc_get_symbol(tccStat,"_start");
-        tcc_delete(tccStat);
-		if(entry==NULL){
-			log3("entry function not found...\n");
-		}else{
-			log3("run entry function...\n");
-			entry(NULL);
-		}
-		log3("entry function returned...\n");
-        sljit_free_exec(mem);
-    }else{
-        log3("failed\n");
+        fseek(f,0,SEEK_SET);
+
+        uint8_t *data = malloc(filesize);
+
+        pwart_namespace *ns=pwart_namespace_new();
+        pwart_syslib_load(ns);
+        len = fread(data, 1, filesize, f);
+        fclose(f);
+        pwart_module_state stat=pwart_namespace_define_wasm_module(ns,"__main__",data,len,&err);
+        free(data);
+        if(err!=NULL){
+            printf("error occur:%s\n",err);
+            return 1;
+        }
+        struct pwart_wasm_memory *mem=pwart_get_export_memory(stat,"memory");
+        pwart_wasi_module_set_wasimemory(mem);
+        err=pwart_wasi_module_init();
+        if(err!=NULL){
+            printf("%s\n",err);
+            return 1;
+        }
+        pwart_wasm_function fn=pwart_get_start_function(stat);
+        if(fn!=NULL){
+            pwart_call_wasm_function(fn,stackbase);
+        }
+        fn=pwart_get_export_function(stat,"_start");
+        if(fn!=NULL){
+            pwart_call_wasm_function(fn,stackbase);
+        }else{
+            printf("%s\n","'_start' function not found. ");
+        }
+        pwart_free_stack(stackbase);
+        pwart_namespace_delete(ns);
     }
+	
 	log3("exit\n");
 	if(logfile!=NULL){
 		fclose(logfile);
