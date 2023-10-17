@@ -89,6 +89,7 @@ public class MainActivity extends Activity {
 		try {
 			AssetsCopy.loadAssets(this);
 		} catch (IOException e) {
+			e.printStackTrace();
 			finish();
 		}
 		launch();

@@ -1,9 +1,13 @@
 package project.xplat.launcher.pxprpcapi.androidhelper;
 
 import android.annotation.TargetApi;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
@@ -36,6 +40,7 @@ public class Misc2 {
 	ClipboardManager cbm;
 	AudioManager am;
 	LocationManager lm;
+	NotificationManager nm;
 
 	public static class Light2 {
 		public int id;
@@ -51,6 +56,7 @@ public class Misc2 {
 		cbm = (ClipboardManager) ApiServer.defaultAndroidContext.getSystemService(Service.CLIPBOARD_SERVICE);
 		am = (AudioManager) ApiServer.defaultAndroidContext.getSystemService(Service.AUDIO_SERVICE);
 		lm = (LocationManager) ApiServer.defaultAndroidContext.getSystemService(Service.LOCATION_SERVICE);
+		nm=(NotificationManager)ApiServer.defaultAndroidContext.getSystemService((Service.NOTIFICATION_SERVICE));
 		lights = new ArrayList<Light2>();
 		initCameraFlashLight();
 	}
@@ -76,7 +82,14 @@ public class Misc2 {
 
 	}
 
+	public String notificationChannelId="pxprpc";
 	public void init() {
+		if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+			this.notificationChannelId=ApiServer.defaultAndroidContext.getPackageName() + ":pxprpc";
+			NotificationChannel chan = new NotificationChannel(this.notificationChannelId, "pxprpc channel",
+					NotificationManager.IMPORTANCE_UNSPECIFIED);
+			nm.createNotificationChannel(chan);
+		}
 	}
 
 	public void deinit() {
@@ -215,5 +228,17 @@ public class Misc2 {
 			ApiServer.closeQuietly(l.cam1dev);
 			l.cam1dev=null;
 		}
+	}
+
+	public void postNotification(int notifyId,String title,String content){
+		Notification.Builder nb;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+			nb = new Notification.Builder(ApiServer.defaultAndroidContext,this.notificationChannelId);
+		}else{
+			nb = new Notification.Builder(ApiServer.defaultAndroidContext);
+		}
+		Notification noti=nb.setDefaults(Notification.DEFAULT_ALL).setContentTitle(title).setContentTitle(content).
+				setTicker(title).setWhen(System.currentTimeMillis()).setSmallIcon(android.R.drawable.alert_light_frame).build();
+		this.nm.notify(notifyId,noti);
 	}
 }

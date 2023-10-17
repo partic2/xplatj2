@@ -1,5 +1,7 @@
 package project.xplat.launcher.pxprpcapi.androidhelper;
 
+import android.app.Activity;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -98,6 +100,14 @@ public class SysBase {
 			}
 		}
 		return Utils.packFrom(mb.build());
+	}
+
+	public void requestExit(){
+		if(ApiServer.defaultAndroidContext instanceof Service){
+			((Service) ApiServer.defaultAndroidContext).stopSelf();
+		}else if(ApiServer.defaultAndroidContext instanceof Activity){
+			((Activity) ApiServer.defaultAndroidContext).finish();
+		}
 	}
 
 	public void close(Closeable c) {

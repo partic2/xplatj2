@@ -5,7 +5,7 @@
 
 #ifdef __ANDROID__
 #define SDL_DISABLE_IMMINTRIN_H 1
-#define BOOT_DIR "/sdcard/xplat"
+#define BOOT_DIR "/sdcard/Download/xplat"
 #define DATA_DIR "/data/data/project.xplat/files"
 #else 
 #define BOOT_DIR "res"

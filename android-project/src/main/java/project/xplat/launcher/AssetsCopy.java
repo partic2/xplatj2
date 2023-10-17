@@ -9,7 +9,7 @@ import java.io.*;
 public class AssetsCopy {
 	private Context mContext;
 	public static AssetsCopy ac;
-	public static String assetsDir="/sdcard/xplat";
+	public static String assetsDir="/sdcard/Download/xplat";
 	public static String packageName="project.xplat";
 	public static boolean loadAssets(Context ctx) throws IOException {
 		File f=new File(assetsDir+"/flat");

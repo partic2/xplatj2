@@ -32,8 +32,14 @@ public class PrefixFS implements IFileSystem {
 		if (iniFile == null) {
 			try {
 				if (os.equals("Android")) {
-					iniFile = new FileInputStream("/sdcard/xplat/cfg.ini");
-				} else if (os.equals("Windows")||os.equals("Linux")) {
+					try {
+						Class<?> clsAssertCopy = Class.forName("project.xplat.launcher.AssetsCopy");
+						String assertsDir = (String) clsAssertCopy.getField("assetsDir").get(null);
+						iniFile = new FileInputStream(assertsDir+"/cfg.ini");
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+                } else if (os.equals("Windows")||os.equals("Linux")) {
 					iniFile = new FileInputStream("res/cfg.ini");
 				} else {
 					return false;
@@ -80,7 +86,7 @@ public class PrefixFS implements IFileSystem {
 
 		@Override
 		public IDataBlock open() throws IOException {
-			throw new IOException("Not suppoert open()");
+			throw new IOException("Not support open()");
 		}
 
 		@Override

@@ -125,6 +125,7 @@ public class PlatCoreConfig implements Closeable {
 		stdreader = new InputStreamReader(stdin);
 
 		IFile netCfgFile = fs.resolve("/6/config/net.ini");
+
 		if (netCfgFile.exists()) {
 			CommonNetDefaultImpl.Config netCfg = new CommonNetDefaultImpl.Config();
 			Properties props = new Properties();
@@ -154,6 +155,7 @@ public class PlatCoreConfig implements Closeable {
 					netCfg.filterSelf = Boolean.parseBoolean(prop);
 				}
 			} catch (IOException e) {
+				e.printStackTrace();
 				try {
 					input.close();
 				} catch (IOException e1) {
