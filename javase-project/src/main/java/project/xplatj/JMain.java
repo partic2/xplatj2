@@ -20,7 +20,7 @@ public class JMain {
 			startOptsParsed=true;
 			FileInputStream in1 = null;
 			try {
-				in1 = new FileInputStream("data/flat");
+				in1 = new FileInputStream("data/xplat-flag.txt");
 				byte[] content=new byte[1024];
 				int len=in1.read(content);
 				String[] opts=new String(content,0,len,"utf8").split("\\s+");

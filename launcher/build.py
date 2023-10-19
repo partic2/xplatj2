@@ -131,8 +131,8 @@ def BuildNativeRelease():
             shutil.copy(builddir+'/'+t1,\
         outdir+'/'+t1.split('/')[-1])
     shutil.unpack_archive(sourceroot+'/javase-project/build/distributions/xplatj.zip',\
-        sourceroot+'launcher/build/native/jse')
-    shutil.copytree(sourceroot+'launcher/build/native/jse/xplatj',outdir,dirs_exist_ok=True)
+        sourceroot+'/launcher/build/native/jse')
+    shutil.copytree(sourceroot+'/launcher/build/native/jse/xplatj',outdir,dirs_exist_ok=True)
         
     os.chdir(sourceroot+'/launcher')
 

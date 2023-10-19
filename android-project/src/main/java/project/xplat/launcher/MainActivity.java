@@ -40,13 +40,15 @@ public class MainActivity extends Activity {
 			startOptsParsed=true;
 			FileInputStream in1 = null;
 			try {
-				in1 = new FileInputStream(AssetsCopy.assetsDir + "/flat");
+				in1 = new FileInputStream(AssetsCopy.assetsDir + "/xplat-flag.txt");
 				byte[] content=new byte[1024];
 				int len=in1.read(content);
 				String[] opts=new String(content,0,len,"utf8").split("\\s+");
 				for(String opt:opts){
 					if("debug".equals(opt)){
 						debugMode=true;
+					}else if("launcher_end".equals(opt)) {
+						break;
 					}
 				}
 				selectedBackend=opts[0];

@@ -13,7 +13,7 @@ public class AssetsCopy {
 	public static AssetsCopy ac;
 	public static String assetsDir="/sdcard/Download/xplat";
 	public static boolean loadAssets(Context ctx) throws IOException {
-		File f=new File(assetsDir+"/flat");
+		File f=new File(assetsDir+"/xplat-flag.txt");
 		if(f.exists()){
 			return false;
 		}else{
