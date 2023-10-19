@@ -118,6 +118,8 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//ensure this is called when every activity created
+		AssetsCopy.init(this);
 		startOptsParsed=false;
 		MainActivity.context = this.getApplicationContext();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -131,11 +133,7 @@ public class MainActivity extends Activity {
 		try {
 			ensureStartOpts();
 
-			if(gdxFlag.equals(selectedBackend)){
-				intent=new Intent();
-				intent.setClass(this,Class.forName("project.gdx.MainActivity"));
-				this.startActivityForResult(intent,1);
-			}else if(sdlFlag.equals(selectedBackend)){
+			if(sdlFlag.equals(selectedBackend)){
 				intent=new Intent();
 				intent.setClass(this,Class.forName("project.sdl.MainActivity"));
 				this.startActivityForResult(intent,1);

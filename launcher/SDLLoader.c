@@ -5,11 +5,6 @@
 
 #ifdef __ANDROID__
 #define SDL_DISABLE_IMMINTRIN_H 1
-#define BOOT_DIR "/sdcard/Download/xplat"
-#define DATA_DIR "/data/data/project.xplat/files"
-#else 
-#define BOOT_DIR "res"
-#define DATA_DIR "data"
 #endif
 
 
@@ -32,24 +27,32 @@ struct c_symbol{
     void *val;
 };
 
+char path_buf[256];
+const char *data_dir=NULL;
+char *get_data_path(const char *subpath){
+    #ifdef __ANDROID__
+    if(data_dir==NULL){
+        data_dir=SDL_AndroidGetInternalStoragePath();
+    }
+    #else
+    if(data_dir==NULL){
+        data_dir="./data";
+    }
+    #endif
+    strcpy(path_buf,data_dir);
+    strcat(path_buf,subpath);
+    return path_buf;
+}
 
 FILE *logfile=NULL;
 
-int log3(const char *str){
-	if(logfile==NULL){
-		logfile=fopen(DATA_DIR"/stdlog.txt","ab+");
-	}
-	fwrite(str,strlen(str),1,logfile);
-	fflush(logfile);
-	return 0;
-}
 
 
 typedef void *(*entry_func)(void *);
 
 
 int SDL_main(int argc,char *argv[]){
-	
+	SDL_Init(SDL_INIT_EVERYTHING);
     pwart_namespace ns=NULL;
     FILE *boot0=NULL;
     void *wasmbuf=NULL;
@@ -58,14 +61,12 @@ int SDL_main(int argc,char *argv[]){
     char *errmsg=NULL;
     pwart_module_state modstat=NULL;
     pwart_wasm_function startfn=NULL;
-	
-	log3("SDLLoader startup\n");
-	FILE *redirecterr=freopen(DATA_DIR"/stderr.txt","ab+",stderr);
-	
-	fflush(stdout);
-	
+	SDL_Log("SDLLoader startup");
+
     {
-        char *modpath=BOOT_DIR"/boot0.wasm";
+        freopen(get_data_path("/stdout.txt"),"w",stdout);
+        freopen(get_data_path("/stderr.txt"),"w",stderr);
+        char *modpath=get_data_path("/boot0.wasm");
         void *stackbase = pwart_allocate_stack(64 * 1024);
         char *err=NULL;
         void *sp;
@@ -81,7 +82,7 @@ int SDL_main(int argc,char *argv[]){
         filesize=ftell(f);
 
         if(filesize>1024*1024*1024){
-            log3(".wasm file too large(>1GB)\n");
+            SDL_Log(".wasm file too large(>1GB)");
             return 1;
         }
         fseek(f,0,SEEK_SET);
@@ -95,15 +96,14 @@ int SDL_main(int argc,char *argv[]){
         pwart_module_state stat=pwart_namespace_define_wasm_module(ns,"__main__",data,len,&err);
         free(data);
         if(err!=NULL){
-            printf("error occur:%s\n",err);
+            SDL_Log("error occur:%s\n",err);
             return 1;
         }
         struct pwart_wasm_memory *mem=pwart_get_export_memory(stat,"memory");
         pwart_wasi_module_set_wasimemory(mem);
         err=pwart_wasi_module_init();
         if(err!=NULL){
-            printf("%s\n",err);
-            return 1;
+            SDL_Log("warning:%s uvwasi will not load",err);
         }
         pwart_wasm_function fn=pwart_get_start_function(stat);
         if(fn!=NULL){
@@ -113,17 +113,19 @@ int SDL_main(int argc,char *argv[]){
         if(fn!=NULL){
             pwart_call_wasm_function(fn,stackbase);
         }else{
-            printf("%s\n","'_start' function not found. ");
+            SDL_Log("%s\n","'_start' function not found. ");
         }
         pwart_free_stack(stackbase);
         pwart_namespace_delete(ns);
     }
 	
-	log3("exit\n");
+	SDL_Log("exit\n");
 	if(logfile!=NULL){
 		fclose(logfile);
 		logfile=NULL;
 	}
-	fclose(redirecterr);
+    fclose(stdout);
+    fclose(stderr);
+    SDL_Quit();
     return 0;
 }

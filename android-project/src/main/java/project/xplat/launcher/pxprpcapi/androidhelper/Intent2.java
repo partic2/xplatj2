@@ -22,7 +22,7 @@ public class Intent2 {
         File file = new File(apkPath);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Uri apkUri = PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
-                    AssetsCopy.packageName+".publicfileprovider", file);
+                    ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", file);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
         } else {
@@ -91,7 +91,7 @@ public class Intent2 {
     }
     public String getContentUriForFile(String path){
         return PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
-                AssetsCopy.packageName+".publicfileprovider", new File(path)).toString();
+                ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", new File(path)).toString();
     }
 
 }

@@ -1,6 +1,7 @@
 package project.sdl;
 import android.os.*;
 import org.libsdl.app.*;
+import project.xplat.launcher.AssetsCopy;
 import project.xplat.launcher.pxprpcapi.ApiServer;
 
 public class MainActivity extends SDLActivity
@@ -10,6 +11,8 @@ public class MainActivity extends SDLActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//ensure this is called when every activity created
+		AssetsCopy.init(this);
 		ApiServer.start(this);
 	}
 

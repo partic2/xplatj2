@@ -72,8 +72,6 @@ public class ApiServer {
 
     public static void start(Context context) {
         defaultAndroidContext=context;
-        //may we have better place.
-        PlatCoreConfig.platApi=new PlatApiImpl(context);
         new Thread(new Runnable() {
             @Override
             public void run() {

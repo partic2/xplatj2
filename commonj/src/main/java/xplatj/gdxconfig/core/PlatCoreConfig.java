@@ -54,7 +54,54 @@ public class PlatCoreConfig implements Closeable {
 
 	public IFileSystem fs;
 	public String os;
-	public ICommonNet commonNet;
+	//remove in future?
+	protected ICommonNet commonNet;
+	public ICommonNet getNetManager(){
+		if(commonNet==null){
+			IFile netCfgFile = fs.resolve("/config/net.ini");
+
+			if (netCfgFile.exists()) {
+				CommonNetDefaultImpl.Config netCfg = new CommonNetDefaultImpl.Config();
+				Properties props = new Properties();
+				InputStream input = null;
+				try {
+					input = new FSUtils().readFromIFile(netCfgFile);
+					props.load(input);
+					input.close();
+					String prop = props.getProperty("NetManager.msgPort");
+					if (prop != null) {
+						netCfg.msgPort = Integer.parseInt(prop);
+					}
+					prop = props.getProperty("NetManager.streamPort");
+					prop = props.getProperty("NetManager.othersMsgPort");
+
+					prop = props.getProperty("NetManager.othersStreamPort");
+					prop = props.getProperty("NetManager.ipv4");
+					if (prop != null) {
+						netCfg.ipv4 = Boolean.parseBoolean(prop);
+					}
+					prop = props.getProperty("NetManager.ipv6");
+					if (prop != null) {
+						netCfg.ipv6 = Boolean.parseBoolean(prop);
+					}
+					prop = props.getProperty("NetManager.filterSelf");
+					if (prop != null) {
+						netCfg.filterSelf = Boolean.parseBoolean(prop);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+					try {
+						input.close();
+					} catch (IOException e1) {
+					}
+				}
+				commonNet = new CommonNetDefaultImpl(executor, netCfg);
+			} else {
+				commonNet = new CommonNetDefaultImpl(executor);
+			}
+		}
+		return this.commonNet;
+	}
 	public InputStream stdin;
 	public OutputStream stdout;
 	public OutputStream stderr;
@@ -103,7 +150,9 @@ public class PlatCoreConfig implements Closeable {
 
 					@Override
 					public Thread newThread(Runnable r) {
-						return new Thread(null, r, "threadId-" + threadId, 10240 * 1024);
+						Thread th = new Thread(null, r, "threadId-" + threadId, 10240 * 1024);
+						th.setDaemon(true);
+						return th;
 					}
 				}));
 			} else {
@@ -116,7 +165,6 @@ public class PlatCoreConfig implements Closeable {
 		System.getProperties().put("file.encoding", "utf-8");
 		PrefixFS pfs = new PrefixFS();
 		fs = pfs;
-		pfs.init(os, null);
 		stdin = System.in;
 		stdout = System.out;
 		stderr = System.err;
@@ -124,47 +172,6 @@ public class PlatCoreConfig implements Closeable {
 		stdwriter = new PrintWriter(new OutputStreamWriter(stdout));
 		stdreader = new InputStreamReader(stdin);
 
-		IFile netCfgFile = fs.resolve("/6/config/net.ini");
-
-		if (netCfgFile.exists()) {
-			CommonNetDefaultImpl.Config netCfg = new CommonNetDefaultImpl.Config();
-			Properties props = new Properties();
-			InputStream input = null;
-			try {
-				input = new FSUtils().readFromIFile(netCfgFile);
-				props.load(input);
-				input.close();
-				String prop = props.getProperty("NetManager.msgPort");
-				if (prop != null) {
-					netCfg.msgPort = Integer.parseInt(prop);
-				}
-				prop = props.getProperty("NetManager.streamPort");
-				prop = props.getProperty("NetManager.othersMsgPort");
-
-				prop = props.getProperty("NetManager.othersStreamPort");
-				prop = props.getProperty("NetManager.ipv4");
-				if (prop != null) {
-					netCfg.ipv4 = Boolean.parseBoolean(prop);
-				}
-				prop = props.getProperty("NetManager.ipv6");
-				if (prop != null) {
-					netCfg.ipv6 = Boolean.parseBoolean(prop);
-				}
-				prop = props.getProperty("NetManager.filterSelf");
-				if (prop != null) {
-					netCfg.filterSelf = Boolean.parseBoolean(prop);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-				try {
-					input.close();
-				} catch (IOException e1) {
-				}
-			}
-			commonNet = new CommonNetDefaultImpl(executor, netCfg);
-		} else {
-			commonNet = new CommonNetDefaultImpl(executor);
-		}
 		socketFactory = new DefaultSocketFactory();
 		serverSocketFactory = new DefaultServerSocketFactory();
 		datagramSocketFactory = new DefaultDatagramSocketFactory();

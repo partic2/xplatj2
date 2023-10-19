@@ -20,7 +20,7 @@ public class JMain {
 			startOptsParsed=true;
 			FileInputStream in1 = null;
 			try {
-				in1 = new FileInputStream("res/flat");
+				in1 = new FileInputStream("data/flat");
 				byte[] content=new byte[1024];
 				int len=in1.read(content);
 				String[] opts=new String(content,0,len,"utf8").split("\\s+");
@@ -45,6 +45,9 @@ public class JMain {
 	public static void processStartupConfig() {
 		ensureStartOpts();
 		PlatCoreConfig.platApi=new PlatApiImpl();
+		if(PlatCoreConfig.get()==null){
+			PlatCoreConfig.singleton.set(new PlatCoreConfig());
+		}
 		if("webapp".equals(selectedBackend)) {
 			startWebAppBackend();
 		}
@@ -69,7 +72,7 @@ public class JMain {
 		}
 		try {
 			httpd.start(60*1000);
-			String entryUrl = cd.getAbsoluteFile()+"/res/index.html";
+			String entryUrl = cd.getAbsoluteFile()+"/data/index.html";
 			entryUrl=entryUrl.substring(rootPath.getAbsolutePath().length()).replace("\\", "/");
 			entryUrl="http://127.0.0.1:"+httpdPort+"/localFile"+(entryUrl.startsWith("/")?"":"/")+entryUrl;
 			System.out.println("Open url "+entryUrl+" in borwser.");
@@ -90,5 +93,7 @@ public class JMain {
 	}
 	public static void main(String args[]) {
 		processStartupConfig();
+		System.out.println("exit...");
+		System.exit(0);
 	}
 }

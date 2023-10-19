@@ -33,7 +33,7 @@ public class ConnectionSlot implements Closeable {
 	protected EventListener2<ICommonNet, NetMessage> messageListener;
 
 	private void initDefault() {
-		nmgr = PlatCoreConfig.get().commonNet;
+		nmgr = PlatCoreConfig.get().getNetManager();
 		connectListener = new EventListener2<ICommonNet, NetConnection>(nmgr.getOnConnect()) {
 			public void run() {
 				PlatCoreConfig.get().executor.execute(new EventOnReq(getData()));

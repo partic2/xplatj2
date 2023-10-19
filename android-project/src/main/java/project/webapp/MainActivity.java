@@ -69,9 +69,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-        if(PlatCoreConfig.get()==null){
-            PlatCoreConfig.singleton.set(new PlatCoreConfig());
-        }
+        //ensure this is called when every activity created
+        AssetsCopy.init(this);
         PlatCoreConfig.get().executor.execute(
                 new Runnable() {
                     @Override

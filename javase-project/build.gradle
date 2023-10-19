@@ -64,7 +64,7 @@ repositories {
 task copyResDirForRun(type:Copy){
 	if(!new File(project.getRootDir(),"res").exists()){
 		from projectDir.path+'/src/dist/res'
-		into 'res'
+		into 'data'
 	}
 }
 

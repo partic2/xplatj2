@@ -17,18 +17,27 @@ int main(int argc, char *argv[]) {
     }
   }
   if(pch>=thisPath){
-	currentDir = (char *)malloc(pch - thisPath + 2);
-	memcpy(currentDir, thisPath, pch - thisPath + 1);
-	currentDir[pch - thisPath + 1] = 0;
-	chdir(currentDir);
-	free(currentDir);
+    currentDir = (char *)malloc(pch - thisPath + 2);
+    memcpy(currentDir, thisPath, pch - thisPath + 1);
+    currentDir[pch - thisPath + 1] = 0;
+    chdir(currentDir);
+    free(currentDir);
   }
   
   mkdir("./data");
   do {
-    flatConfigFile = fopen("./res/flat", "r");
+    flatConfigFile = fopen("./data/flat", "r");
+    if(flatConfigFile==NULL){
+      //implement copy tree by hand?
+      #ifdef __WIN32
+        system("xcopy .\\res .\\data /S /I /Y");
+      #elif defined __linux__
+        system("cp -r -T ./res ./data");
+      #endif
+      flatConfigFile = fopen("./data/flat", "r");
+    }
     if (flatConfigFile == NULL) {
-      printf("./res/flat not Found.");
+      printf("./data/flat not Found.");
       return 1;
     }
     buf = (char *)malloc(0x100);
@@ -52,9 +61,9 @@ int main(int argc, char *argv[]) {
       free(buf);
       fclose(flatConfigFile);
 #ifdef __WIN32
-      system("cmd.exe /c \".\\bin\\xplatj.bat\"");
-#elif defined __linux
-      system("sh -c ./bin/xplatj");
+      system("\".\\bin\\xplatj.bat\"");
+#elif defined __linux__
+      system("./bin/xplatj");
 #endif
     } else if (opType == 2) {
       free(buf);
@@ -62,7 +71,7 @@ int main(int argc, char *argv[]) {
 	  
 #ifdef __WIN32
       system(".\\SDLLoader");
-#elif defined __linux
+#elif defined __linux__
       system("./SDLLoader");
 #endif
     } else {

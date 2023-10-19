@@ -289,7 +289,7 @@ public class PublicFileProvider extends ContentProvider {
             throw new AssertionError("Provider must be exported");
         }
 
-        strategy = new SimplePathStrategy(AssetsCopy.packageName+".publicfileprovider");
+        strategy = new SimplePathStrategy(this.getContext().getPackageName()+".publicfileprovider");
     }
 
     /**
