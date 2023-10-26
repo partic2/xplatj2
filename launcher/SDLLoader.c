@@ -64,6 +64,8 @@ int SDL_main(int argc,char *argv[]){
 	SDL_Log("SDLLoader startup");
 
     {
+        //to init wasi module on windows, maybe changed in future.
+        freopen(get_data_path("/xplat-flag.txt"),"r",stdin);
         freopen(get_data_path("/stdout.txt"),"w",stdout);
         freopen(get_data_path("/stderr.txt"),"w",stderr);
         char *modpath=get_data_path("/boot0.wasm");
