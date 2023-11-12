@@ -1,8 +1,14 @@
 package project.xplatj;
 
+import lib.pursuer.simplewebserver.PxprpcWsServer;
 import lib.pursuer.simplewebserver.XplatHTTPDServer;
+import project.xplatj.backend.jse.ApiServer;
 import project.xplatj.backend.jse.PlatApiImpl;
+import pursuer.pxprpc.ServerContext;
 import xplatj.gdxconfig.core.PlatCoreConfig;
+import xplatj.javaplat.pursuer.filesystem.impl.PrefixFS;
+import xplatj.javaplat.pursuer.util.IFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -43,6 +49,9 @@ public class JMain {
 		}
 	}
 	public static void processStartupConfig() {
+		try{
+			PrefixFS.defaultPrefix=new File("data").getCanonicalPath();
+		}catch(IOException e){};
 		ensureStartOpts();
 		PlatCoreConfig.platApi=new PlatApiImpl();
 		if(PlatCoreConfig.get()==null){
@@ -71,6 +80,14 @@ public class JMain {
 			httpd=new XplatHTTPDServer("127.0.0.1",httpdPort,rootPath);
 		}
 		try {
+			PxprpcWsServer.registeredServer.put(Integer.toString(ApiServer.port), new IFactory<ServerContext>() {
+				@Override
+				public ServerContext create() {
+					ServerContext sc=new ServerContext();
+					sc.funcMap=ApiServer.tcpServ.funcMap;
+					return sc;
+				}
+			});
 			httpd.start(60*1000);
 			String entryUrl = cd.getAbsoluteFile()+"/data/index.html";
 			entryUrl=entryUrl.substring(rootPath.getAbsolutePath().length()).replace("\\", "/");

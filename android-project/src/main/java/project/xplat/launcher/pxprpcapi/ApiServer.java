@@ -10,6 +10,7 @@ import project.xplat.launcher.pxprpcapi.androidhelper.*;
 import pursuer.pxprpc_ex.TCPBackend;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.platform.PlatApi;
+import xplatj.pxprpcapi.JseBaseOsHelper;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -58,6 +59,7 @@ public class ApiServer {
                 putModule(Wifi2.PxprpcNamespace,new Wifi2());
                 putModule(Misc2.PxprpcNamespace,new Misc2());
                 putModule(Power2.PxprpcNamespace,new Power2());
+                putModule(JseBaseOsHelper.PxprpcNamespace,new JseBaseOsHelper());
             }
         });
         Log.d("PxpRpc", "start: listen");

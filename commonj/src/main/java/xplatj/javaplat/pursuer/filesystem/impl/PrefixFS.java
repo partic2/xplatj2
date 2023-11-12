@@ -12,7 +12,7 @@ import xplatj.javaplat.pursuer.util.PropertiesUtils;
 public class PrefixFS implements IFileSystem {
     public static String defaultPrefix="";
 
-    protected String prefix;
+    public String prefix;
 	public static String separator = "/";
 
 	public PrefixFS() {
