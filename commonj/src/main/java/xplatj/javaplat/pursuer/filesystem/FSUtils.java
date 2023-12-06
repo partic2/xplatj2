@@ -13,10 +13,10 @@ import xplatj.javaplat.pursuer.util.IFilter;
 
 public class FSUtils {
 
-	public String executableFileRoot = "/6/exec";
-	public String configFileRoot = "/6/config";
-	public String guiResourceRoot = "/6/gui";
-	public String tempFileRoot = "/6/temp";
+	public String executableFileRoot = "xplatj/executable";
+	public String configFileRoot = "xplatj/config";
+	public String guiResourceRoot = "xplatj/gui";
+	public String tempFileRoot = "xplatj/temp";
 
 	public IFile scriptFileRoot() {
 		return PlatCoreConfig.get().fs.resolve(executableFileRoot + "/script");
@@ -93,6 +93,14 @@ public class FSUtils {
 		}
 	}
 
+	public void deleteFileOrDir(IFile f) throws IOException {
+		if(f.list()==null){
+			f.delete();
+		}else{
+			deleteDirectory(f);
+		}
+	}
+
 	private static class FileCopyRecord {
 		IFile s;
 		IFile d;
@@ -135,7 +143,40 @@ public class FSUtils {
 				}
 			}
 		}
-		DataBlockInputStream srcStream = readFromIFile(src);
+	}
+
+	public void moveFileOrDir(IFile src,IFile dest,boolean overwrite) throws IOException{
+		LinkedList<FileCopyRecord> dirs = new LinkedList<FileCopyRecord>();
+		Iterable<String> children = src.list();
+		if (children != null && dest.exists()) {
+			dirs.offer(new FileCopyRecord(src, dest));
+		} else {
+			if(dest.exists()&&overwrite){
+				dest.delete();
+			}
+			if(!dest.exists()){
+				src.rename(dest.getPath());
+			}
+		}
+		for (int rp = 0; dirs.size() > 0 && rp < 0x100000; rp++) {
+			FileCopyRecord copyRec = dirs.poll();
+			IFile thisDir = copyRec.s;
+			children = thisDir.list();
+			for (String child : children) {
+				IFile f = thisDir.next(child);
+				IFile df = copyRec.d.next(child);
+				if (f.list() != null && df.exists()) {
+					dirs.push(new FileCopyRecord(f, copyRec.d.next(child)));
+				} else {
+					if(df.exists()&&overwrite){
+						df.delete();
+					}
+					if(!df.exists()){
+						f.rename(df.getPath());
+					}
+				}
+			}
+		}
 	}
 
 	public long getFileSize(IFile file) throws IOException {

@@ -6,8 +6,12 @@ import project.xplatj.backend.jse.ApiServer;
 import project.xplatj.backend.jse.PlatApiImpl;
 import pursuer.pxprpc.ServerContext;
 import xplatj.gdxconfig.core.PlatCoreConfig;
+import xplatj.gdxplat.pursuer.utils.Env;
+import xplatj.javaplat.pursuer.filesystem.FSUtils;
 import xplatj.javaplat.pursuer.filesystem.impl.PrefixFS;
+
 import xplatj.javaplat.pursuer.util.IFactory;
+
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,7 +54,7 @@ public class JMain {
 	}
 	public static void processStartupConfig() {
 		try{
-			PrefixFS.defaultPrefix=new File("data").getCanonicalPath();
+			PrefixFS.defaultPrefix=new File("data").getCanonicalPath()+"/";
 		}catch(IOException e){};
 		ensureStartOpts();
 		PlatCoreConfig.platApi=new PlatApiImpl();

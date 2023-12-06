@@ -58,7 +58,7 @@ public class PlatCoreConfig implements Closeable {
 	protected ICommonNet commonNet;
 	public ICommonNet getNetManager(){
 		if(commonNet==null){
-			IFile netCfgFile = fs.resolve("/config/net.ini");
+			IFile netCfgFile = fs.resolve("config/net.ini");
 
 			if (netCfgFile.exists()) {
 				CommonNetDefaultImpl.Config netCfg = new CommonNetDefaultImpl.Config();
