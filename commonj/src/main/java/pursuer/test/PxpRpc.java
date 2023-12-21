@@ -16,10 +16,10 @@ import pursuer.pxprpc_ex.TCPBackend;
 public class PxpRpc {
 	
 	//Just for test, will ignore session check.
-	
 
 	//Rpc server handler demo.
 	public static class Handler1 {
+		public static Timer tm=new Timer(true);
 		public int getInt2345() {
 			return 2345;
 		}
@@ -40,9 +40,9 @@ public class PxpRpc {
 				}
 			};
 		}
-		public void printArg(int a,long b,float c,double d,ByteBuffer e) {
+		public void printArg(int a,long b,float c,double d,byte[] e) {
 			System.out.println(a+","+b+","+c+","+d+","+
-					Arrays.toString(Utils.bytesGet(e, 0, 4)));
+					Arrays.toString(e));
 		}
 		public void printArg2(byte[] bb){
 			Serializer2 ser = new Serializer2().prepareUnserializing(ByteBuffer.wrap(bb));
@@ -75,7 +75,6 @@ public class PxpRpc {
 			return te;
 		}
 		public void waitOneTick(final AsyncReturn<Object> asyncRet) {
-			Timer tm=new Timer();
 			tm.schedule(new TimerTask() {
 				@Override
 				public void run() {
@@ -88,19 +87,15 @@ public class PxpRpc {
 		}
 	}
 	public static class TickEvent extends EventDispatcher{
-		Timer tm=new Timer();
 		public TickEvent() {
 		}
 		public void start() {
-			tm.schedule(new TimerTask() {
+			Handler1.tm.schedule(new TimerTask() {
 				@Override
 				public void run() {
 					TickEvent.this.fireEvent("tick");
 				}
 			}, 1000,1000);
-		}
-		public void stop() {
-			tm.cancel();
 		}
 	}
 
@@ -138,7 +133,7 @@ public class PxpRpc {
 			soc.configureBlocking(true);
 			soc.connect(new InetSocketAddress("localhost",listenPort));
 			
-			ClientContext client = new ClientContext();
+			final ClientContext client = new ClientContext();
 			client.init(soc);
 			
 			
@@ -242,6 +237,14 @@ public class PxpRpc {
 			System.out.println("expect print 'free by server gc' if server support");
 			client.push(12, new byte[0]);
 
+			client.sequence();
+			System.out.println("expect print 5678 in 1 second later.");
+			client.getFunc(11,"test1.waitOneTick");
+			client.getFunc(12,"test1.print5678");
+			client.seqCallFuncReq(13,11,new Object[]{});
+			client.seqCallFuncReq(13,12,new Object[]{});
+			client.seqCallFuncResp();
+			client.seqCallFuncResp();
 
 			//should be free when connection close, if server support. 
 			client.callIntFunc(12, 11, new Object[0]);
@@ -256,7 +259,6 @@ public class PxpRpc {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 	
 	public static class ClientContext {
@@ -271,6 +273,7 @@ public class PxpRpc {
 			}
 		}
 		public int session=0x78593<<8;
+		public int sequenceSession=0x78597<<8;
 		
 		public void push(int addr,byte[] data) throws IOException {
 			int op=session|0x1;
@@ -285,7 +288,8 @@ public class PxpRpc {
 			int op=session|0x2;
 			Utils.writeInt32(chan,op);
 			Utils.writeInt32(chan,addr);
-			assert2(Utils.readInt32(chan)==op);
+			int rs=Utils.readInt32(chan);
+			assert2(rs==op);
 			int len=Utils.readInt32(chan);
 			byte[] r=new byte[len];
 			Utils.readf(chan,ByteBuffer.wrap(r));
@@ -330,5 +334,41 @@ public class PxpRpc {
 			Utils.readf(chan,ByteBuffer.wrap(r));
 			return new String(r,"utf-8");
 		}
+		public void sequence() throws IOException{
+			int op=session|0x9;
+			Utils.writeInt32(chan,op);
+			Utils.writeInt32(chan,sequenceSession|24);
+			int op2=Utils.readInt32(chan);
+			assert2(op2==op);
+		}
+		public void buffer() throws IOException {
+			int op=session|0xa;
+			Utils.writeInt32(chan,op);
+		}
+		public void seqCallFuncReq(int assignAddr,int addr,Object[] params) throws IOException {
+			int op=sequenceSession|0x5;
+			Utils.writeInt32(chan,op);
+			Utils.writeInt32(chan,assignAddr);
+			Utils.writeInt32(chan,addr);
+			for(Object p : params) {
+				if(p.getClass().equals(Integer.class)) {
+					Utils.writeInt32(chan,(Integer) p);
+				}else if(p.getClass().equals(Long.class)) {
+					Utils.writeInt64(chan,(Long) p);
+				}else if(p.getClass().equals(Float.class)) {
+					Utils.writeFloat32(chan,(Float) p);
+				}else if(p.getClass().equals(Double.class)) {
+					Utils.writeFloat64(chan,(Double) p);
+				}else {
+					throw new UnsupportedOperationException();
+				}
+			}
+		}
+		public int seqCallFuncResp() throws IOException {
+			int op=sequenceSession|0x5;
+			assert2(Utils.readInt32(chan)==op);
+			return Utils.readInt32(chan);
+		}
+
 	}
 }
