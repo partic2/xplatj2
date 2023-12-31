@@ -1,5 +1,6 @@
 package project.xplat.launcher.pxprpcapi.androidhelper;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.ImageFormat;
@@ -11,13 +12,10 @@ import android.os.Build;
 import android.util.Size;
 import android.view.Surface;
 import project.xplat.launcher.pxprpcapi.ApiServer;
-import project.xplat.launcher.pxprpcapi.Utils;
-import pursuer.patchedmsgpack.tools.ArrayBuilder2;
-import pursuer.patchedmsgpack.tools.MPValueTable;
-import pursuer.patchedmsgpack.tools.MapBuilder2;
-import pursuer.patchedmsgpack.value.ArrayValue;
 import pursuer.pxprpc.AsyncReturn;
 import pursuer.pxprpc.EventDispatcher;
+import pursuer.pxprpc.TableSerializer;
+import pursuer.pxprpc.Utils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -47,25 +45,46 @@ public class AndroidCamera2 {
     		ApiServer.closeQuietly(cam);
     	}
     }
-    
-    public String getCameraIdList() throws CameraAccessException {
-        return Utils.joinStringList(Arrays.asList(camSrv.getCameraIdList()),"\n");
-    }
 
-    public byte[] describeBaseCameraInfo(String id) throws CameraAccessException {
-        CameraCharacteristics info = camSrv.getCameraCharacteristics(id);
-        MapBuilder2 mb = new MapBuilder2();
-        mb.put("face",info.get(CameraCharacteristics.LENS_FACING))
-                        .put("flashAvailable",info.get(CameraCharacteristics.FLASH_INFO_AVAILABLE));
-        StreamConfigurationMap sscm = info.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
-        Size[] sizes = sscm.getOutputSizes(ImageFormat.YUV_420_888);
-        ArrayBuilder2 sizevalue = new ArrayBuilder2();
-        for(Size e : sizes){
-            sizevalue.add(new ArrayBuilder2().add(e.getWidth()).add(e.getHeight()).build());
+    public byte[] getBaseCamerasInfo() throws CameraAccessException {
+        TableSerializer ser=new TableSerializer().setHeader("isb",new String[]{"id","features","outputSizes"});
+        for(String id:camSrv.getCameraIdList()){
+            CameraCharacteristics info = camSrv.getCameraCharacteristics(id);
+            Object[] row = new Object[3];
+            row[0]=id;
+            ArrayList<String> features=new ArrayList<String>();
+            int face=info.get(CameraCharacteristics.LENS_FACING);
+            switch(face){
+                case CameraCharacteristics.LENS_FACING_FRONT:
+                    features.add("facing_front");
+                    break;
+                case CameraCharacteristics.LENS_FACING_BACK:
+                    features.add("facing_back");
+                    break;
+            }
+            if(info.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)){
+                features.add("flash");
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if(info.get(CameraCharacteristics.CONTROL_AE_LOCK_AVAILABLE)){
+                    features.add("ae_lock");
+                }
+                if(info.get(CameraCharacteristics.CONTROL_AWB_LOCK_AVAILABLE)){
+                    features.add("af_lock");
+                }
+            }
+            row[1]= Utils.stringJoin(" ",features);
+            TableSerializer ser2=new TableSerializer().setHeader("ii",new String[]{"w","h"});
+            StreamConfigurationMap sscm = info.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+            Size[] sizes = sscm.getOutputSizes(ImageFormat.YUV_420_888);
+            for(Size e : sizes){
+                ser2.addRow(new Object[]{e.getWidth(),e.getHeight()});
+            }
+            row[2]=pursuer.pxprpc.Utils.toBytes(ser2.build());
+            ser.addRow(row);
         }
-        mb.put("outputSizes",sizevalue.build());
-        return Utils.packFrom(mb.build());
+        return pursuer.pxprpc.Utils.toBytes(ser.build());
     }
 
     public static class CameraWrap1 extends EventDispatcher implements Closeable{
@@ -98,7 +117,8 @@ public class AndroidCamera2 {
             this.ctx.openedResource.remove(this);
         }
     }
-    public void openCamera(final AsyncReturn<Object> aret, String id) {
+    @SuppressLint("MissingPermission")
+    public Object openCamera(final AsyncReturn<Object> aret, String id) {
         try {
             camSrv.openCamera(id, new CameraDevice.StateCallback() {
                 @Override
@@ -120,6 +140,7 @@ public class AndroidCamera2 {
         }catch(Exception e){
             aret.result(e);
         }
+        return null;
     }
     public void closeCamera(CameraWrap1 cam){
         ApiServer.closeQuietly(cam);
@@ -132,7 +153,7 @@ public class AndroidCamera2 {
     	camWrap.flashMode=flashMode;
     	camWrap.flashMode=autoFocusMode;
     }
-    public void requestContinuousCapture(final AsyncReturn<Object> aret, final CameraWrap1 camWrap) throws CameraAccessException {
+    public Object requestContinuousCapture(final AsyncReturn<Object> aret, final CameraWrap1 camWrap) throws CameraAccessException {
         CameraDevice camDev = camWrap.wrapped;
         ImageReader imgReader = ImageReader.newInstance(camWrap.imageWidth, camWrap.imageHeight, ImageFormat.YUV_420_888, 2);
         if(camWrap.imgRead!=null)camWrap.imgRead.close();
@@ -164,6 +185,7 @@ public class AndroidCamera2 {
         } catch (Exception e) {
             aret.result(e);
         }
+        return null;
     }
 
     public void stopContinuousCapture(CameraWrap1 camWrap) throws CameraAccessException {
@@ -171,7 +193,7 @@ public class AndroidCamera2 {
         camWrap.capSess=null;
     }
 
-    public void requestOnceCapture(final AsyncReturn<Object> aret, final CameraWrap1 camWrap) throws CameraAccessException {
+    public Object requestOnceCapture(final AsyncReturn<Object> aret, final CameraWrap1 camWrap) throws CameraAccessException {
         final CameraDevice camDev = camWrap.wrapped;
         ImageReader imgReader = ImageReader.newInstance(camWrap.imageWidth, camWrap.imageHeight, ImageFormat.YUV_420_888, 2);
         if(camWrap.imgRead!=null)camWrap.imgRead.close();
@@ -202,6 +224,7 @@ public class AndroidCamera2 {
         } catch (Exception e) {
             aret.result(e);
         }
+        return null;
     }
 
     public List<Image.Plane> accuireLastestImageData(CameraWrap1 camDev){
@@ -210,36 +233,29 @@ public class AndroidCamera2 {
     }
 
     public byte[] describePlaneInfo(List<Image.Plane> planes){
-        MPValueTable vt = new MPValueTable();
-        vt.header(new String[]{"pixelStride","rowStride"});
+        TableSerializer ser = new TableSerializer().setHeader("ii",new String[]{"pixelStride","rowStride"});
         for(Image.Plane e:planes){
-            vt.addRow(new ArrayBuilder2()
-                    .add(e.getPixelStride())
-                    .add(e.getRowStride())
-                    .build());
+            ser.addRow(new Object[]{
+                    e.getPixelStride()
+                    ,e.getRowStride()});
         }
-        return Utils.packFrom(vt.toValue());
+        return pursuer.pxprpc.Utils.toBytes(ser.build());
     }
 
     public byte[] getPlaneBufferData(Image.Plane plane1){
         ByteBuffer buf1 = plane1.getBuffer();
-        //avoid method signature error on low version android.
-        byte[] buf2 = new byte[((ByteBuffer)buf1).remaining()];
-        buf1.get(buf2);
-        return buf2;
+        return pursuer.pxprpc.Utils.toBytes(buf1);
     }
 
     public byte[] packPlaneData(List<Image.Plane> planes){
-        MPValueTable vt = new MPValueTable();
-        vt.header(new String[]{"pixelStride","rowStride","buffer"});
+        TableSerializer ser = new TableSerializer().setHeader("ii",new String[]{"pixelStride","rowStride","buffer"});
         for(Image.Plane e:planes){
-            vt.addRow(new ArrayBuilder2()
-                    .add(e.getPixelStride())
-                    .add(e.getRowStride())
-                    .add(getPlaneBufferData(e))
-                    .build());
+            ser.addRow(new Object[]{
+                    e.getPixelStride()
+                    ,e.getRowStride()
+            ,getPlaneBufferData(e)});
         }
-        return Utils.packFrom(vt.toValue());
+        return pursuer.pxprpc.Utils.toBytes(ser.build());
     }
 
 }

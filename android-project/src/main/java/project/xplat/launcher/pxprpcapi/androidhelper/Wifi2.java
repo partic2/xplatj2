@@ -1,36 +1,28 @@
 package project.xplat.launcher.pxprpcapi.androidhelper;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.IntentFilter;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WpsInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import project.xplat.launcher.pxprpcapi.ApiServer;
-import project.xplat.launcher.pxprpcapi.Utils;
-import pursuer.patchedmsgpack.tools.ArrayBuilder2;
-import pursuer.patchedmsgpack.tools.MPValueTable;
-import pursuer.patchedmsgpack.tools.MapBuilder2;
-import pursuer.patchedmsgpack.value.Value;
-import pursuer.patchedmsgpack.value.ValueFactory;
 import pursuer.pxprpc.AsyncReturn;
+import pursuer.pxprpc.TableSerializer;
+import pursuer.pxprpc.Utils;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
@@ -67,23 +59,26 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         return wm.getScanResults();
     }
     public byte[] packScanResult(List<ScanResult> l){
-        MPValueTable vt = new MPValueTable().header(new String[]{"SSID","level","frequency","capabilities"});
+        TableSerializer ser = new TableSerializer().setHeader(null, new String[]{
+                "SSID", "level", "frequency", "capabilities"});
         for(ScanResult r:l){
-        	vt.addRow(new ArrayBuilder2().add(r.SSID).add(r.level).add(r.frequency).add(r.capabilities).build());
+        	ser.addRow(new Object[]{r.SSID,r.level,r.frequency,r.capabilities});
         }
-        return Utils.packFrom(vt.toValue());
+        return Utils.toBytes(ser.build());
     }
     public byte[] getWifiInfo1(){
-        return Utils.packFrom(new MapBuilder2()
-                .put("5GHzBandSupported",wm.is5GHzBandSupported())
-                .put("P2pSupported",wm.isP2pSupported())
-                .build());
+        return Utils.toBytes(new TableSerializer().setHeader(null,new String[]{
+                "5GHzBandSupported","P2pSupported"
+                }).addRow(new Object[]{
+                wm.is5GHzBandSupported(),wm.isP2pSupported()
+        }).build());
     }
     public byte[] getState(){
-        return Utils.packFrom(new MapBuilder2()
-        		.put("WifiEnabled", wm.isWifiEnabled())
-        		.put("WifiState",wm.getWifiState())
-        		.build());
+        return Utils.toBytes(new TableSerializer().setHeader(null,new String[]{
+                "WifiEnabled","WifiState"
+        }).addRow(new Object[]{
+                wm.isWifiEnabled(),wm.getWifiState()
+        }).build());
     }
     public void setWifiEnable(boolean enable){
         wm.setWifiEnabled(enable);
@@ -138,6 +133,7 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         });
         return this.defaultChannel;
     }
+    @SuppressLint("MissingPermission")
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void p2pStartDiscover(final AsyncReturn<Exception> aret){
         wpm.discoverPeers(defaultChannel,new WifiP2pManager.ActionListener(){
@@ -165,9 +161,10 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
             }
         });
     }
+    @SuppressLint("MissingPermission")
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     //return ArrayList<WifiP2pDevice>
-    public void p2pGetPeersList(final AsyncReturn<Object> aret){
+    public Object p2pGetPeersList(final AsyncReturn<Object> aret){
         wpm.requestPeers(defaultChannel, new WifiP2pManager.PeerListListener() {
             @Override
             public void onPeersAvailable(WifiP2pDeviceList peerList) {
@@ -176,18 +173,20 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
                 aret.result(peers);
             }
         });
+        return null;
     }
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public byte[] describeP2pPeersInfo(ArrayList<WifiP2pDevice> peers){
-        MPValueTable table = new MPValueTable().header(new String[]{"deviceAddress", "deviceName", "status"});
+        TableSerializer ser = new TableSerializer().setHeader(null, new String[]{"deviceAddress", "deviceName", "status"});
         for(WifiP2pDevice p:peers){
-            table.addRow(new ArrayBuilder2().add(p.deviceAddress).add(p.deviceName).add(p.status).build());
+            ser.addRow(new Object[]{p.deviceAddress,p.deviceName,p.status});
         }
-        return Utils.packFrom(table.toValue());
+        return Utils.toBytes(ser.build());
     }
 
+    @SuppressLint("MissingPermission")
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public void p2pConnect(final AsyncReturn<Object> aret,String addr){
+    public void p2pConnect(final AsyncReturn<Exception> aret,String addr){
         WifiP2pConfig conf = new WifiP2pConfig();
         conf.deviceAddress=addr;
         wpm.connect(defaultChannel,conf, new WifiP2pManager.ActionListener(){
@@ -203,7 +202,7 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public void p2pCancelConnect(final AsyncReturn<Object> aret){
+    public void p2pCancelConnect(final AsyncReturn<Exception> aret){
         wpm.cancelConnect(defaultChannel, new WifiP2pManager.ActionListener(){
             @Override
             public void onSuccess() {
@@ -217,7 +216,7 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public void p2pDisconnect(final AsyncReturn<Object> aret) {
+    public void p2pDisconnect(final AsyncReturn<Exception> aret) {
         wpm.removeGroup(defaultChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {

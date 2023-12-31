@@ -9,11 +9,10 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.ParcelUuid;
 import project.xplat.launcher.pxprpcapi.ApiServer;
-import project.xplat.launcher.pxprpcapi.Utils;
-import pursuer.patchedmsgpack.tools.ArrayBuilder2;
-import pursuer.patchedmsgpack.tools.MPValueTable;
-import pursuer.patchedmsgpack.tools.MapBuilder2;
-import pursuer.pxprpc.EventDispatcher;
+import pursuer.pxprpc.BuiltInFuncList;
+import pursuer.pxprpc.Serializer2;
+import pursuer.pxprpc.TableSerializer;
+import pursuer.pxprpc.Utils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -49,6 +48,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
                 throw new UnsupportedOperationException("Not support yet");
             }
         }
+        this.dispatcher.setEventType(String.class);
     }
     public void close(){
 
@@ -57,19 +57,16 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         }catch(Exception e){}
     }
 
-    public byte[] describeBluetoothAdapterConstant(){
-        return ApiServer.sysbase.describeStaticFields(BluetoothAdapter.class);
+    public byte[] describeBluetoothAdapterConstant() throws IllegalAccessException {
+        return new BuiltInFuncList().listStaticConstField(BluetoothAdapter.class);
     }
-    public byte[] describeBluetoothDeviceConstant(){
-        return ApiServer.sysbase.describeStaticFields(BluetoothDevice.class);
+    public byte[] describeBluetoothDeviceConstant() throws IllegalAccessException {
+        return new BuiltInFuncList().listStaticConstField(BluetoothDevice.class);
     }
     public byte[] describeAdapterState(){
-        MapBuilder2 mb=new MapBuilder2()
-                .put("address",this.adapter.getAddress())
-                .put("name",this.adapter.getName())
-                .put("state",this.adapter.getState())
-                .put("enabled",this.adapter.isEnabled());
-        return Utils.packFrom(mb.build());
+        TableSerializer ser = new TableSerializer().setHeader("ssic",new String[]{"address","name","state","enabled"});
+        ser.addRow(new Object[]{this.adapter.getAddress(),this.adapter.getName(),this.adapter.getState(),this.adapter.isEnabled()});
+        return pursuer.pxprpc.Utils.toBytes(ser.build());
     }
     public void setName(String name){
         this.adapter.setName(name);
@@ -171,22 +168,24 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     }
 
     public byte[] describeDiscoveredDevices(){
-        MPValueTable vt = new MPValueTable().header(new String[]{"address","class","name","rssi","type","bondState"});
+        TableSerializer ser = new TableSerializer().setHeader("sisiii", new String[]{"address", "class", "name", "rssi", "type", "bondState"});
         for(Map.Entry<String,DiscoveryResult> e:this.discovered.entrySet()){
             DiscoveryResult v = e.getValue();
-            vt.addRow(new ArrayBuilder2()
-                    .add(e.getKey()).add(v.device.getBluetoothClass().getDeviceClass()).add(v.device.getName()).add(v.rssi).add(v.device.getType())
-                            .add(v.device.getBondState())
-                    .build());
+            ser.addRow(new Object[]{
+                    e.getKey(),v.device.getBluetoothClass().getDeviceClass(),v.device.getName(),
+                    v.rssi,v.device.getType(),v.device.getBondState()});
         }
-        return Utils.packFrom(vt.toValue());
+        return pursuer.pxprpc.Utils.toBytes(ser.build());
     }
     public byte[] describeDiscoveredDevice(String address){
-        DiscoveryResult v = this.discovered.get(address);
-        return Utils.packFrom(new ArrayBuilder2()
-                .add(address).add(v.device.getBluetoothClass().getDeviceClass()).add(v.device.getName()).add(v.rssi).add(v.device.getType())
-                .add(v.device.getBondState())
-                .build());
+        TableSerializer ser = new TableSerializer().setHeader("sisiii", new String[]{"address", "class", "name", "rssi", "type", "bondState"});
+        DiscoveryResult dr = this.discovered.get(address);
+        if(dr!=null){
+            ser.addRow(new Object[]{
+                    address,dr.device.getBluetoothClass().getDeviceClass(),dr.device.getName(),
+                    dr.rssi,dr.device.getType(),dr.device.getBondState()});
+        }
+        return pursuer.pxprpc.Utils.toBytes(ser.build());
     }
     @Override
     public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] scanRecord) {
@@ -216,11 +215,12 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     public byte[] querySupportUuids(String address){
         BluetoothDevice dev = discovered.get(address).device;
         ParcelUuid[] uuids = dev.getUuids();
-        ArrayBuilder2 v = new ArrayBuilder2();
+        Serializer2 ser=new Serializer2().prepareSerializing(32);
+        ser.putVarint(uuids.length);
         for(ParcelUuid e:uuids){
-            v.add(e.getUuid().toString());
+            ser.putString(e.getUuid().toString());
         }
-        return Utils.packFrom(v.build());
+        return Utils.toBytes(ser.build());
     }
     @TargetApi(Build.VERSION_CODES.Q)
     public BluetoothServerSocket listenL2cap() throws IOException {

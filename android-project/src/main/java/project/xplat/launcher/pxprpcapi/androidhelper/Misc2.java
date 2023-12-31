@@ -1,5 +1,6 @@
 package project.xplat.launcher.pxprpcapi.androidhelper;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -18,12 +19,10 @@ import android.media.AudioManager;
 import android.os.*;
 import android.hardware.Camera;
 import project.xplat.launcher.pxprpcapi.ApiServer;
-import project.xplat.launcher.pxprpcapi.Utils;
-import project.xplat.launcher.pxprpcapi.androidhelper.AndroidCamera2.CameraWrap1;
-import pursuer.patchedmsgpack.tools.ArrayBuilder2;
-import pursuer.patchedmsgpack.tools.MPValueTable;
-import pursuer.patchedmsgpack.tools.MapBuilder2;
 import pursuer.pxprpc.AsyncReturn;
+import pursuer.pxprpc.Serializer2;
+import pursuer.pxprpc.TableSerializer;
+import pursuer.pxprpc.Utils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -130,27 +129,29 @@ public class Misc2 {
 
 	public LocationListener lastLocationListener = null;
 
-	public void getGpsLocationInfo(final AsyncReturn<Object> ret, final boolean msgpackMode) {
+	@SuppressLint("MissingPermission")
+	public byte[] getGpsLocationInfo(final AsyncReturn<Object> ret, final boolean msgpackMode) {
 		if (this.lastLocationListener != null)
 			this.cancelGetGpsLocationInfo();
 		this.lastLocationListener = new LocationListener() {
 			@Override
 			public void onLocationChanged(Location location) {
 				if (msgpackMode) {
-					ret.result(Utils.packFrom(new MapBuilder2().put("latitude", location.getLatitude())
-							.put("longitude", location.getLongitude()).put("speed", location.getSpeed())
-							.put("bearing", location.getBearing()).put("altitude", location.getAltitude())
-							.put("accuracy", location.getAccuracy()).build()));
+					ret.result(Utils.toBytes(new TableSerializer().setHeader("dddddd", new String[]{
+							"latitude", "longitude", "speed", "bearing", "altitude", "accuracy"})
+									.addRow(new Object[]{
+											location.getLatitude(),location.getLongitude(),location.getSpeed(),
+											location.getBearing(),location.getAltitude(),location.getAccuracy()
+									}).build()));
 				} else {
-					ByteBuffer bb = ByteBuffer.allocate(40);
-					bb.order(ByteOrder.LITTLE_ENDIAN);
-					bb.putDouble(location.getLatitude());
-					bb.putDouble(location.getLongitude());
-					bb.putDouble(location.getSpeed());
-					bb.putDouble(location.getBearing());
-					bb.putDouble(location.getAltitude());
-					bb.putDouble(location.getAccuracy());
-					ret.result(bb.array());
+					Serializer2 ser=new Serializer2();
+					ser.putDouble(location.getLatitude());
+					ser.putDouble(location.getLongitude());
+					ser.putDouble(location.getSpeed());
+					ser.putDouble(location.getBearing());
+					ser.putDouble(location.getAltitude());
+					ser.putDouble(location.getAccuracy());
+					ret.result(Utils.toBytes(ser.build()));
 				}
 			}
 
@@ -170,6 +171,7 @@ public class Misc2 {
 		};
 		lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, this.lastLocationListener,
 				ApiServer.getHandler().getLooper());
+		return null;
 	}
 
 	public void cancelGetGpsLocationInfo() {
@@ -177,12 +179,11 @@ public class Misc2 {
 	}
 
 	public byte[] getLightsInfo() {
-		MPValueTable mvt = new MPValueTable();
-		mvt.header(new String[] { "id", "desc" });
+		TableSerializer ser = new TableSerializer().setHeader("is", new String[]{"id", "desc"});
 		for (Light2 tl : this.lights) {
-			mvt.addRow(new ArrayBuilder2().add(tl.id).add(tl.desc).build());
+			ser.addRow(new Object[]{tl.id,tl.desc});
 		}
-		return Utils.packFrom(mvt.toValue());
+		return Utils.toBytes(ser.build());
 	}
 
 	public static class Camera1Wrap implements Closeable {

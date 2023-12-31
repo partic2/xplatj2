@@ -8,9 +8,9 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.PowerManager;
 import project.xplat.launcher.pxprpcapi.ApiServer;
-import project.xplat.launcher.pxprpcapi.Utils;
-import pursuer.patchedmsgpack.tools.MapBuilder2;
 import pursuer.pxprpc.EventDispatcher;
+import pursuer.pxprpc.TableSerializer;
+import pursuer.pxprpc.Utils;
 
 public class Power2 extends PxprpcBroadcastReceiverAdapter {
 
@@ -52,11 +52,12 @@ public class Power2 extends PxprpcBroadcastReceiverAdapter {
     }
     public byte[] getBatteryState(){
         bm=(BatteryManager) ApiServer.defaultAndroidContext.getSystemService(Service.BATTERY_SERVICE);
-        return Utils.packFrom(new MapBuilder2()
-                .put("chargeCounter",bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER))
-                .put("currentAverage",bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE))
-                .put("currentNow",bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW))
-                .put("capacity",bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY))
-                .build());
+        TableSerializer ser = new TableSerializer().setHeader("iiii", new String[]{"chargeCounter", "currentAverage", "currentNow", "capacity"}).addRow(new Object[]{
+                bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER),
+                bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE),
+                bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW),
+                bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+        });
+        return Utils.toBytes(ser.build());
     }
 }
