@@ -5,7 +5,7 @@ import android.content.Context;
 import android.hardware.*;
 import android.os.Build;
 import project.xplat.launcher.pxprpcapi.ApiServer;
-import pursuer.pxprpc.EventDispatcher;
+import pxprpc.extend.EventDispatcher;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -22,7 +22,7 @@ public class Sensor2 extends EventDispatcher implements SensorEventListener, Clo
 
     public static final String PxprpcNamespace="AndroidHelper-Sensor";
 
-    private SensorManager smgr;
+    private final SensorManager smgr;
     public Sensor2(){
         this.smgr=(SensorManager) ApiServer.defaultAndroidContext.getSystemService(Context.SENSOR_SERVICE);
     }

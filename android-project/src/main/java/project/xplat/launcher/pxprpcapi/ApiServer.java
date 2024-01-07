@@ -7,7 +7,7 @@ import android.util.Log;
 import project.xplat.launcher.MainActivity;
 import project.xplat.launcher.PlatApiImpl;
 import project.xplat.launcher.pxprpcapi.androidhelper.*;
-import pursuer.pxprpc_ex.TCPBackend;
+import pxprpc.backend.TCPBackend;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.platform.PlatApi;
 import xplatj.pxprpcapi.JseBaseOsHelper;

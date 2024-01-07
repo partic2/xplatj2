@@ -3,7 +3,7 @@ package project.xplatj.backend.jse;
 
 
 import project.xplatj.JMain;
-import pursuer.pxprpc_ex.TCPBackend;
+import pxprpc.backend.TCPBackend;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.platform.PlatApi;
 import xplatj.pxprpcapi.JseBaseOsHelper;

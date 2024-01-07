@@ -19,10 +19,10 @@ import android.media.AudioManager;
 import android.os.*;
 import android.hardware.Camera;
 import project.xplat.launcher.pxprpcapi.ApiServer;
-import pursuer.pxprpc.AsyncReturn;
-import pursuer.pxprpc.Serializer2;
-import pursuer.pxprpc.TableSerializer;
-import pursuer.pxprpc.Utils;
+import pxprpc.base.Serializer2;
+import pxprpc.base.Utils;
+import pxprpc.extend.AsyncReturn;
+import pxprpc.extend.TableSerializer;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -137,7 +137,7 @@ public class Misc2 {
 			@Override
 			public void onLocationChanged(Location location) {
 				if (msgpackMode) {
-					ret.result(Utils.toBytes(new TableSerializer().setHeader("dddddd", new String[]{
+					ret.resolve(Utils.toBytes(new TableSerializer().setHeader("dddddd", new String[]{
 							"latitude", "longitude", "speed", "bearing", "altitude", "accuracy"})
 									.addRow(new Object[]{
 											location.getLatitude(),location.getLongitude(),location.getSpeed(),
@@ -151,7 +151,7 @@ public class Misc2 {
 					ser.putDouble(location.getBearing());
 					ser.putDouble(location.getAltitude());
 					ser.putDouble(location.getAccuracy());
-					ret.result(Utils.toBytes(ser.build()));
+					ret.resolve(Utils.toBytes(ser.build()));
 				}
 			}
 
@@ -166,7 +166,7 @@ public class Misc2 {
 			@Override
 			public void onProviderDisabled(String provider) {
 				Misc2.this.cancelGetGpsLocationInfo();
-				ret.result(new IOException("User disable gps provider"));
+				ret.reject(new IOException("User disable gps provider"));
 			}
 		};
 		lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, this.lastLocationListener,

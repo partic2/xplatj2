@@ -13,19 +13,20 @@ import org.nanohttpd.protocols.http.IHTTPSession;
 import org.nanohttpd.protocols.websockets.CloseCode;
 import org.nanohttpd.protocols.websockets.WebSocket;
 import org.nanohttpd.protocols.websockets.WebSocketFrame;
-
-import pursuer.pxprpc.ServerContext;
+;
+import pxprpc.backend.ChannelIo;
+import pxprpc.base.AbstractIo;
+import pxprpc.base.ServerContext;
+import pxprpc.base.Utils;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.pursuer.util.IFactory;
 
-public class PxprpcWsTunnel extends WebSocket implements ByteChannel {
+public class PxprpcWsTunnel extends WebSocket implements AbstractIo {
     protected ServerContext serv;
     protected IHTTPSession req;
     protected Exception err;
     protected BlockingQueue<byte[]> wsMsg=new ArrayBlockingQueue<byte[]>(16);
-    
-    
-    
+
     public PxprpcWsTunnel(IHTTPSession handshakeRequest) {
         super(handshakeRequest);
         this.req=handshakeRequest;
@@ -97,38 +98,39 @@ public class PxprpcWsTunnel extends WebSocket implements ByteChannel {
 
     protected byte[] readingData;
     protected int readingPos;
-	@Override
-	public int read(ByteBuffer arg0) throws IOException {
-		try {
-			if(readingData==null||readingPos>=readingData.length) {
-				this.readingData=this.wsMsg.take();
-				readingPos=0;
-			}
-			int readCount=arg0.remaining();
-			if(readCount>readingData.length-readingPos) {
-				readCount=readingData.length-readingPos;
-			}
-			arg0.put(readingData,readingPos,readCount);
-			readingPos+=readCount;
-			return readCount;
-		} catch (InterruptedException e) {
-			throw new IOException("unexpected interrupted.");
-		}
-	}
-	
-	@Override
-	public void close() throws IOException {
+
+    @Override
+    public void send(ByteBuffer[] buffs) throws IOException {
+        int size=0;
+        for(int i=0;i<buffs.length;i++){
+            size+=buffs[i].remaining();
+        }
+        ByteBuffer buf=ByteBuffer.allocate(size);
+        for(int i=0;i<buffs.length;i++){
+            buf.put(buffs[i]);
+        }
+        this.send(buf.array());
+    }
+
+    @Override
+    public void receive(ByteBuffer[] buffs) throws IOException {
+        try {
+            ByteBuffer msg=ByteBuffer.wrap(wsMsg.take());
+            for(int i=0;i<buffs.length-1;i++){
+                Utils.setLimit(msg,msg.position()+buffs[i].remaining());
+                buffs[i].put(msg);
+            }
+            Utils.setLimit(msg,msg.capacity());
+            buffs[buffs.length-1]=msg;
+        } catch (InterruptedException e) {
+        }
+    }
+
+    @Override
+	public void close() {
 		if(err!=null) {
 			this.closeQuietly(CloseCode.InternalServerError,err.toString(), false);
 		}
 	}
 
-	@Override
-	public int write(ByteBuffer arg0) throws IOException {
-		int b = arg0.remaining();
-		byte[] buf=new byte[b];
-		arg0.get(buf);
-		this.send(buf);
-		return b;
-	}
 }

@@ -8,9 +8,8 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.PowerManager;
 import project.xplat.launcher.pxprpcapi.ApiServer;
-import pursuer.pxprpc.EventDispatcher;
-import pursuer.pxprpc.TableSerializer;
-import pursuer.pxprpc.Utils;
+import pxprpc.base.Utils;
+import pxprpc.extend.TableSerializer;
 
 public class Power2 extends PxprpcBroadcastReceiverAdapter {
 

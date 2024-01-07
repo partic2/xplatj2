@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import xplatj.platform.PlatApi;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.io.*;
 
@@ -43,7 +44,7 @@ public class MainActivity extends Activity {
 				in1 = new FileInputStream(AssetsCopy.assetsDir + "/xplat-flag.txt");
 				byte[] content=new byte[1024];
 				int len=in1.read(content);
-				String[] opts=new String(content,0,len,"utf8").split("\\s+");
+				String[] opts=new String(content,0,len, StandardCharsets.UTF_8).split("\\s+");
 				for(String opt:opts){
 					if("debug".equals(opt)){
 						debugMode=true;

@@ -3,7 +3,7 @@ package project.xplat.launcher.pxprpcapi.androidhelper;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import pursuer.pxprpc.EventDispatcher;
+import pxprpc.extend.EventDispatcher;
 
 public class PxprpcBroadcastReceiverAdapter extends BroadcastReceiver {
 

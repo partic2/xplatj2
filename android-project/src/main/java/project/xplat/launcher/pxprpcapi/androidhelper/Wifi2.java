@@ -14,9 +14,9 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import project.xplat.launcher.pxprpcapi.ApiServer;
-import pursuer.pxprpc.AsyncReturn;
-import pursuer.pxprpc.TableSerializer;
-import pursuer.pxprpc.Utils;
+import pxprpc.base.Utils;
+import pxprpc.extend.AsyncReturn;
+import pxprpc.extend.TableSerializer;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -139,11 +139,11 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         wpm.discoverPeers(defaultChannel,new WifiP2pManager.ActionListener(){
             @Override
             public void onSuccess() {
-                aret.result(null);
+                aret.resolve(null);
             }
             @Override
             public void onFailure(int reason) {
-                aret.result(new IOException("wifip2p manager return  reason:"+reason));
+                aret.reject(new IOException("wifip2p manager return  reason:"+reason));
             }
         });
     }
@@ -152,12 +152,12 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         wpm.stopPeerDiscovery(defaultChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                aret.result(null);
+                aret.resolve(null);
             }
 
             @Override
             public void onFailure(int reason) {
-                aret.result(new IOException("wifip2p manager return  reason:"+reason));
+                aret.reject(new IOException("wifip2p manager return  reason:"+reason));
             }
         });
     }
@@ -170,7 +170,7 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
             public void onPeersAvailable(WifiP2pDeviceList peerList) {
                 ArrayList<WifiP2pDevice> peers=new ArrayList<WifiP2pDevice>();
                 peers.addAll(peerList.getDeviceList());
-                aret.result(peers);
+                aret.resolve(peers);
             }
         });
         return null;
@@ -192,11 +192,11 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         wpm.connect(defaultChannel,conf, new WifiP2pManager.ActionListener(){
             @Override
             public void onSuccess() {
-                aret.result(null);
+                aret.resolve(null);
             }
             @Override
             public void onFailure(int reason) {
-                aret.result(new IOException("wifip2p manager return  reason:"+reason));
+                aret.reject(new IOException("wifip2p manager return  reason:"+reason));
             }
         });
     }
@@ -206,11 +206,11 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         wpm.cancelConnect(defaultChannel, new WifiP2pManager.ActionListener(){
             @Override
             public void onSuccess() {
-                aret.result(null);
+                aret.resolve(null);
             }
             @Override
             public void onFailure(int reason) {
-                aret.result(new IOException("wifip2p manager return  reason:"+reason));
+                aret.reject(new IOException("wifip2p manager return  reason:"+reason));
             }
         });
     }
@@ -220,12 +220,12 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         wpm.removeGroup(defaultChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                aret.result(null);
+                aret.resolve(null);
             }
 
             @Override
             public void onFailure(int reason) {
-                aret.result(new IOException("wifip2p manager return  reason:" + reason));
+                aret.reject(new IOException("wifip2p manager return  reason:" + reason));
             }
         });
     }

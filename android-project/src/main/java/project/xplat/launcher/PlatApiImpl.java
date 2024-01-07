@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,7 +38,7 @@ public class PlatApiImpl implements PlatApi{
 		for (File f : obj) {
 			String name = f.getName();
 			if (fileNames.contains(name)) {
-				String dotSuffix=name.substring(name.lastIndexOf("."), name.length());
+				String dotSuffix=name.substring(name.lastIndexOf("."));
 				if (newTmpDexDir == null) {
 					newTmpDexDir = new File(cacheDir(), "tmpDex");
 					newTmpDexDir.mkdirs();
@@ -62,7 +63,7 @@ public class PlatApiImpl implements PlatApi{
 			cp.deleteCharAt(cplen - 1);
 		}
 		try {
-			String dirprefix=Base64.encodeToString(MessageDigest.getInstance("MD5").digest(cp.toString().getBytes("utf-8")), Base64.DEFAULT).replace('/', '-');
+			String dirprefix=Base64.encodeToString(MessageDigest.getInstance("MD5").digest(cp.toString().getBytes(StandardCharsets.UTF_8)), Base64.DEFAULT).replace('/', '-');
 			File odexdir=new File(cache + "/" + dirprefix);
 			odexdir.mkdirs();
 			dex = new DexClassLoader(cp.toString(), odexdir.getAbsolutePath() , System.getProperty("libraryPath"), parent);

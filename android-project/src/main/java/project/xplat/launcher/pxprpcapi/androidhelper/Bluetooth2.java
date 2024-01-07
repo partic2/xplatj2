@@ -9,10 +9,10 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.ParcelUuid;
 import project.xplat.launcher.pxprpcapi.ApiServer;
-import pursuer.pxprpc.BuiltInFuncList;
-import pursuer.pxprpc.Serializer2;
-import pursuer.pxprpc.TableSerializer;
-import pursuer.pxprpc.Utils;
+import pxprpc.base.Serializer2;
+import pxprpc.base.Utils;
+import pxprpc.extend.BuiltInFuncList;
+import pxprpc.extend.TableSerializer;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -66,7 +66,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     public byte[] describeAdapterState(){
         TableSerializer ser = new TableSerializer().setHeader("ssic",new String[]{"address","name","state","enabled"});
         ser.addRow(new Object[]{this.adapter.getAddress(),this.adapter.getName(),this.adapter.getState(),this.adapter.isEnabled()});
-        return pursuer.pxprpc.Utils.toBytes(ser.build());
+        return Utils.toBytes(ser.build());
     }
     public void setName(String name){
         this.adapter.setName(name);
@@ -175,7 +175,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
                     e.getKey(),v.device.getBluetoothClass().getDeviceClass(),v.device.getName(),
                     v.rssi,v.device.getType(),v.device.getBondState()});
         }
-        return pursuer.pxprpc.Utils.toBytes(ser.build());
+        return Utils.toBytes(ser.build());
     }
     public byte[] describeDiscoveredDevice(String address){
         TableSerializer ser = new TableSerializer().setHeader("sisiii", new String[]{"address", "class", "name", "rssi", "type", "bondState"});
@@ -185,7 +185,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
                     address,dr.device.getBluetoothClass().getDeviceClass(),dr.device.getName(),
                     dr.rssi,dr.device.getType(),dr.device.getBondState()});
         }
-        return pursuer.pxprpc.Utils.toBytes(ser.build());
+        return Utils.toBytes(ser.build());
     }
     @Override
     public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] scanRecord) {

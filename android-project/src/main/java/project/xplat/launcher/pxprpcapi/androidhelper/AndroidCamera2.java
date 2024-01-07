@@ -12,10 +12,10 @@ import android.os.Build;
 import android.util.Size;
 import android.view.Surface;
 import project.xplat.launcher.pxprpcapi.ApiServer;
-import pursuer.pxprpc.AsyncReturn;
-import pursuer.pxprpc.EventDispatcher;
-import pursuer.pxprpc.TableSerializer;
-import pursuer.pxprpc.Utils;
+import pxprpc.base.Utils;
+import pxprpc.extend.AsyncReturn;
+import pxprpc.extend.EventDispatcher;
+import pxprpc.extend.TableSerializer;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -35,11 +35,12 @@ public class AndroidCamera2 {
     public AndroidCamera2() {
     	camSrv=(CameraManager)ApiServer.defaultAndroidContext.getSystemService(Context.CAMERA_SERVICE);
     }
-    public void init() {};
+    public void init() {}
+
     public void deinit() {
     	closeAllOpenedResource();
-    };
-    
+    }
+
     public void closeAllOpenedResource() {
     	for(Closeable cam:openedResource) {
     		ApiServer.closeQuietly(cam);
@@ -81,10 +82,10 @@ public class AndroidCamera2 {
             for(Size e : sizes){
                 ser2.addRow(new Object[]{e.getWidth(),e.getHeight()});
             }
-            row[2]=pursuer.pxprpc.Utils.toBytes(ser2.build());
+            row[2]=Utils.toBytes(ser2.build());
             ser.addRow(row);
         }
-        return pursuer.pxprpc.Utils.toBytes(ser.build());
+        return Utils.toBytes(ser.build());
     }
 
     public static class CameraWrap1 extends EventDispatcher implements Closeable{
@@ -124,7 +125,7 @@ public class AndroidCamera2 {
                 @Override
                 public void onOpened(CameraDevice camera) {
                     CameraWrap1 c = new CameraWrap1(AndroidCamera2.this, camera);
-                    aret.result(c);
+                    aret.resolve(c);
                 }
 
                 @Override
@@ -133,12 +134,12 @@ public class AndroidCamera2 {
 
                 @Override
                 public void onError(CameraDevice camera, int error) {
-                    aret.result(new Exception("Android Camera2 Error:" + error));
+                    aret.reject(new Exception("Android Camera2 Error:" + error));
                 }
 
             }, ApiServer.getHandler());
         }catch(Exception e){
-            aret.result(e);
+            aret.reject(e);
         }
         return null;
     }
@@ -172,18 +173,18 @@ public class AndroidCamera2 {
                         if(camWrap.autoFocusMode>=0)capReq.set(CaptureRequest.CONTROL_AF_MODE, camWrap.autoFocusMode);
                         capReq.addTarget(camWrap.imgRead.getSurface());
                         session.setRepeatingRequest(capReq.build(),null,ApiServer.handler);
-                        aret.result(null);
+                        aret.resolve(null);
                     }catch (Exception e) {
-                        aret.result(e);
+                        aret.reject(e);
                     }
                 }
                 @Override
                 public void onConfigureFailed(CameraCaptureSession session) {
-                    aret.result(new RuntimeException("createCaptureSession failed."));
+                    aret.reject(new RuntimeException("createCaptureSession failed."));
                 }
             },ApiServer.getHandler());
         } catch (Exception e) {
-            aret.result(e);
+            aret.reject(e);
         }
         return null;
     }
@@ -211,18 +212,18 @@ public class AndroidCamera2 {
                         if(camWrap.autoFocusMode>=0)capReq.set(CaptureRequest.CONTROL_AF_MODE, camWrap.autoFocusMode);
                         capReq.addTarget(camWrap.imgRead.getSurface());
                         session.capture(capReq.build(), null, ApiServer.handler);
-                        aret.result(null);
+                        aret.resolve(null);
                     }catch (Exception e) {
-                        aret.result(e);
+                        aret.reject(e);
                     }
                 }
                 @Override
                 public void onConfigureFailed(CameraCaptureSession session) {
-                    aret.result(new RuntimeException("createCaptureSession failed."));
+                    aret.reject(new RuntimeException("createCaptureSession failed."));
                 }
             },ApiServer.getHandler());
         } catch (Exception e) {
-            aret.result(e);
+            aret.reject(e);
         }
         return null;
     }
@@ -239,12 +240,12 @@ public class AndroidCamera2 {
                     e.getPixelStride()
                     ,e.getRowStride()});
         }
-        return pursuer.pxprpc.Utils.toBytes(ser.build());
+        return Utils.toBytes(ser.build());
     }
 
     public byte[] getPlaneBufferData(Image.Plane plane1){
         ByteBuffer buf1 = plane1.getBuffer();
-        return pursuer.pxprpc.Utils.toBytes(buf1);
+        return Utils.toBytes(buf1);
     }
 
     public byte[] packPlaneData(List<Image.Plane> planes){
@@ -255,7 +256,7 @@ public class AndroidCamera2 {
                     ,e.getRowStride()
             ,getPlaneBufferData(e)});
         }
-        return pursuer.pxprpc.Utils.toBytes(ser.build());
+        return Utils.toBytes(ser.build());
     }
 
 }
