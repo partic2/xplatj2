@@ -4,6 +4,7 @@ package project.xplatj.backend.jse;
 
 import project.xplatj.JMain;
 import pxprpc.backend.TCPBackend;
+import pxprpc.extend.DefaultFuncMap;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.platform.PlatApi;
 import xplatj.pxprpcapi.JseBaseOsHelper;
@@ -31,7 +32,7 @@ public class ApiServer {
         tcpServ.listenAndServe();
     }
     public static void putModule(String modName,Object module){
-        tcpServ.funcMap.put(modName,module);
+        DefaultFuncMap.registered.put(modName,module);
     }
     public static Object getModule(String modName){
         return tcpServ.funcMap.get(modName);
@@ -59,7 +60,7 @@ public class ApiServer {
             @Override
             public void run() {
                 closeQuietly(tcpServ);
-                for(Object mod:ApiServer.tcpServ.funcMap.values()){
+                for(Object mod: DefaultFuncMap.registered.values()){
                     if(mod instanceof Closeable){
                         closeQuietly((Closeable) mod);
                     }

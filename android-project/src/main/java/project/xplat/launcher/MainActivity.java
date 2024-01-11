@@ -1,7 +1,6 @@
 package project.xplat.launcher;
 
 
-
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -9,14 +8,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
-
 import android.os.Build;
 import android.os.Bundle;
-import xplatj.platform.PlatApi;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.io.*;
+import java.util.ArrayList;
 
 
 
@@ -33,12 +32,12 @@ public class MainActivity extends Activity {
 	public static String selectedBackend="";
 	public static String selectedResultAction="shutdown";
 	public static boolean debugMode=false;
-	public static Boolean startOptsParsed=false;
+	public static boolean[] startOptsParsed=new boolean[]{false};
 	public static void ensureStartOpts(){
 		
 		synchronized (startOptsParsed){
-			if(startOptsParsed)return;
-			startOptsParsed=true;
+			if(startOptsParsed[0])return;
+			startOptsParsed[0]=true;
 			FileInputStream in1 = null;
 			try {
 				in1 = new FileInputStream(AssetsCopy.assetsDir + "/xplat-flag.txt");
@@ -123,7 +122,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		//ensure this is called when every activity created
 		AssetsCopy.init(this);
-		startOptsParsed=false;
+		startOptsParsed[0]=false;
 		MainActivity.context = this.getApplicationContext();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			String[] reqPerms=getPermissionNotGranted();
@@ -161,7 +160,7 @@ public class MainActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		boolean shutdown=true;
 		try{
-			startOptsParsed=false;
+			startOptsParsed[0]=false;
 			ensureStartOpts();
 			if(shutdownFlag.equals(selectedResultAction)){
 				shutdown=true;

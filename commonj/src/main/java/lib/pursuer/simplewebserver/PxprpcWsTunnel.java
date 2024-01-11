@@ -3,6 +3,7 @@ package lib.pursuer.simplewebserver;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -25,7 +26,7 @@ public class PxprpcWsTunnel extends WebSocket implements AbstractIo {
     protected ServerContext serv;
     protected IHTTPSession req;
     protected Exception err;
-    protected BlockingQueue<byte[]> wsMsg=new ArrayBlockingQueue<byte[]>(16);
+    protected BlockingQueue<WebSocketFrame> wsMsg=new ArrayBlockingQueue<WebSocketFrame>(16);
 
     public PxprpcWsTunnel(IHTTPSession handshakeRequest) {
         super(handshakeRequest);
@@ -38,17 +39,14 @@ public class PxprpcWsTunnel extends WebSocket implements AbstractIo {
         String name = uri.substring(1);
         if(PxprpcWsServer.registeredServer.containsKey(name)) {
         	this.serv=PxprpcWsServer.registeredServer.get(name).create();
-        	this.serv.init(this);
+        	this.serv.init(this,null);
         	new Thread((new Runnable() {
         		@Override
         		public void run() {
         			try {
 						PxprpcWsTunnel.this.serv.serve();
 					} catch (Exception e) {
-						if(!(e instanceof IOException)){
-							PxprpcWsTunnel.this.closeQuietly(CloseCode.InternalServerError, e.toString(), false);
-							e.printStackTrace();
-						}
+                        PxprpcWsTunnel.this.closeQuietly(CloseCode.InternalServerError, e.toString(), false);
 					}
         		}
         	})).start();
@@ -76,9 +74,8 @@ public class PxprpcWsTunnel extends WebSocket implements AbstractIo {
 
     @Override
     protected void onMessage(WebSocketFrame message) {
-        byte[] data = message.getBinaryPayload();
         try {
-			this.wsMsg.offer(data,1,TimeUnit.SECONDS);
+			this.wsMsg.offer(message,1,TimeUnit.SECONDS);
         } catch (InterruptedException e) {
         	this.closeQuietly(CloseCode.InternalServerError, "server not response too long.", false);
         }
@@ -115,10 +112,27 @@ public class PxprpcWsTunnel extends WebSocket implements AbstractIo {
     @Override
     public void receive(ByteBuffer[] buffs) throws IOException {
         try {
-            ByteBuffer msg=ByteBuffer.wrap(wsMsg.take());
+            ArrayList<byte[]> packets=new ArrayList<byte[]>();
+            WebSocketFrame wsFrm=null;
+            do{
+                wsFrm=wsMsg.take();
+                packets.add(wsFrm.getBinaryPayload());
+            }while(!wsFrm.isFin());
+            int size=0;
+            for(byte[] p:packets){
+                size+=p.length;
+            }
+            ByteBuffer msg=ByteBuffer.allocate(size);
+            for(byte[] p:packets){
+                msg.put(p);
+            }
+            Utils.setPos(msg,0);
+            Utils.setLimit(msg,0);
             for(int i=0;i<buffs.length-1;i++){
                 Utils.setLimit(msg,msg.position()+buffs[i].remaining());
+                int bufStart=buffs[i].position();
                 buffs[i].put(msg);
+                Utils.setPos(buffs[i],bufStart);
             }
             Utils.setLimit(msg,msg.capacity());
             buffs[buffs.length-1]=msg;

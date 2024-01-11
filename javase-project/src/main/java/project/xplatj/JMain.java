@@ -22,12 +22,12 @@ import java.util.Scanner;
 public class JMain {
 	static int orientation = 1;
 	public static boolean debugMode;
-	public static Boolean startOptsParsed=false;
+	public static boolean[] startOptsParsed=new boolean[]{false};
 	public static String selectedBackend;
 	public static void ensureStartOpts(){
 		synchronized (startOptsParsed){
-			if(startOptsParsed)return;
-			startOptsParsed=true;
+			if(startOptsParsed[0])return;
+			startOptsParsed[0]=true;
 			FileInputStream in1 = null;
 			try {
 				in1 = new FileInputStream("data/xplat-flag.txt");
@@ -113,6 +113,7 @@ public class JMain {
 		}
 	}
 	public static void main(String args[]) {
+		ApiServer.start();
 		processStartupConfig();
 		System.out.println("exit...");
 		System.exit(0);
