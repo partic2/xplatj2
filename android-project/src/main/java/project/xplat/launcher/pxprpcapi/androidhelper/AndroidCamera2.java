@@ -48,7 +48,7 @@ public class AndroidCamera2 {
     }
 
 
-    public byte[] getBaseCamerasInfo() throws CameraAccessException {
+    public ByteBuffer getBaseCamerasInfo() throws CameraAccessException {
         TableSerializer ser=new TableSerializer().setHeader("isb",new String[]{"id","features","outputSizes"});
         for(String id:camSrv.getCameraIdList()){
             CameraCharacteristics info = camSrv.getCameraCharacteristics(id);
@@ -85,7 +85,7 @@ public class AndroidCamera2 {
             row[2]=Utils.toBytes(ser2.build());
             ser.addRow(row);
         }
-        return Utils.toBytes(ser.build());
+        return ser.build();
     }
 
     public static class CameraWrap1 extends EventDispatcher implements Closeable{
@@ -233,22 +233,22 @@ public class AndroidCamera2 {
         return Arrays.asList(plane1);
     }
 
-    public byte[] describePlaneInfo(List<Image.Plane> planes){
+    public ByteBuffer describePlaneInfo(List<Image.Plane> planes){
         TableSerializer ser = new TableSerializer().setHeader("ii",new String[]{"pixelStride","rowStride"});
         for(Image.Plane e:planes){
             ser.addRow(new Object[]{
                     e.getPixelStride()
                     ,e.getRowStride()});
         }
-        return Utils.toBytes(ser.build());
+        return ser.build();
     }
 
-    public byte[] getPlaneBufferData(Image.Plane plane1){
+    public ByteBuffer getPlaneBufferData(Image.Plane plane1){
         ByteBuffer buf1 = plane1.getBuffer();
-        return Utils.toBytes(buf1);
+        return buf1;
     }
 
-    public byte[] packPlaneData(List<Image.Plane> planes){
+    public ByteBuffer packPlaneData(List<Image.Plane> planes){
         TableSerializer ser = new TableSerializer().setHeader("ii",new String[]{"pixelStride","rowStride","buffer"});
         for(Image.Plane e:planes){
             ser.addRow(new Object[]{
@@ -256,7 +256,7 @@ public class AndroidCamera2 {
                     ,e.getRowStride()
             ,getPlaneBufferData(e)});
         }
-        return Utils.toBytes(ser.build());
+        return ser.build();
     }
 
 }

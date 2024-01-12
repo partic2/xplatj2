@@ -18,6 +18,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,22 +52,21 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         this.dispatcher.setEventType(String.class);
     }
     public void close(){
-
         try{
             ApiServer.defaultAndroidContext.unregisterReceiver(this);
         }catch(Exception e){}
     }
 
-    public byte[] describeBluetoothAdapterConstant() throws IllegalAccessException {
+    public ByteBuffer describeBluetoothAdapterConstant() throws IllegalAccessException {
         return new BuiltInFuncList().listStaticConstField(BluetoothAdapter.class);
     }
-    public byte[] describeBluetoothDeviceConstant() throws IllegalAccessException {
+    public ByteBuffer describeBluetoothDeviceConstant() throws IllegalAccessException {
         return new BuiltInFuncList().listStaticConstField(BluetoothDevice.class);
     }
-    public byte[] describeAdapterState(){
+    public ByteBuffer describeAdapterState(){
         TableSerializer ser = new TableSerializer().setHeader("ssic",new String[]{"address","name","state","enabled"});
         ser.addRow(new Object[]{this.adapter.getAddress(),this.adapter.getName(),this.adapter.getState(),this.adapter.isEnabled()});
-        return Utils.toBytes(ser.build());
+        return ser.build();
     }
     public void setName(String name){
         this.adapter.setName(name);
@@ -113,8 +113,8 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         allowNoConfirmPairing=b;
     }
 
-    public boolean setPairPin(String address,byte[] pin){
-        return discovered.get(address).device.setPin(pin);
+    public boolean setPairPin(String address,ByteBuffer pin){
+        return discovered.get(address).device.setPin(Utils.toBytes(pin));
     }
 
 
@@ -122,6 +122,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         public BluetoothDevice device;
         public int rssi;
         public boolean pairingRequest;
+        public byte[] scanRecord;
     }
 
     @Override
@@ -167,17 +168,17 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         discovered.clear();
     }
 
-    public byte[] describeDiscoveredDevices(){
-        TableSerializer ser = new TableSerializer().setHeader("sisiii", new String[]{"address", "class", "name", "rssi", "type", "bondState"});
+    public ByteBuffer describeDiscoveredDevices(){
+        TableSerializer ser = new TableSerializer().setHeader("sisiii", new String[]{"address", "class", "name", "rssi", "type", "bondState","scanRecord"});
         for(Map.Entry<String,DiscoveryResult> e:this.discovered.entrySet()){
             DiscoveryResult v = e.getValue();
             ser.addRow(new Object[]{
                     e.getKey(),v.device.getBluetoothClass().getDeviceClass(),v.device.getName(),
-                    v.rssi,v.device.getType(),v.device.getBondState()});
+                    v.rssi,v.device.getType(),v.device.getBondState(),ByteBuffer.wrap(v.scanRecord)});
         }
-        return Utils.toBytes(ser.build());
+        return ser.build();
     }
-    public byte[] describeDiscoveredDevice(String address){
+    public ByteBuffer describeDiscoveredDevice(String address){
         TableSerializer ser = new TableSerializer().setHeader("sisiii", new String[]{"address", "class", "name", "rssi", "type", "bondState"});
         DiscoveryResult dr = this.discovered.get(address);
         if(dr!=null){
@@ -185,7 +186,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
                     address,dr.device.getBluetoothClass().getDeviceClass(),dr.device.getName(),
                     dr.rssi,dr.device.getType(),dr.device.getBondState()});
         }
-        return Utils.toBytes(ser.build());
+        return ser.build();
     }
     @Override
     public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] scanRecord) {
@@ -193,6 +194,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         t.device = bluetoothDevice;
         t.pairingRequest=false;
         t.rssi=rssi;
+        t.scanRecord=scanRecord;
         discovered.put(bluetoothDevice.getAddress(),t);
     }
 
@@ -212,7 +214,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         s.connect();
         return s;
     }
-    public byte[] querySupportUuids(String address){
+    public ByteBuffer querySupportUuids(String address){
         BluetoothDevice dev = discovered.get(address).device;
         ParcelUuid[] uuids = dev.getUuids();
         Serializer2 ser=new Serializer2().prepareSerializing(32);
@@ -220,7 +222,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         for(ParcelUuid e:uuids){
             ser.putString(e.getUuid().toString());
         }
-        return Utils.toBytes(ser.build());
+        return ser.build();
     }
     @TargetApi(Build.VERSION_CODES.Q)
     public BluetoothServerSocket listenL2cap() throws IOException {
@@ -233,13 +235,13 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     public BluetoothSocket socketAccept(BluetoothServerSocket s,int timeout) throws IOException {
         return s.accept(timeout);
     }
-    public byte[] socketRead(BluetoothSocket s) throws IOException {
+    public ByteBuffer socketRead(BluetoothSocket s) throws IOException {
         byte[] b = new byte[4096];
         int read=s.getInputStream().read(b);
-        return Arrays.copyOf(b,read);
+        return ByteBuffer.wrap(b,0,read);
     }
-    public void socketWrite(BluetoothSocket s,byte[] b) throws IOException {
-        s.getOutputStream().write(b);
+    public void socketWrite(BluetoothSocket s,ByteBuffer b) throws IOException {
+        s.getOutputStream().write(Utils.toBytes(b));
     }
     public void socketClose(Closeable s) throws IOException {
         s.close();

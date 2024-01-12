@@ -5,14 +5,13 @@ import android.content.Context;
 import android.hardware.*;
 import android.os.Build;
 import project.xplat.launcher.pxprpcapi.ApiServer;
+import pxprpc.base.Serializer2;
 import pxprpc.extend.EventDispatcher;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,15 +90,14 @@ public class Sensor2 extends EventDispatcher implements SensorEventListener, Clo
         this.fireEvent(event);
     }
 
-    public byte[] packSensorEvent(SensorEvent event){
-        ByteBuffer bb=ByteBuffer.allocate(event.values.length*4+8);
-        bb.order(ByteOrder.LITTLE_ENDIAN);
-        bb.putInt(runningSensor.get(event.sensor));
-        bb.putInt(event.values.length);
+    public ByteBuffer packSensorEvent(SensorEvent event){
+        Serializer2 ser = new Serializer2().prepareSerializing(64);
+        ser.putInt(runningSensor.get(event.sensor));
+        ser.putInt(event.values.length);
         for(int i=0;i<event.values.length;i++){
-            bb.putFloat(event.values[i]);
+            ser.putFloat(event.values[i]);
         }
-        return bb.array();
+        return ser.build();
     }
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {

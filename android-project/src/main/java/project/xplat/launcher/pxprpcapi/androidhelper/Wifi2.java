@@ -22,6 +22,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,27 +59,27 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
     public List<ScanResult> getScanResult(){
         return wm.getScanResults();
     }
-    public byte[] packScanResult(List<ScanResult> l){
+    public ByteBuffer packScanResult(List<ScanResult> l){
         TableSerializer ser = new TableSerializer().setHeader(null, new String[]{
                 "SSID", "level", "frequency", "capabilities"});
         for(ScanResult r:l){
         	ser.addRow(new Object[]{r.SSID,r.level,r.frequency,r.capabilities});
         }
-        return Utils.toBytes(ser.build());
+        return ser.build();
     }
-    public byte[] getWifiInfo1(){
-        return Utils.toBytes(new TableSerializer().setHeader(null,new String[]{
+    public ByteBuffer getWifiInfo1(){
+        return new TableSerializer().setHeader(null,new String[]{
                 "5GHzBandSupported","P2pSupported"
                 }).addRow(new Object[]{
                 wm.is5GHzBandSupported(),wm.isP2pSupported()
-        }).build());
+        }).build();
     }
-    public byte[] getState(){
-        return Utils.toBytes(new TableSerializer().setHeader(null,new String[]{
+    public ByteBuffer getState(){
+        return new TableSerializer().setHeader(null,new String[]{
                 "WifiEnabled","WifiState"
         }).addRow(new Object[]{
                 wm.isWifiEnabled(),wm.getWifiState()
-        }).build());
+        }).build();
     }
     public void setWifiEnable(boolean enable){
         wm.setWifiEnabled(enable);
@@ -164,7 +165,7 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
     @SuppressLint("MissingPermission")
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     //return ArrayList<WifiP2pDevice>
-    public Object p2pGetPeersList(final AsyncReturn<Object> aret){
+    public Object p2pGetPeersList(final AsyncReturn<ArrayList<WifiP2pDevice>> aret){
         wpm.requestPeers(defaultChannel, new WifiP2pManager.PeerListListener() {
             @Override
             public void onPeersAvailable(WifiP2pDeviceList peerList) {
@@ -176,12 +177,12 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         return null;
     }
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public byte[] describeP2pPeersInfo(ArrayList<WifiP2pDevice> peers){
+    public ByteBuffer describeP2pPeersInfo(ArrayList<WifiP2pDevice> peers){
         TableSerializer ser = new TableSerializer().setHeader(null, new String[]{"deviceAddress", "deviceName", "status"});
         for(WifiP2pDevice p:peers){
             ser.addRow(new Object[]{p.deviceAddress,p.deviceName,p.status});
         }
-        return Utils.toBytes(ser.build());
+        return ser.build();
     }
 
     @SuppressLint("MissingPermission")

@@ -11,6 +11,8 @@ import project.xplat.launcher.pxprpcapi.ApiServer;
 import pxprpc.base.Utils;
 import pxprpc.extend.TableSerializer;
 
+import java.nio.ByteBuffer;
+
 public class Power2 extends PxprpcBroadcastReceiverAdapter {
 
     public static final String PxprpcNamespace="AndroidHelper-Power";
@@ -49,7 +51,7 @@ public class Power2 extends PxprpcBroadcastReceiverAdapter {
             screenWake.release();
         }
     }
-    public byte[] getBatteryState(){
+    public ByteBuffer getBatteryState(){
         bm=(BatteryManager) ApiServer.defaultAndroidContext.getSystemService(Service.BATTERY_SERVICE);
         TableSerializer ser = new TableSerializer().setHeader("iiii", new String[]{"chargeCounter", "currentAverage", "currentNow", "capacity"}).addRow(new Object[]{
                 bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER),
@@ -57,6 +59,6 @@ public class Power2 extends PxprpcBroadcastReceiverAdapter {
                 bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW),
                 bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         });
-        return Utils.toBytes(ser.build());
+        return ser.build();
     }
 }

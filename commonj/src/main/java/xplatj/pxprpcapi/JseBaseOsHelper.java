@@ -1,5 +1,6 @@
 package xplatj.pxprpcapi;
 
+import pxprpc.base.Utils;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.pursuer.filesystem.FSUtils;
 import xplatj.javaplat.pursuer.filesystem.IFile;
@@ -9,6 +10,7 @@ import xplatj.javaplat.pursuer.io.IDataBlock;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 
 public class JseBaseOsHelper {
     public static final String PxprpcNamespace="JseBaseOsHelper";
@@ -17,27 +19,28 @@ public class JseBaseOsHelper {
         fs=new PrefixFS();
         fs.prefix="";
     }
-    public byte[] fileRead(String path,long offset,int size) throws IOException {
+    public ByteBuffer fileRead(String path, long offset, int size) throws IOException {
         IFile fo = fs.resolve(path);
         if(!fo.exists()){
-            return new byte[0];
+            throw new IOException("File not existed");
         }else{
             IDataBlock db = fo.open();
             db.seek(offset);
             byte[] buf = new byte[size];
-            db.read(buf,0,size);
+            int len = db.read(buf, 0, size);
             db.free();
-            return buf;
+            return ByteBuffer.wrap(buf,0,len);
         }
     }
-    public void fileWrite(String path,int offset,byte[] data) throws IOException {
+    public void fileWrite(String path,int offset,ByteBuffer data) throws IOException {
         IFile fo = fs.resolve(path);
         if(!fo.exists()){
             fo.create();
         }else{
             IDataBlock db = fo.open();
             db.seek(offset);
-            db.write(data,0,data.length);
+            byte[] b = Utils.toBytes(data);
+            db.write(b,0,b.length);
             db.free();
         }
     }

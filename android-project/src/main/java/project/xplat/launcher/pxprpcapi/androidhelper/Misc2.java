@@ -130,19 +130,19 @@ public class Misc2 {
 	public LocationListener lastLocationListener = null;
 
 	@SuppressLint("MissingPermission")
-	public byte[] getGpsLocationInfo(final AsyncReturn<Object> ret, final boolean msgpackMode) {
+	public ByteBuffer getGpsLocationInfo(final AsyncReturn<ByteBuffer> ret, final boolean msgpackMode) {
 		if (this.lastLocationListener != null)
 			this.cancelGetGpsLocationInfo();
 		this.lastLocationListener = new LocationListener() {
 			@Override
 			public void onLocationChanged(Location location) {
 				if (msgpackMode) {
-					ret.resolve(Utils.toBytes(new TableSerializer().setHeader("dddddd", new String[]{
+					ret.resolve(new TableSerializer().setHeader("dddddd", new String[]{
 							"latitude", "longitude", "speed", "bearing", "altitude", "accuracy"})
 									.addRow(new Object[]{
 											location.getLatitude(),location.getLongitude(),location.getSpeed(),
 											location.getBearing(),location.getAltitude(),location.getAccuracy()
-									}).build()));
+									}).build());
 				} else {
 					Serializer2 ser=new Serializer2();
 					ser.putDouble(location.getLatitude());
@@ -151,7 +151,7 @@ public class Misc2 {
 					ser.putDouble(location.getBearing());
 					ser.putDouble(location.getAltitude());
 					ser.putDouble(location.getAccuracy());
-					ret.resolve(Utils.toBytes(ser.build()));
+					ret.resolve(ser.build());
 				}
 			}
 
@@ -178,12 +178,12 @@ public class Misc2 {
 		lm.removeUpdates(this.lastLocationListener);
 	}
 
-	public byte[] getLightsInfo() {
+	public ByteBuffer getLightsInfo() {
 		TableSerializer ser = new TableSerializer().setHeader("is", new String[]{"id", "desc"});
 		for (Light2 tl : this.lights) {
 			ser.addRow(new Object[]{tl.id,tl.desc});
 		}
-		return Utils.toBytes(ser.build());
+		return ser.build();
 	}
 
 	public static class Camera1Wrap implements Closeable {
