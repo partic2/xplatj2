@@ -23,6 +23,7 @@ import pxprpc.base.Serializer2;
 import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.TableSerializer;
+import xplatj.gdxconfig.core.PlatCoreConfig;
 
 import java.io.Closeable;
 import java.io.IOException;
