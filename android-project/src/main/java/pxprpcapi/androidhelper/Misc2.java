@@ -1,4 +1,4 @@
-package project.xplat.launcher.pxprpcapi.androidhelper;
+package pxprpcapi.androidhelper;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -8,7 +8,6 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
@@ -18,23 +17,19 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.*;
 import android.hardware.Camera;
-import project.xplat.launcher.pxprpcapi.ApiServer;
+import project.xplat.launcher.ApiServer;
 import pxprpc.base.Serializer2;
-import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.TableSerializer;
-import xplatj.gdxconfig.core.PlatCoreConfig;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.List;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class Misc2 {
-	public static final String PxprpcNamespace="AndroidHelper-Misc";
+	public static final String PxprpcNamespace="AndroidHelper.Misc";
 
 	Vibrator vb;
 	ClipboardManager cbm;

@@ -1,4 +1,4 @@
-package project.xplat.launcher.pxprpcapi.androidhelper;
+package pxprpcapi.androidhelper;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -13,8 +13,7 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
-import project.xplat.launcher.pxprpcapi.ApiServer;
-import pxprpc.base.Utils;
+import project.xplat.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.TableSerializer;
 
@@ -27,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
-    public static final String PxprpcNamespace="AndroidHelper-Wifi";
+    public static final String PxprpcNamespace="AndroidHelper.Wifi";
     WifiManager wm;
     WifiP2pManager wpm;
     ConnectivityManager cm;

@@ -1,4 +1,4 @@
-package project.xplat.launcher.pxprpcapi.androidhelper;
+package pxprpcapi.androidhelper;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -11,7 +11,7 @@ import android.media.ImageReader;
 import android.os.Build;
 import android.util.Size;
 import android.view.Surface;
-import project.xplat.launcher.pxprpcapi.ApiServer;
+import project.xplat.launcher.ApiServer;
 import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.EventDispatcher;
@@ -26,7 +26,7 @@ import java.util.List;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class AndroidCamera2 {
-    public static final String PxprpcNamespace="AndroidHelper-Camera2";
+    public static final String PxprpcNamespace="AndroidHelper.Camera2";
 
     public CameraManager camSrv;
     public String uid="";

@@ -1,26 +1,20 @@
-package xplatj.pxprpcapi;
+package pxprpcapi.jsehelper;
 
 import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
-import pxprpc.extend.BuiltInFuncList;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.pursuer.filesystem.FSUtils;
-import xplatj.javaplat.pursuer.filesystem.IFile;
 import xplatj.javaplat.pursuer.filesystem.impl.PrefixFS;
-import xplatj.javaplat.pursuer.io.IDataBlock;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
-public class JseBaseOsHelper {
-    public static final String PxprpcNamespace="JseBaseOsHelper";
+public class JseIo {
+    public static final String PxprpcNamespace="JseHelper.JseIo";
     public PrefixFS fs;
-    public JseBaseOsHelper(){
+    public JseIo(){
         fs=new PrefixFS();
         fs.prefix="";
     }

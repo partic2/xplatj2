@@ -1,21 +1,19 @@
-package project.xplat.launcher.pxprpcapi.androidhelper;
+package pxprpcapi.androidhelper;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
-import android.content.ContentProvider;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import de.cketti.fileprovider.PublicFileProvider;
-import project.xplat.launcher.AssetsCopy;
-import project.xplat.launcher.pxprpcapi.ApiServer;
+import project.xplat.launcher.ApiServer;
 
 import java.io.File;
 
 public class Intent2 {
-    public static final String PxprpcNamespace="AndroidHelper-Intent";
+    public static final String PxprpcNamespace="AndroidHelper.Intent";
     public void requestInstallApk(String apkPath){
         Intent intent = new Intent(Intent.ACTION_VIEW);
         File file = new File(apkPath);

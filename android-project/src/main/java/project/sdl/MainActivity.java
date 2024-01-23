@@ -2,7 +2,7 @@ package project.sdl;
 import android.os.*;
 import org.libsdl.app.*;
 import project.xplat.launcher.AssetsCopy;
-import project.xplat.launcher.pxprpcapi.ApiServer;
+import project.xplat.launcher.ApiServer;
 
 public class MainActivity extends SDLActivity
 {

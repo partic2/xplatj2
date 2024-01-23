@@ -1,10 +1,10 @@
-package project.xplat.launcher.pxprpcapi.androidhelper;
+package pxprpcapi.androidhelper;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.hardware.*;
 import android.os.Build;
-import project.xplat.launcher.pxprpcapi.ApiServer;
+import project.xplat.launcher.ApiServer;
 import pxprpc.base.Serializer2;
 import pxprpc.extend.EventDispatcher;
 
@@ -19,7 +19,7 @@ import java.util.Map;
 @TargetApi(Build.VERSION_CODES.CUPCAKE)
 public class Sensor2 extends EventDispatcher implements SensorEventListener, Closeable {
 
-    public static final String PxprpcNamespace="AndroidHelper-Sensor";
+    public static final String PxprpcNamespace="AndroidHelper.Sensor";
 
     private final SensorManager smgr;
     public Sensor2(){

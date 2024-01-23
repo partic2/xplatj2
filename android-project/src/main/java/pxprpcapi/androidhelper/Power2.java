@@ -1,21 +1,18 @@
-package project.xplat.launcher.pxprpcapi.androidhelper;
+package pxprpcapi.androidhelper;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.PowerManager;
-import project.xplat.launcher.pxprpcapi.ApiServer;
-import pxprpc.base.Utils;
+import project.xplat.launcher.ApiServer;
 import pxprpc.extend.TableSerializer;
 
 import java.nio.ByteBuffer;
 
 public class Power2 extends PxprpcBroadcastReceiverAdapter {
 
-    public static final String PxprpcNamespace="AndroidHelper-Power";
+    public static final String PxprpcNamespace="AndroidHelper.Power";
 
 
     BatteryManager bm;

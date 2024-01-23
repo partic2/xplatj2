@@ -83,7 +83,7 @@
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
         <service
-                android:name=".launcher.pxprpcapi.PxprpcService"
+                android:name=".launcher.PxprpcService"
                 android:enabled="true"
                 android:exported="true"
                 android:process=":pxprpcsrv">

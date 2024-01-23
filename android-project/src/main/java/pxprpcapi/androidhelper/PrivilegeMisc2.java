@@ -1,9 +1,9 @@
-package project.xplat.launcher.pxprpcapi.androidhelper;
+package pxprpcapi.androidhelper;
 
 import java.io.IOException;
 
 public class PrivilegeMisc2 {
-    public static final String PxprpcNamespace="AndroidHelper-PrivilegeMisc";
+    public static final String PxprpcNamespace="AndroidHelper.PrivilegeMisc";
     public boolean isRooted(){
         try {
             Runtime.getRuntime().exec("su -c echo rooted").waitFor();

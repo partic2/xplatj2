@@ -1,9 +1,8 @@
-package project.xplat.launcher.pxprpcapi;
+package project.xplat.launcher;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import project.webapp.MainActivity;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 
 public class PxprpcService extends Service {

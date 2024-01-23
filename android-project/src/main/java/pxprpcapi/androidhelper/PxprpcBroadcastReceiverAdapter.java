@@ -1,4 +1,4 @@
-package project.xplat.launcher.pxprpcapi.androidhelper;
+package pxprpcapi.androidhelper;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

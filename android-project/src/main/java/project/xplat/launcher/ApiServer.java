@@ -1,16 +1,13 @@
-package project.xplat.launcher.pxprpcapi;
+package project.xplat.launcher;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
-import project.xplat.launcher.MainActivity;
-import project.xplat.launcher.PlatApiImpl;
 import project.xplat.launcher.pxprpcapi.androidhelper.*;
 import pxprpc.backend.TCPBackend;
 import pxprpc.extend.DefaultFuncMap;
-import xplatj.gdxconfig.core.PlatCoreConfig;
-import xplatj.platform.PlatApi;
+import pxprpcapi.androidhelper.*;
 import xplatj.pxprpcapi.JseBaseOsHelper;
 
 import java.io.Closeable;

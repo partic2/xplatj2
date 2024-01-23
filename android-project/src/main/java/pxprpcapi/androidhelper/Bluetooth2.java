@@ -1,14 +1,13 @@
-package project.xplat.launcher.pxprpcapi.androidhelper;
+package pxprpcapi.androidhelper;
 
 import android.annotation.TargetApi;
 import android.bluetooth.*;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.ParcelUuid;
-import project.xplat.launcher.pxprpcapi.ApiServer;
+import project.xplat.launcher.ApiServer;
 import pxprpc.base.Serializer2;
 import pxprpc.base.Utils;
 import pxprpc.extend.BuiltInFuncList;
@@ -19,14 +18,13 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements BluetoothAdapter.LeScanCallback,Closeable {
-    public static final String PxprpcNamespace="AndroidHelper-Bluetooth";
+    public static final String PxprpcNamespace="AndroidHelper.Bluetooth";
     public BluetoothAdapter adapter;
     public Bluetooth2(){
         init();

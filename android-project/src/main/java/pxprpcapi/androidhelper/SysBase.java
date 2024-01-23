@@ -1,18 +1,18 @@
-package project.xplat.launcher.pxprpcapi.androidhelper;
+package pxprpcapi.androidhelper;
 
 import android.app.Activity;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
-import project.xplat.launcher.pxprpcapi.ApiServer;
+import project.xplat.launcher.ApiServer;
 
 import java.io.Closeable;
 import java.util.UUID;
 
 public class SysBase {
 
-	public static final String PxprpcNamespace="AndroidHelper-Sysbase";
+	public static final String PxprpcNamespace="AndroidHelper.Sysbase";
 
 	public BroadcastReceiver newBroadcastReceiver() {
 		return new PxprpcBroadcastReceiverAdapter();
