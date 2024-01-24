@@ -5,9 +5,9 @@ package project.xplatj.backend.jse;
 import project.xplatj.JMain;
 import pxprpc.backend.TCPBackend;
 import pxprpc.extend.DefaultFuncMap;
+import pxprpcapi.jsehelper.JseIo;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.platform.PlatApi;
-import xplatj.pxprpcapi.JseBaseOsHelper;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class ApiServer {
             tcpServ.bindAddr= new InetSocketAddress(
                     Inet4Address.getByAddress(new byte[]{(byte)127,(byte)0,(byte)0,(byte)1}),port);
         }
-        putModule(JseBaseOsHelper.PxprpcNamespace,new JseBaseOsHelper());
+        putModule(JseIo.PxprpcNamespace,new JseIo());
         tcpServ.listenAndServe();
     }
     public static void putModule(String modName,Object module){
