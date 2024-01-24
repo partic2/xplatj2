@@ -5,9 +5,14 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.os.Build;
 import project.xplat.launcher.ApiServer;
+import pxprpc.base.Utils;
+import pxprpc.extend.TableSerializer;
 
 import java.io.Closeable;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class SysBase {
@@ -44,6 +49,12 @@ public class SysBase {
 		}else if(ApiServer.defaultAndroidContext instanceof Activity){
 			((Activity) ApiServer.defaultAndroidContext).finish();
 		}
+	}
+	public ByteBuffer deviceInfo(){
+		return new TableSerializer().setHeader(null,new String[]{
+				"version","hardware","abi","product","device","board","manufacturer","brand"}).addRow(new Object[]{
+				Build.VERSION.SDK_INT,Build.HARDWARE, Utils.stringJoin(",", Arrays.asList(Build.SUPPORTED_ABIS)),
+				Build.PRODUCT,Build.DEVICE,Build.BOARD,Build.MANUFACTURER,Build.BRAND}).build();
 	}
 
 	public void close(Closeable c) {

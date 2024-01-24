@@ -4,11 +4,11 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
-import project.xplat.launcher.pxprpcapi.androidhelper.*;
 import pxprpc.backend.TCPBackend;
 import pxprpc.extend.DefaultFuncMap;
 import pxprpcapi.androidhelper.*;
-import xplatj.pxprpcapi.JseBaseOsHelper;
+import pxprpcapi.jsehelper.JseIo;
+
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -57,7 +57,7 @@ public class ApiServer {
                 putModule(Wifi2.PxprpcNamespace,new Wifi2());
                 putModule(Misc2.PxprpcNamespace,new Misc2());
                 putModule(Power2.PxprpcNamespace,new Power2());
-                putModule(JseBaseOsHelper.PxprpcNamespace,new JseBaseOsHelper());
+                putModule(JseIo.PxprpcNamespace,new JseIo());
             }
         });
         Log.d("PxpRpc", "start: listen");
