@@ -59,8 +59,13 @@ def BuildEnvironPrepare():
     if not 'ANDROID_NATIVE_API_LEVEL' in buildConfig:
         buildConfig['ANDROID_NATIVE_API_LEVEL']='21'
 
-    buildConfig['ANDROID_NDK']=os.environ.get('ANDROID_NDK','')
-    assert buildConfig['ANDROID_NDK']!=''
+    androidHome=os.environ['ANDROID_HOME']
+    ndkversion=os.listdir(androidHome+'/ndk')
+    for t1 in ndkversion:
+        if os.path.exists(os.sep.join([androidHome,'ndk',t1,'build','cmake','android.toolchain.cmake'])):
+            #found
+            buildConfig['ANDROID_NDK']=os.sep.join([os.environ['ANDROID_HOME'],'ndk',t1])
+    assert 'ANDROID_NDK' in buildConfig
 
     if 'ANDROID_ABI' not in buildConfig:
         buildConfig['ANDROID_ABI']=['armeabi-v7a','arm64-v8a']
