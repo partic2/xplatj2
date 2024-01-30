@@ -70,6 +70,7 @@ import org.nanohttpd.protocols.http.response.Response;
 import org.nanohttpd.protocols.http.response.Status;
 import org.nanohttpd.protocols.http.tempfiles.ITempFile;
 import org.nanohttpd.protocols.http.tempfiles.ITempFileManager;
+import pxprpc.base.Utils;
 
 public class HTTPSession implements IHTTPSession {
 
@@ -198,7 +199,7 @@ public class HTTPSession implements IHTTPSession {
 
             byte[] partHeaderBuff = new byte[MAX_HEADER_SIZE];
             for (int boundaryIdx = 0; boundaryIdx < boundaryIdxs.length - 1; boundaryIdx++) {
-                fbuf.position(boundaryIdxs[boundaryIdx]);
+                Utils.setPos(fbuf,boundaryIdxs[boundaryIdx]);
                 int len = (fbuf.remaining() < MAX_HEADER_SIZE) ? fbuf.remaining() : MAX_HEADER_SIZE;
                 fbuf.get(partHeaderBuff, 0, len);
                 BufferedReader in =
@@ -256,7 +257,7 @@ public class HTTPSession implements IHTTPSession {
                 int partDataStart = boundaryIdxs[boundaryIdx] + partHeaderLength;
                 int partDataEnd = boundaryIdxs[boundaryIdx + 1] - 4;
 
-                fbuf.position(partDataStart);
+                Utils.setPos(fbuf,partDataStart);
 
                 List<String> values = parms.get(partName);
                 if (values == null) {
@@ -679,7 +680,8 @@ public class HTTPSession implements IHTTPSession {
                 ByteBuffer src = b.duplicate();
                 fileOutputStream = new FileOutputStream(tempFile.getName());
                 FileChannel dest = fileOutputStream.getChannel();
-                src.position(offset).limit(offset + len);
+                Utils.setPos(src,offset);
+                Utils.setLimit(src,offset+len);
                 dest.write(src.slice());
                 path = tempFile.getName();
             } catch (Exception e) { // Catch exception if any
