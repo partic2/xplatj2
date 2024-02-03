@@ -1,19 +1,27 @@
 package project.xplat.launcher;
 
+import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.util.Log;
 import pxprpc.backend.TCPBackend;
 import pxprpc.extend.DefaultFuncMap;
 import pxprpcapi.androidhelper.*;
 import pxprpcapi.jsehelper.JseIo;
+import xplatj.javaplat.pursuer.util.AsyncFunc;
+import xplatj.javaplat.pursuer.util.OneArgFunc;
 
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
+import java.util.*;
 
 
 public class ApiServer {
@@ -22,6 +30,7 @@ public class ApiServer {
     public static HandlerThread handlerThread;
     public static Handler handler;
     public static int port=2050;
+    public static IBinder serviceBinder;
     
     public static SysBase sysbase;
     public static AndroidCamera2 androidcamera2;
@@ -57,9 +66,25 @@ public class ApiServer {
                 putModule(Wifi2.PxprpcNamespace,new Wifi2());
                 putModule(Misc2.PxprpcNamespace,new Misc2());
                 putModule(Power2.PxprpcNamespace,new Power2());
+                putModule(SurfaceManager.PxprpcNamespace,new SurfaceManager());
+                putModule(MediaProjection2.PxprpcNamespace,new MediaProjection2());
                 putModule(JseIo.PxprpcNamespace,new JseIo());
             }
         });
+        if(!(ApiServer.defaultAndroidContext instanceof PxprpcService)){
+            ApiServer.defaultAndroidContext.bindService(
+                    new Intent(ApiServer.defaultAndroidContext,PxprpcService.class),
+                    new ServiceConnection(){
+                        @Override
+                        public void onServiceConnected(ComponentName name, IBinder service) {
+                            ApiServer.serviceBinder=service;
+                        }
+                        @Override
+                        public void onServiceDisconnected(ComponentName name) {
+                            ApiServer.serviceBinder=null;
+                        }
+                    },Context.BIND_AUTO_CREATE);
+        }
         Log.d("PxpRpc", "start: listen");
         tcpServ.listenAndServe();
     }
@@ -102,5 +127,14 @@ public class ApiServer {
             }
         }).start();
 
+    }
+    //map<requestCode,callback:([requestCode,resultCode,data])->void>
+    public static Map<Integer, OneArgFunc<Boolean,Object[]>> onActivityResultCallbeck=new HashMap<>();
+    public static void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(onActivityResultCallbeck.containsKey(requestCode)){
+            onActivityResultCallbeck.get(requestCode).call(new Object[]{requestCode,resultCode,data});
+        }else{
+            onActivityResultCallbeck.get(0).call(new Object[]{requestCode,resultCode,data});
+        }
     }
 }

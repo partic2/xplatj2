@@ -2,7 +2,11 @@ package project.xplat.launcher;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.RemoteException;
+import pxprpcapi.androidhelper.MediaProjection2;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 
 public class PxprpcService extends Service {
@@ -13,12 +17,14 @@ public class PxprpcService extends Service {
     public void onCreate() {
         super.onCreate();
         ApiServer.port=ApiServer.port+1;
+        ApiServer.defaultAndroidContext=this;
     }
 
     void bgThread() {
         ApiServer.start(this);
     }
     public boolean rpcsrvListening=false;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(!rpcsrvListening){
@@ -35,15 +41,25 @@ public class PxprpcService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    public class ServiceBinder extends Binder{
+        @Override
+        protected boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
+            switch(data.readInt()){
+                case MediaProjection2.ServiceBinderCode:
+                    return ((MediaProjection2)ApiServer.getModule(MediaProjection2.PxprpcNamespace)).mediaProjectionRequest(data,reply);
+            }
+            return true;
+        }
+    }
     @Override
     public void onDestroy() {
         ApiServer.stop();
         super.onDestroy();
     }
-
+    public ServiceBinder mBinder;
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        this.mBinder=new ServiceBinder();
+        return this.mBinder;
     }
 }

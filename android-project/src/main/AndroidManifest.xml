@@ -23,6 +23,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
     <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"/>
     <uses-permission android:name="android.permission.BROADCAST_STICKY"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
@@ -99,11 +101,11 @@
             </intent-filter>
         </activity>
         <activity
-                android:name="project.sdl.MainActivity"
+                android:name=".sdl.MainActivity"
                 android:process=":sdl">
         </activity>
         <activity
-                android:name="project.webapp.MainActivity"
+                android:name=".webapp.MainActivity"
                 android:process=":webapp">
         </activity>
 

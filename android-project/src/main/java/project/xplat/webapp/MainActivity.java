@@ -1,4 +1,4 @@
-package project.webapp;
+package project.xplat.webapp;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -30,7 +30,6 @@ public class MainActivity extends Activity {
     }
     static NanoHTTPD httpd;
     static int httpdPort = 2080;
-
     public void initWebServer() {
         try {
             if (httpd == null) {
@@ -112,5 +111,8 @@ public class MainActivity extends Activity {
         ApiServer.stop();
 
         super.onDestroy();
+    }
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        ApiServer.onActivityResult(requestCode,resultCode,data);
     }
 }

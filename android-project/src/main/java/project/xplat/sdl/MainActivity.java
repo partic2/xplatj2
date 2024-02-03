@@ -1,4 +1,5 @@
-package project.sdl;
+package project.xplat.sdl;
+import android.content.Intent;
 import android.os.*;
 import org.libsdl.app.*;
 import project.xplat.launcher.AssetsCopy;
@@ -14,6 +15,11 @@ public class MainActivity extends SDLActivity
 		//ensure this is called when every activity created
 		AssetsCopy.init(this);
 		ApiServer.start(this);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		ApiServer.onActivityResult(requestCode,resultCode,data);
 	}
 
 	@Override

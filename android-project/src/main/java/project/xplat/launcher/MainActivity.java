@@ -94,6 +94,7 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 			finish();
 		}
+		this.startService(new Intent(this,PxprpcService.class));
 		launch();
 	}
 	String[] dangerousPerm=new String[]{"android.permission.READ_CALENDAR","android.permission.WRITE_CALENDAR",
@@ -137,11 +138,11 @@ public class MainActivity extends Activity {
 
 			if(sdlFlag.equals(selectedBackend)){
 				intent=new Intent();
-				intent.setClass(this,Class.forName("project.sdl.MainActivity"));
+				intent.setClass(this,Class.forName("project.xplat.sdl.MainActivity"));
 				this.startActivityForResult(intent,1);
 			}else if(webappFlag.equals(selectedBackend)){
 				intent=new Intent();
-				intent.setClass(this,Class.forName("project.webapp.MainActivity"));
+				intent.setClass(this,Class.forName("project.xplat.webapp.MainActivity"));
 				this.startActivityForResult(intent,1);
 			}
 		} catch (ClassNotFoundException e) {

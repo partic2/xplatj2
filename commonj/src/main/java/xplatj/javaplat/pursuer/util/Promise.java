@@ -4,17 +4,17 @@ public class Promise<T> {
 	public AsyncFunc<T> func;
 
 	public Promise(AsyncFunc<T> func) {
-		state = stateReady;
+		state[0] = stateReady;
 		this.func = func;
 		func.onDone = new Runnable() {
 			@Override
 			public void run() {
 				synchronized (state) {
-					state = stateCallingDone;
+					state[0] = stateCallingDone;
 					if (Promise.this.func.fulfilled) {
 						if (onFulfill != null || onReject != null) {
 							callThenFunc();
-							state = stateThenableCalled;
+							state[0] = stateThenableCalled;
 						}
 					}
 				}
@@ -55,7 +55,7 @@ public class Promise<T> {
 	public OneArgFunc<Promise<Object>, Exception> onReject;
 	public AsyncFunc<Object> nextFunc;
 
-	public Integer state = 1;
+	public int[] state = new int[stateReady];
 
 	public static final int stateReady = 1;
 	public static final int stateIncalling = 2;
@@ -74,7 +74,7 @@ public class Promise<T> {
 			this.onFulfill = (OneArgFunc) onFulfilled;
 			this.onReject = (OneArgFunc) onRejected;
 			nextFunc = (AsyncFunc<Object>) t1;
-			if (state == stateCallingDone) {
+			if (state[0] == stateCallingDone) {
 				callThenFunc();
 			}
 		}
