@@ -1,6 +1,5 @@
 package project.xplat.launcher;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +12,7 @@ import pxprpc.backend.TCPBackend;
 import pxprpc.extend.DefaultFuncMap;
 import pxprpcapi.androidhelper.*;
 import pxprpcapi.jsehelper.JseIo;
-import xplatj.javaplat.pursuer.util.AsyncFunc;
+import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.pursuer.util.OneArgFunc;
 
 
@@ -34,6 +33,7 @@ public class ApiServer {
     
     public static SysBase sysbase;
     public static AndroidCamera2 androidcamera2;
+    public static SurfaceManager surfaceManager;
 
     public static Handler getHandler(){
         return handler;
@@ -58,6 +58,7 @@ public class ApiServer {
             public void run() {
             	ApiServer.sysbase=new SysBase();
             	ApiServer.androidcamera2=new AndroidCamera2();
+                ApiServer.surfaceManager=new SurfaceManager();
                 putModule(SysBase.PxprpcNamespace,sysbase);
                 putModule(AndroidCamera2.PxprpcNamespace,androidcamera2);
                 putModule(Bluetooth2.PxprpcNamespace,new Bluetooth2());
@@ -66,9 +67,10 @@ public class ApiServer {
                 putModule(Wifi2.PxprpcNamespace,new Wifi2());
                 putModule(Misc2.PxprpcNamespace,new Misc2());
                 putModule(Power2.PxprpcNamespace,new Power2());
-                putModule(SurfaceManager.PxprpcNamespace,new SurfaceManager());
+                putModule(SurfaceManager.PxprpcNamespace,surfaceManager);
                 putModule(MediaProjection2.PxprpcNamespace,new MediaProjection2());
                 putModule(JseIo.PxprpcNamespace,new JseIo());
+                putModule(DisplayManager2.PxprpcNamespace,new DisplayManager2());
             }
         });
         if(!(ApiServer.defaultAndroidContext instanceof PxprpcService)){
@@ -129,12 +131,17 @@ public class ApiServer {
 
     }
     //map<requestCode,callback:([requestCode,resultCode,data])->void>
-    public static Map<Integer, OneArgFunc<Boolean,Object[]>> onActivityResultCallbeck=new HashMap<>();
+    public static Map<Integer, OneArgFunc<Boolean,Object[]>> onActivityResultCallback =new HashMap<>();
     public static void onActivityResult(int requestCode, int resultCode, Intent data){
-        if(onActivityResultCallbeck.containsKey(requestCode)){
-            onActivityResultCallbeck.get(requestCode).call(new Object[]{requestCode,resultCode,data});
+        if(onActivityResultCallback.containsKey(requestCode)){
+            //we should prevent invoke callback on main thread.
+            PlatCoreConfig.get().executor.execute(()->{
+                onActivityResultCallback.get(requestCode).call(new Object[]{requestCode,resultCode,data});
+            });
         }else{
-            onActivityResultCallbeck.get(0).call(new Object[]{requestCode,resultCode,data});
+            PlatCoreConfig.get().executor.execute(()->{
+                onActivityResultCallback.get(0).call(new Object[]{requestCode,resultCode,data});
+            });
         }
     }
 }

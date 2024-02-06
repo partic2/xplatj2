@@ -4,13 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
-import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
-import android.view.Surface;
 import project.xplat.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
 import xplatj.gdxplat.pursuer.utils.Env;
@@ -30,7 +28,7 @@ public class MediaProjection2 {
         int resultCode = param.readInt();
         this.mediaProjectionToken=param.readParcelable(ApiServer.defaultAndroidContext.getClassLoader());
         this.mp=mpm.getMediaProjection(resultCode,mediaProjectionToken);
-        result.writeString("");
+        result.writeString(null);
         return true;
     }
     public void startScreenCapture(SurfaceManager.SurfaceWrap sur){
@@ -40,8 +38,8 @@ public class MediaProjection2 {
     }
 
     public boolean requestScreenCapture(final AsyncReturn<Boolean> ret){
-        int reqCode= Env.i(Random.class).nextInt();
-        ApiServer.onActivityResultCallbeck.put(reqCode,(param)->{
+        int reqCode= Env.i(Random.class).nextInt(0xffffff);
+        ApiServer.onActivityResultCallback.put(reqCode,(param)->{
             if((Integer)param[1]==Activity.RESULT_OK){
                 mediaProjectionToken=(Intent)param[2];
                 Parcel data=Parcel.obtain();
@@ -51,14 +49,16 @@ public class MediaProjection2 {
                 try {
                     ApiServer.serviceBinder.transact(reqCode,data,result,0);
                     String errInfo=result.readString();
-                    if(errInfo==""){
-                        ret.resolve(null);
+                    if(errInfo==null){
+                        ret.resolve(true);
                     }else{
                         ret.reject(new Exception(errInfo));
                     }
                 } catch (RemoteException e) {
                     ret.reject(e);
                 }
+            }else{
+                ret.resolve(false);
             }
             return true;
         });

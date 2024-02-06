@@ -6,17 +6,20 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import xplatj.gdxplat.pursuer.utils.Env;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-
+import java.util.Random;
 
 
 public class MainActivity extends Activity {
@@ -97,14 +100,27 @@ public class MainActivity extends Activity {
 		this.startService(new Intent(this,PxprpcService.class));
 		launch();
 	}
-	String[] dangerousPerm=new String[]{"android.permission.READ_CALENDAR","android.permission.WRITE_CALENDAR",
-			"android.permission.CAMERA","android.permission.READ_CONTACTS","android.permission.WRITE_CONTACTS",
-			"android.permission.GET_ACCOUNTS","android.permission.ACCESS_FINE_LOCATION","android.permission.RECORD_AUDIO",
-			"android.permission.READ_PHONE_STATE","android.permission.CALL_PHONE","android.permission.READ_CALL_LOG",
-			"android.permission.WRITE_CALL_LOG","android.permission.ADD_VOICEMAIL","android.permission.USE_SIP",
-			"android.permission.BODY_SENSORS","android.permission.SEND_SMS","android.permission.RECEIVE_SMS",
+	String[] dangerousPerm=new String[]{"android.permission.ACCESS_LOCATION_EXTRA_COMMANDS","android.permission.ACCESS_NETWORK_STATE",
+			"android.permission.ACCESS_NOTIFICATION_POLICY","android.permission.ACCESS_WIFI_STATE","android.permission.BLUETOOTH",
+			"android.permission.BLUETOOTH_ADMIN","android.permission.BLUETOOTH_ADVERTISE","android.permission.BLUETOOTH_CONNECT",
+			"android.permission.BROADCAST_STICKY","android.permission.CHANGE_NETWORK_STATE","android.permission.CHANGE_WIFI_MULTICAST_STATE",
+			"android.permission.CHANGE_WIFI_STATE","android.permission.DISABLE_KEYGUARD","android.permission.EXPAND_STATUS_BAR",
+			"android.permission.GET_PACKAGE_SIZE","com.android.launcher.permission.INSTALL_SHORTCUT","android.permission.INTERNET",
+			"android.permission.KILL_BACKGROUND_PROCESSES","android.permission.MODIFY_AUDIO_SETTINGS","android.permission.NFC",
+			"android.permission.READ_SYNC_SETTINGS","android.permission.READ_SYNC_STATS","android.permission.RECEIVE_BOOT_COMPLETED",
+			"android.permission.REORDER_TASKS","android.permission.REQUEST_INSTALL_PACKAGES","com.android.alarm.permission.SET_ALARM",
+			"android.permission.SET_WALLPAPER","android.permission.SET_WALLPAPER_HINTS","android.permission.TRANSMIT_IR",
+			"com.android.launcher.permission.UNINSTALL_SHORTCUT","android.permission.USE_BIOMETRIC","android.permission.VIBRATE",
+			"android.permission.WAKE_LOCK","android.permission.WRITE_SYNC_SETTINGS","android.permission.READ_CALENDAR",
+			"android.permission.WRITE_CALENDAR","android.permission.CAMERA","android.permission.FLASHLIGHT","android.permission.READ_CONTACTS",
+			"android.permission.WRITE_CONTACTS","android.permission.GET_ACCOUNTS","android.permission.ACCESS_FINE_LOCATION",
+			"android.permission.RECORD_AUDIO","android.permission.READ_PHONE_STATE","android.permission.CALL_PHONE",
+			"android.permission.READ_CALL_LOG","android.permission.WRITE_CALL_LOG","com.android.voicemail.permission.ADD_VOICEMAIL",
+			"android.permission.USE_SIP","android.permission.BODY_SENSORS","android.permission.SEND_SMS","android.permission.RECEIVE_SMS",
 			"android.permission.READ_SMS","android.permission.RECEIVE_WAP_PUSH","android.permission.RECEIVE_MMS",
-			"android.permission.READ_EXTERNAL_STORAGE","android.permission.WRITE_EXTERNAL_STORAGE"};
+			"android.permission.READ_EXTERNAL_STORAGE","android.permission.WRITE_EXTERNAL_STORAGE","android.permission.MANAGE_EXTERNAL_STORAGE",
+			"android.permission.SYSTEM_ALERT_WINDOW","android.permission.SYSTEM_OVERLAY_WINDOW","android.permission.ACCESS_COARSE_LOCATION",
+			"android.permission.BLUETOOTH_SCAN"};
 
 
 
@@ -118,6 +134,8 @@ public class MainActivity extends Activity {
 		}
 		return permNotGranted.toArray(new String[0]);
 	}
+
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

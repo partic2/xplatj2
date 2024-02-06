@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -91,10 +92,10 @@ public class Intent2 {
         String uri=getContentUriForFile(imagePath);
         Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT,uri);
-        int reqCode= Env.i(Random.class).nextInt();
+        int reqCode= Env.i(Random.class).nextInt(0xffffff);
         if(ApiServer.defaultAndroidContext instanceof Activity){
-            ApiServer.onActivityResultCallbeck.put(reqCode,(param)->{
-                ApiServer.onActivityResultCallbeck.remove(reqCode);
+            ApiServer.onActivityResultCallback.put(reqCode,(param)->{
+                ApiServer.onActivityResultCallback.remove(reqCode);
                 ret.resolve((Integer)param[1]);
                 return true;
             });
@@ -108,6 +109,26 @@ public class Intent2 {
     public String getContentUriForFile(String path){
         return PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
                 ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", new File(path)).toString();
+    }
+
+    public boolean requestSystemAlertWindowPermission(AsyncReturn<Boolean> ret){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if(ApiServer.defaultAndroidContext.checkSelfPermission("SYSTEM_OVERLAY_WINDOW")==PackageManager.PERMISSION_GRANTED){
+                ret.resolve(true);
+                return true;
+            }
+            Intent intent=new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            intent.setData(Uri.parse("package:"+ApiServer.defaultAndroidContext.getPackageName()));
+            int reqCode= Env.i(Random.class).nextInt(0xffffff);
+            ApiServer.onActivityResultCallback.put(reqCode,(args)->{
+                ret.resolve(args[1].equals(Activity.RESULT_OK));
+                return true;
+            });
+            ((Activity)ApiServer.defaultAndroidContext).startActivityForResult(intent,reqCode);
+        }else{
+            ret.resolve(true);
+        }
+        return false;
     }
 
 }

@@ -228,33 +228,25 @@ public class AndroidCamera2 {
         return null;
     }
 
-    public List<Image.Plane> accuireLastestImageData(CameraWrap1 camDev){
-        Image.Plane[] plane1 = camDev.imgRead.acquireLatestImage().getPlanes();
-        return Arrays.asList(plane1);
+    public Image accuireLastestImageData(CameraWrap1 camDev){
+        return camDev.imgRead.acquireLatestImage();
     }
 
-    public ByteBuffer describePlaneInfo(List<Image.Plane> planes){
-        TableSerializer ser = new TableSerializer().setHeader("ii",new String[]{"pixelStride","rowStride"});
-        for(Image.Plane e:planes){
-            ser.addRow(new Object[]{
-                    e.getPixelStride()
-                    ,e.getRowStride()});
-        }
-        return ser.build();
+    public ByteBuffer describePlanesInfo(Image img){
+        return ApiServer.surfaceManager.describePlanesInfo(img);
     }
 
-    public ByteBuffer getPlaneBufferData(Image.Plane plane1){
-        ByteBuffer buf1 = plane1.getBuffer();
-        return buf1;
+    public ByteBuffer getPlaneBufferData(Image img,int planeIndex){
+        return ApiServer.surfaceManager.getPlaneBufferData(img,planeIndex);
     }
 
-    public ByteBuffer packPlaneData(List<Image.Plane> planes){
+    public ByteBuffer packPlaneData(Image img){
         TableSerializer ser = new TableSerializer().setHeader("ii",new String[]{"pixelStride","rowStride","buffer"});
-        for(Image.Plane e:planes){
+        for(Image.Plane e:img.getPlanes()){
             ser.addRow(new Object[]{
                     e.getPixelStride()
                     ,e.getRowStride()
-            ,getPlaneBufferData(e)});
+            ,e.getBuffer()});
         }
         return ser.build();
     }

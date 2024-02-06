@@ -1,5 +1,6 @@
 package pxprpcapi.androidhelper;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.bluetooth.*;
 import android.content.Context;
@@ -111,7 +112,8 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         allowNoConfirmPairing=b;
     }
 
-    public boolean setPairPin(String address,ByteBuffer pin){
+    @SuppressLint("MissingPermission")
+    public boolean setPairPin(String address, ByteBuffer pin){
         return discovered.get(address).device.setPin(Utils.toBytes(pin));
     }
 
@@ -128,7 +130,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         if(BluetoothDevice.ACTION_FOUND.equals(intent.getAction())){
             DiscoveryResult t = new DiscoveryResult();
             BluetoothDevice dev = (BluetoothDevice) intent.getExtras().get(BluetoothDevice.EXTRA_DEVICE);
-            String addr = t.device.getAddress();
+            String addr = dev.getAddress();
             if(discovered.containsKey(addr)){
                 t=discovered.get(addr);
             }else{
@@ -155,9 +157,11 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     }
 
     public HashMap<String,DiscoveryResult> discovered =new HashMap<String,DiscoveryResult>();
+    @SuppressLint("MissingPermission")
     public void startDiscovery(){
         bluetoothAdapter().startDiscovery();
     }
+    @SuppressLint("MissingPermission")
     public void cancelDiscovery(){
         bluetoothAdapter().cancelDiscovery();
     }
@@ -166,16 +170,19 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         discovered.clear();
     }
 
+    @SuppressLint("MissingPermission")
     public ByteBuffer describeDiscoveredDevices(){
-        TableSerializer ser = new TableSerializer().setHeader("sisiii", new String[]{"address", "class", "name", "rssi", "type", "bondState","scanRecord"});
+        TableSerializer ser = new TableSerializer().setHeader(null, new String[]{
+                "address", "class", "name", "rssi", "type", "bondState","scanRecord"});
         for(Map.Entry<String,DiscoveryResult> e:this.discovered.entrySet()){
             DiscoveryResult v = e.getValue();
             ser.addRow(new Object[]{
                     e.getKey(),v.device.getBluetoothClass().getDeviceClass(),v.device.getName(),
-                    v.rssi,v.device.getType(),v.device.getBondState(),ByteBuffer.wrap(v.scanRecord)});
+                    v.rssi,v.device.getType(),v.device.getBondState(),v.scanRecord!=null?ByteBuffer.wrap(v.scanRecord):ByteBuffer.allocate(0)});
         }
         return ser.build();
     }
+    @SuppressLint("MissingPermission")
     public ByteBuffer describeDiscoveredDevice(String address){
         TableSerializer ser = new TableSerializer().setHeader("sisiii", new String[]{"address", "class", "name", "rssi", "type", "bondState"});
         DiscoveryResult dr = this.discovered.get(address);

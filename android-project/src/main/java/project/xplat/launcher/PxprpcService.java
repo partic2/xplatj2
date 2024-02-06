@@ -16,6 +16,7 @@ public class PxprpcService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        AssetsCopy.init(this);
         ApiServer.port=ApiServer.port+1;
         ApiServer.defaultAndroidContext=this;
     }

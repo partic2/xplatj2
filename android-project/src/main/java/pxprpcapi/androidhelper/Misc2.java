@@ -76,19 +76,17 @@ public class Misc2 {
 		}
 
 	}
-
-	public String notificationChannelId="pxprpc";
-	public void init() {
+	protected void initNotifyChannel(){
 		if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
 			this.notificationChannelId=ApiServer.defaultAndroidContext.getPackageName() + ":pxprpc";
-			NotificationChannel chan = new NotificationChannel(this.notificationChannelId, "pxprpc channel",
-					NotificationManager.IMPORTANCE_UNSPECIFIED);
+			NotificationChannel chan = new NotificationChannel(this.notificationChannelId+":"+ApiServer.defaultAndroidContext.getClass().getName(),
+					"pxprpc channel",
+					NotificationManager.IMPORTANCE_DEFAULT);
 			nm.createNotificationChannel(chan);
 		}
 	}
 
-	public void deinit() {
-	}
+	public String notificationChannelId="pxprpc";
 
 	public boolean hasVibrator() {
 		return vb.hasVibrator();
@@ -126,13 +124,13 @@ public class Misc2 {
 	public LocationListener lastLocationListener = null;
 
 	@SuppressLint("MissingPermission")
-	public ByteBuffer getGpsLocationInfo(final AsyncReturn<ByteBuffer> ret, final boolean msgpackMode) {
+	public ByteBuffer getGpsLocationInfo(final AsyncReturn<ByteBuffer> ret, final boolean tableSer) {
 		if (this.lastLocationListener != null)
 			this.cancelGetGpsLocationInfo();
 		this.lastLocationListener = new LocationListener() {
 			@Override
 			public void onLocationChanged(Location location) {
-				if (msgpackMode) {
+				if (tableSer) {
 					ret.resolve(new TableSerializer().setHeader("dddddd", new String[]{
 							"latitude", "longitude", "speed", "bearing", "altitude", "accuracy"})
 									.addRow(new Object[]{
