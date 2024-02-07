@@ -70,18 +70,10 @@ public class JMain {
 	public static void startWebAppBackend() {
 		File cd = new File("");
 		String absPath = cd.getAbsolutePath();
-		File rootPath=cd;
-		if(absPath.startsWith("/")) {
-			//unix like system
-			rootPath=new File("/");
-		}else if(absPath.substring(1,3).equals(":\\") && System.getProperty("os.name").contains("Windows")){
-			//windows
-			rootPath=new File(absPath.substring(0,3));
-		}
 		if(debugMode) {
-			httpd=new XplatHTTPDServer("0.0.0.0",httpdPort,rootPath);
+			httpd=new XplatHTTPDServer("0.0.0.0",httpdPort);
 		}else {
-			httpd=new XplatHTTPDServer("127.0.0.1",httpdPort,rootPath);
+			httpd=new XplatHTTPDServer("127.0.0.1",httpdPort);
 		}
 		try {
 			PxprpcWsServer.registeredServer.put(Integer.toString(ApiServer.port), new IFactory<ServerContext>() {
@@ -93,9 +85,8 @@ public class JMain {
 				}
 			});
 			httpd.start(60*1000);
-			String entryUrl = cd.getAbsoluteFile()+"/data/index.html";
-			entryUrl=entryUrl.substring(rootPath.getAbsolutePath().length()).replace("\\", "/");
-			entryUrl="http://127.0.0.1:"+httpdPort+"/localFile"+(entryUrl.startsWith("/")?"":"/")+entryUrl;
+			String entryUrl=XplatHTTPDServer.urlPathForFile(new File(cd.getAbsoluteFile()+"/data/index.html"));
+			entryUrl="http://127.0.0.1:"+httpdPort+(entryUrl.startsWith("/")?"":"/")+entryUrl;
 			System.out.println("Open url "+entryUrl+" in borwser.");
 			if(System.getProperty("os.name").contains("Windows")) {
 				Runtime.getRuntime().exec("explorer "+entryUrl);

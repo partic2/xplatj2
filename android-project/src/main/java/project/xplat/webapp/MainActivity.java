@@ -35,9 +35,9 @@ public class MainActivity extends Activity {
             if (httpd == null) {
                 project.xplat.launcher.MainActivity.ensureStartOpts();
                 if(project.xplat.launcher.MainActivity.debugMode){
-                    httpd = new XplatHTTPDServer("0.0.0.0", httpdPort, new File("/"));
+                    httpd = new XplatHTTPDServer("0.0.0.0", httpdPort);
                 }else{
-                    httpd = new XplatHTTPDServer("127.0.0.1", httpdPort, new File("/"));
+                    httpd = new XplatHTTPDServer("127.0.0.1", httpdPort);
                 }
                 PxprpcWsServer.registeredServer.put(Integer.toString(ApiServer.port), new IFactory<ServerContext>() {
 					@Override
@@ -95,7 +95,11 @@ public class MainActivity extends Activity {
         mWebView.getSettings().setAllowFileAccess(true);
         mWebView.getSettings().setAllowContentAccess(true);
         mWebView.getSettings().setAllowUniversalAccessFromFileURLs(true);
-        mWebView.loadUrl("http://127.0.0.1:" + httpdPort +"/localFile"+ AssetsCopy.assetsDir + "/index.html");
+        try {
+            mWebView.loadUrl("http://127.0.0.1:" + httpdPort +XplatHTTPDServer.urlPathForFile(new File(AssetsCopy.assetsDir + "/index.html")));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
