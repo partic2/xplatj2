@@ -30,6 +30,16 @@ public class ApiServer {
     public static Handler handler;
     public static int port=2050;
     public static IBinder serviceBinder;
+    public static ServiceConnection serviceConnection=new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            ApiServer.serviceBinder=service;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            ApiServer.serviceBinder=null;
+        }
+    };
     
     public static SysBase sysbase;
     public static AndroidCamera2 androidcamera2;
@@ -76,16 +86,7 @@ public class ApiServer {
         if(!(ApiServer.defaultAndroidContext instanceof PxprpcService)){
             ApiServer.defaultAndroidContext.bindService(
                     new Intent(ApiServer.defaultAndroidContext,PxprpcService.class),
-                    new ServiceConnection(){
-                        @Override
-                        public void onServiceConnected(ComponentName name, IBinder service) {
-                            ApiServer.serviceBinder=service;
-                        }
-                        @Override
-                        public void onServiceDisconnected(ComponentName name) {
-                            ApiServer.serviceBinder=null;
-                        }
-                    },Context.BIND_AUTO_CREATE);
+                    serviceConnection,Context.BIND_AUTO_CREATE);
         }
         Log.d("PxpRpc", "start: listen");
         tcpServ.listenAndServe();
@@ -126,6 +127,9 @@ public class ApiServer {
                     }
                 }
                 tcpServ=null;
+                if(ApiServer.serviceBinder!=null){
+                    ApiServer.defaultAndroidContext.unbindService(ApiServer.serviceConnection);
+                }
             }
         }).start();
 

@@ -89,7 +89,7 @@ public class Intent2 {
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
     public int requestImageCapture(final AsyncReturn<Integer> ret,String imagePath){
-        String uri=getContentUriForFile(imagePath);
+        Uri uri= Uri.parse(getContentUriForFile(imagePath));
         Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT,uri);
         int reqCode= Env.i(Random.class).nextInt(0xffffff);

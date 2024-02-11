@@ -19,6 +19,7 @@ import android.os.*;
 import android.hardware.Camera;
 import project.xplat.launcher.ApiServer;
 import pxprpc.base.Serializer2;
+import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.TableSerializer;
 
@@ -123,30 +124,39 @@ public class Misc2 {
 
 	public LocationListener lastLocationListener = null;
 
+	//provider:gps,network etc.
 	@SuppressLint("MissingPermission")
-	public ByteBuffer getGpsLocationInfo(final AsyncReturn<ByteBuffer> ret, final boolean tableSer) {
+	public Location getLastLocationInfo(String provider){
+		return lm.getLastKnownLocation(provider);
+	}
+	public ByteBuffer packLocation(Location location,boolean tableSer){
+		if (tableSer) {
+			return new TableSerializer().setHeader("ldddddd", new String[]{
+							"time","latitude", "longitude", "speed", "bearing", "altitude", "accuracy"})
+					.addRow(new Object[]{location.getTime(),
+							(double)location.getLatitude(),(double)location.getLongitude(),(double)location.getSpeed(),
+							(double)location.getBearing(),(double)location.getAltitude(),(double)location.getAccuracy()
+					}).build();
+		} else {
+			Serializer2 ser=new Serializer2();
+			ser.putLong(location.getTime());
+			ser.putDouble(location.getLatitude());
+			ser.putDouble(location.getLongitude());
+			ser.putDouble(location.getSpeed());
+			ser.putDouble(location.getBearing());
+			ser.putDouble(location.getAltitude());
+			ser.putDouble(location.getAccuracy());
+			return ser.build();
+		}
+	}
+	@SuppressLint("MissingPermission")
+	public Location requestLocationUpdate(final AsyncReturn<Location> ret,final String provider) {
 		if (this.lastLocationListener != null)
-			this.cancelGetGpsLocationInfo();
+			this.cancelLocationUpdate();
 		this.lastLocationListener = new LocationListener() {
 			@Override
 			public void onLocationChanged(Location location) {
-				if (tableSer) {
-					ret.resolve(new TableSerializer().setHeader("dddddd", new String[]{
-							"latitude", "longitude", "speed", "bearing", "altitude", "accuracy"})
-									.addRow(new Object[]{
-											location.getLatitude(),location.getLongitude(),location.getSpeed(),
-											location.getBearing(),location.getAltitude(),location.getAccuracy()
-									}).build());
-				} else {
-					Serializer2 ser=new Serializer2();
-					ser.putDouble(location.getLatitude());
-					ser.putDouble(location.getLongitude());
-					ser.putDouble(location.getSpeed());
-					ser.putDouble(location.getBearing());
-					ser.putDouble(location.getAltitude());
-					ser.putDouble(location.getAccuracy());
-					ret.resolve(ser.build());
-				}
+				ret.resolve(location);
 			}
 
 			@Override
@@ -159,17 +169,20 @@ public class Misc2 {
 
 			@Override
 			public void onProviderDisabled(String provider) {
-				Misc2.this.cancelGetGpsLocationInfo();
-				ret.reject(new IOException("User disable gps provider"));
+				Misc2.this.cancelLocationUpdate();
+				ret.reject(new IOException("User disable the provider "+provider));
 			}
 		};
-		lm.requestSingleUpdate(LocationManager.GPS_PROVIDER, this.lastLocationListener,
+		lm.requestSingleUpdate(provider, this.lastLocationListener,
 				ApiServer.getHandler().getLooper());
 		return null;
 	}
 
-	public void cancelGetGpsLocationInfo() {
+	public void cancelLocationUpdate() {
 		lm.removeUpdates(this.lastLocationListener);
+	}
+	public String getLocationProviders(){
+		return Utils.stringJoin("\n",lm.getAllProviders());
 	}
 
 	public ByteBuffer getLightsInfo() {

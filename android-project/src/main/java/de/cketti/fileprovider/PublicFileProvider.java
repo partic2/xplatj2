@@ -43,6 +43,7 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 import project.xplat.launcher.AssetsCopy;
 
@@ -411,7 +412,11 @@ public class PublicFileProvider extends ContentProvider {
     @Override
     public final ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
         File file = strategy.getFileForUri(uri);
-        return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_WRITE);
+        try {
+            return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_WRITE|ParcelFileDescriptor.MODE_CREATE);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

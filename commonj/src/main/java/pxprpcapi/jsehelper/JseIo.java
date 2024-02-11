@@ -36,6 +36,10 @@ public class JseIo {
         return buf;
     }
     public int fileWrite(RpcFile fd,ByteBuffer buf) throws IOException {
+        if(fd.db==null){
+            fd.fi.create();
+            fd.db=fd.fi.open();
+        }
         return fd.db.write(buf.array(),buf.position(),buf.remaining());
     }
     public long fileSize(RpcFile fd) throws IOException {
@@ -112,5 +116,18 @@ public class JseIo {
     }
     public String getDataDir(){
         return PrefixFS.defaultPrefix;
+    }
+
+    public String getProp(String prop){
+        String result = System.getProperty(prop);
+        if(result==null){
+            //How to handle prop not exists?
+            return "";
+        }else{
+            return result;
+        }
+    }
+    public String dumpPropNames(){
+        return Utils.stringJoin("\n",System.getProperties().stringPropertyNames());
     }
 }

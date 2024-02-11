@@ -31,21 +31,25 @@ public class Power2 extends PxprpcBroadcastReceiverAdapter {
     public PowerManager.WakeLock cpuWake;
     public PowerManager.WakeLock screenWake;
     public void accuireCpuWakeLock(){
-        if(cpuWake!=null){
+        if(cpuWake==null){
             cpuWake=pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"xplatj:ApiServer");
+            cpuWake.acquire();
         }
     }
     public void accuireScreenWakeLock(boolean keepBright){
-        if(screenWake!=null){
+        if(screenWake==null){
             screenWake=pm.newWakeLock(keepBright?PowerManager.SCREEN_BRIGHT_WAKE_LOCK:PowerManager.SCREEN_DIM_WAKE_LOCK,"xplatj:ApiServer");
+            screenWake.acquire();
         }
     }
     public void releaseWakeLock(){
         if(cpuWake!=null){
             cpuWake.release();
+            cpuWake=null;
         }
         if(screenWake!=null){
             screenWake.release();
+            screenWake=null;
         }
     }
     public ByteBuffer getBatteryState(){
