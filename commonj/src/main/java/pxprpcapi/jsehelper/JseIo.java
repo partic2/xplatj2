@@ -1,5 +1,6 @@
 package pxprpcapi.jsehelper;
 
+import pxprpc.base.Serializer2;
 import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.MethodTypeDecl;
@@ -10,6 +11,11 @@ import xplatj.javaplat.pursuer.filesystem.impl.PrefixFS;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Stack;
 
 public class JseIo {
     public static final String PxprpcNamespace="JseHelper.JseIo";
@@ -18,50 +24,137 @@ public class JseIo {
         fs=new PrefixFS();
         fs.prefix="";
     }
-
-    public RpcFile fileOpen(String path) throws IOException {
-        RpcFile fd = new RpcFile();
-        fd.fi=fs.resolve(path);
-        if(fd.fi.canOpen()) {
-            fd.db=fd.fi.open();
+    public String realpath(String path) throws IOException {
+        return new File(path).getCanonicalPath();
+    }
+    public void unlink(String path) throws IOException {
+        if(!new File(path).delete()){
+            throw new IOException("deleted failed");
         }
-        return fd;
     }
-    public void fileSeek(RpcFile fd,long pos) throws IOException {
-        fd.db.seek(pos);
+    public void rename(String path,String newPath) throws IOException {
+        if(!new File(path).renameTo(new File(newPath))){
+            throw new IOException("rename failed");
+        };
     }
-    public ByteBuffer fileRead(RpcFile fd,int len) throws IOException {
-        ByteBuffer buf = ByteBuffer.allocate(len);
-        fd.db.read(buf.array(),0,len);
+    //File handler
+    public static class FH implements Closeable{
+        File f;
+        FileChannel fc;
+        @Override
+        public void close() throws IOException {
+            if(fc!=null)fc.close();
+        }
+    }
+    //return fileHandler,path
+    @MethodTypeDecl("s->os")
+    public Object[] mkstemp(String template) throws IOException {
+        String prefix="";
+        for(int i=template.length();i>=0;i--){
+            if(template.charAt(i)!='X'){
+                prefix=template.substring(0,i);
+            }
+        }
+        FH fh = new FH();
+        fh.f=File.createTempFile(prefix,"");
+        fh.fc=FileChannel.open(Paths.get(fh.f.getCanonicalPath()));
+        return new Object[]{fh,fh.f.getCanonicalPath()};
+    }
+
+    public ByteBuffer fhRead(FH f,long offset,int length) throws IOException {
+        ByteBuffer buf = ByteBuffer.allocate(length);
+        f.fc.read(buf,offset);
+        Utils.flip(buf);
         return buf;
     }
-    public int fileWrite(RpcFile fd,ByteBuffer buf) throws IOException {
-        if(fd.db==null){
-            fd.fi.create();
-            fd.db=fd.fi.open();
+    public int fhWrite(FH f,long offset,ByteBuffer buf) throws IOException {
+        return f.fc.write(buf);
+    }
+    public void fhClose(FH f) throws IOException {
+        f.close();
+    }
+    public void fhTruncate(FH f,long offset) throws IOException {
+        f.fc.truncate(offset);
+    }
+    //return isFile,isDirectory,size,modifyTimeStampInSecond
+    @MethodTypeDecl("s->ccll")
+    public Object[] stat(String path) throws IOException {
+        File f=new File(path);
+        return new Object[]{f.isFile(),f.isDirectory(),f.length(),f.lastModified()};
+    }
+    public FH open(String path,String flag,int mode) throws IOException {
+        Set<OpenOption> openModeflag=new HashSet<>();
+        if(flag.contains("r")){
+            openModeflag.add(StandardOpenOption.READ);
         }
-        return fd.db.write(buf.array(),buf.position(),buf.remaining());
+        if(flag.contains("+")){
+            openModeflag.add(StandardOpenOption.READ);
+            openModeflag.add(StandardOpenOption.WRITE);
+        }
+        if(flag.contains("w")){
+            openModeflag.add(StandardOpenOption.CREATE);
+            openModeflag.add(StandardOpenOption.WRITE);
+        }
+        FH fh = new FH();
+        fh.f=new File(path);
+        if(!(fh.f.exists() && fh.f.isDirectory())){
+            fh.fc=FileChannel.open(Paths.get(path),openModeflag);
+            if(flag.contains("w")){
+                fh.fc.truncate(0);
+            }
+        }
+        return fh;
     }
-    public long fileSize(RpcFile fd) throws IOException {
-        return fd.db.size();
+    public void rmdir(String path) throws IOException {
+        if(!new File(path).delete()){
+            throw new IOException("rmdir failed");
+        }
     }
-    public void fileTruncate(RpcFile fd,long size) throws IOException {
-        fd.db.resize(size);
+    public void mkdir(String path) throws IOException {
+        if(!new File(path).mkdirs()){
+            throw new IOException("mkdir failed");
+        }
     }
-    public ByteBuffer fileList(RpcFile fd) throws IOException {
-        TableSerializer ser = new TableSerializer();
-        ser.setHeader("sc",new String[]{"name","isDir"});
-        for(String child:fd.fi.list()){
-            ser.addRow(new Object[]{child,fd.fi.next(child).list()!=null});
+
+    public void copyFile(String path,String newPath) throws IOException {
+        Files.copy(Paths.get(path),Paths.get(newPath), StandardCopyOption.REPLACE_EXISTING);
+    }
+
+
+    public ByteBuffer readdir(String path) throws IOException{
+        TableSerializer ser = new TableSerializer().setHeader2(null, new String[]{"name", "isDirectory", "isFile"});
+        for(File child:new File(path).listFiles()){
+            ser.addRow(new Object[]{child.getName(),child.isFile(),child.isDirectory()});
         }
         return ser.build();
     }
-    public boolean fileExists(RpcFile fd){
-        return fd.fi.exists();
+
+    public void rm(String path) throws IOException {
+        Stack<File> delStack = new Stack<File>();
+        delStack.push(new File(path));
+        int i=0;
+        for(i=0;!delStack.empty() && i<1000000;i++){
+            File top = delStack.peek();
+            if(top.isDirectory()){
+                File[] children = top.listFiles();
+                if(children.length==0){
+                    unlink(top.getCanonicalPath());
+                    delStack.pop();
+                }else{
+                    for(File child:top.listFiles()){
+                        delStack.push(child);
+                    }
+                }
+            }else{
+                unlink(top.getCanonicalPath());
+                delStack.pop();
+            }
+        }
+        if(i==1000000){
+            throw new IOException("recursive too much");
+        }
     }
-    public void fileDelete(RpcFile fd) throws IOException {
-        new FSUtils().deleteDirectory(fd.fi);
-    }
+
     public Process execCommand(String command) throws IOException {
         return Runtime.getRuntime().exec(command);
     }

@@ -87,19 +87,13 @@ public class SurfaceManager {
         ByteBuffer buf1 = img.getPlanes()[planeIndex].getBuffer();
         return buf1;
     }
-
-    public ByteBuffer getPlaneBufferData(Image.Plane plane1){
-        ByteBuffer buf1 = plane1.getBuffer();
-        return buf1;
-    }
-
     public ByteBuffer packPlaneData(List<Image.Plane> planes){
         TableSerializer ser = new TableSerializer().setHeader("iib",new String[]{"pixelStride","rowStride","buffer"});
         for(Image.Plane e:planes){
             ser.addRow(new Object[]{
                     e.getPixelStride()
                     ,e.getRowStride()
-                    ,getPlaneBufferData(e)});
+                    ,e.getBuffer()});
         }
         return ser.build();
     }
