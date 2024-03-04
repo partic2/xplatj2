@@ -53,6 +53,7 @@ public class JseIo {
         for(int i=template.length();i>=0;i--){
             if(template.charAt(i)!='X'){
                 prefix=template.substring(0,i);
+				break;
             }
         }
         FH fh = new FH();
@@ -76,8 +77,8 @@ public class JseIo {
     public void fhTruncate(FH f,long offset) throws IOException {
         f.fc.truncate(offset);
     }
-    //return isFile,isDirectory,size,modifyTimeStampInSecond
-    @MethodTypeDecl("s->ccll")
+    //return type:dir|file,size,modifyTimeStampInSecond
+    @MethodTypeDecl("s->sll")
     public Object[] stat(String path) throws IOException {
         File f=new File(path);
         return new Object[]{f.isFile(),f.isDirectory(),f.length(),f.lastModified()};
@@ -120,11 +121,11 @@ public class JseIo {
         Files.copy(Paths.get(path),Paths.get(newPath), StandardCopyOption.REPLACE_EXISTING);
     }
 
-
     public ByteBuffer readdir(String path) throws IOException{
-        TableSerializer ser = new TableSerializer().setHeader2(null, new String[]{"name", "isDirectory", "isFile"});
+        //return type:dir|file,size,modifyTimeStampInSeconds
+        TableSerializer ser = new TableSerializer().setHeader2(null, new String[]{"name","type","size","mtime"});
         for(File child:new File(path).listFiles()){
-            ser.addRow(new Object[]{child.getName(),child.isFile(),child.isDirectory()});
+            ser.addRow(new Object[]{child.getName(),child.isFile()?"file":"dir",child.isFile()?child.length():0,child.lastModified()});
         }
         return ser.build();
     }
