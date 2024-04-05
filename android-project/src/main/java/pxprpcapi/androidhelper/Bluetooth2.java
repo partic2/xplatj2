@@ -26,9 +26,11 @@ import java.util.UUID;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements BluetoothAdapter.LeScanCallback,Closeable {
     public static final String PxprpcNamespace="AndroidHelper.Bluetooth";
+    public static Bluetooth2 i;
     public BluetoothAdapter adapter;
     public Bluetooth2(){
         init();
+        i=this;
     }
     public void init(){
         if(adapter==null){

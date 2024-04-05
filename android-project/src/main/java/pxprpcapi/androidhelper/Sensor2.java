@@ -20,10 +20,12 @@ import java.util.Map;
 public class Sensor2 extends EventDispatcher implements SensorEventListener, Closeable {
 
     public static final String PxprpcNamespace="AndroidHelper.Sensor";
+    public static Sensor2 i;
 
     private final SensorManager smgr;
     public Sensor2(){
         this.smgr=(SensorManager) ApiServer.defaultAndroidContext.getSystemService(Context.SENSOR_SERVICE);
+        i=this;
     }
     public List<Sensor> getSensorList(int filter){
         List<Sensor> sl = this.smgr.getSensorList(filter);

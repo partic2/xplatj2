@@ -2,10 +2,7 @@ package lib.pursuer.simplewebserver;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ByteChannel;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -15,12 +12,9 @@ import org.nanohttpd.protocols.websockets.CloseCode;
 import org.nanohttpd.protocols.websockets.WebSocket;
 import org.nanohttpd.protocols.websockets.WebSocketFrame;
 ;
-import pxprpc.backend.ChannelIo;
 import pxprpc.base.AbstractIo;
 import pxprpc.base.ServerContext;
 import pxprpc.base.Utils;
-import xplatj.gdxconfig.core.PlatCoreConfig;
-import xplatj.javaplat.pursuer.util.IFactory;
 
 public class PxprpcWsTunnel extends WebSocket implements AbstractIo {
     protected ServerContext serv;

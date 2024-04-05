@@ -27,6 +27,7 @@ import java.util.List;
 
 public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
     public static final String PxprpcNamespace="AndroidHelper.Wifi";
+    public static Wifi2 i;
     WifiManager wm;
     WifiP2pManager wpm;
     ConnectivityManager cm;
@@ -44,6 +45,7 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         if2.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         if2.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         ApiServer.defaultAndroidContext.registerReceiver(this, if2);
+        i=this;
     }
     public void init(){
     }

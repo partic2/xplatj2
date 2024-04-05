@@ -18,6 +18,10 @@ import java.util.UUID;
 public class SysBase {
 
 	public static final String PxprpcNamespace="AndroidHelper.Sysbase";
+	public static SysBase i;
+	public SysBase(){
+		i=this;
+	}
 
 	public BroadcastReceiver newBroadcastReceiver() {
 		return new PxprpcBroadcastReceiverAdapter();

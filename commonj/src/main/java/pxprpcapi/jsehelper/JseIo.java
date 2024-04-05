@@ -6,8 +6,8 @@ import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
 import xplatj.gdxconfig.core.PlatCoreConfig;
-import xplatj.javaplat.pursuer.filesystem.FSUtils;
-import xplatj.javaplat.pursuer.filesystem.impl.PrefixFS;
+import xplatj.javaplat.partic2.filesystem.FSUtils;
+import xplatj.javaplat.partic2.filesystem.impl.PrefixFS;
 
 import java.io.*;
 import java.nio.ByteBuffer;

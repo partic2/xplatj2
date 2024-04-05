@@ -4,7 +4,7 @@ package project.xplat.launcher;
 import android.content.Context;
 import android.content.res.AssetManager;
 import xplatj.gdxconfig.core.PlatCoreConfig;
-import xplatj.javaplat.pursuer.filesystem.impl.PrefixFS;
+import xplatj.javaplat.partic2.filesystem.impl.PrefixFS;
 
 import java.io.*;
 

@@ -31,7 +31,7 @@ import java.util.ArrayList;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class Misc2 {
 	public static final String PxprpcNamespace="AndroidHelper.Misc";
-
+	public static Misc2 i;
 	Vibrator vb;
 	ClipboardManager cbm;
 	AudioManager am;
@@ -54,11 +54,15 @@ public class Misc2 {
 		lm = (LocationManager) ApiServer.defaultAndroidContext.getSystemService(Service.LOCATION_SERVICE);
 		nm=(NotificationManager)ApiServer.defaultAndroidContext.getSystemService((Service.NOTIFICATION_SERVICE));
 		lights = new ArrayList<Light2>();
+		if(AndroidCamera2.i==null){
+			new AndroidCamera2();
+		}
 		initCameraFlashLight();
+		i=this;
 	}
 
 	protected void initCameraFlashLight() {
-		CameraManager camSrv = ApiServer.androidcamera2.camSrv;
+		CameraManager camSrv = AndroidCamera2.i.camSrv;
 		String[] camList;
 		try {
 			camList = camSrv.getCameraIdList();
@@ -197,17 +201,17 @@ public class Misc2 {
 		public Camera wrap;
 		public Camera1Wrap(Camera wrap){
 			this.wrap=wrap;
-			ApiServer.androidcamera2.openedResource.add(this);
+			AndroidCamera2.i.openedResource.add(this);
 		}
 		@Override
 		public void close() throws IOException {
 			wrap.release();
-			ApiServer.androidcamera2.openedResource.remove(this);
+			AndroidCamera2.i.openedResource.remove(this);
 		}
 	}
 	public void turnOnLight(int id) throws CameraAccessException {
 		final Light2 l = this.lights.get(id);
-		final CameraManager camSrv = ApiServer.androidcamera2.camSrv;
+		final CameraManager camSrv = AndroidCamera2.i.camSrv;
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			camSrv.setTorchMode(l.camId, true);
@@ -225,7 +229,7 @@ public class Misc2 {
 
 	public void turnOffLight(int id) throws CameraAccessException {
 		final Light2 l = this.lights.get(id);
-		CameraManager camSrv = ApiServer.androidcamera2.camSrv;
+		CameraManager camSrv = AndroidCamera2.i.camSrv;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			camSrv.setTorchMode(l.camId, false);
 		} else if(l.cam1dev!=null){

@@ -27,13 +27,14 @@ import java.util.List;
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class AndroidCamera2 {
     public static final String PxprpcNamespace="AndroidHelper.Camera2";
-
+    public static AndroidCamera2 i;
     public CameraManager camSrv;
     public String uid="";
     public ArrayList<Closeable> openedResource=new ArrayList<Closeable>();
     
     public AndroidCamera2() {
     	camSrv=(CameraManager)ApiServer.defaultAndroidContext.getSystemService(Context.CAMERA_SERVICE);
+        i=this;
     }
     public void init() {}
 
@@ -228,16 +229,21 @@ public class AndroidCamera2 {
         return null;
     }
 
-    public Image accuireLastestImageData(CameraWrap1 camDev){
-        return camDev.imgRead.acquireLatestImage();
+    public SurfaceManager.ImageOrBitmap accuireLastestImageData(CameraWrap1 camDev){
+        return SurfaceManager.i.accuireLastestImage(camDev.imgRead);
     }
 
-    public ByteBuffer describePlanesInfo(Image img){
-        return ApiServer.surfaceManager.describePlanesInfo(img);
+    public ByteBuffer describePlanesInfo(SurfaceManager.ImageOrBitmap img){
+        return SurfaceManager.i.describePlanesInfo(img);
     }
 
-    public ByteBuffer getPlaneBufferData(Image img,int planeIndex){
-        return ApiServer.surfaceManager.getPlaneBufferData(img,planeIndex);
+    public Boolean waitForImageAvailable(AsyncReturn<Boolean> aret,CameraWrap1 camDev){
+        SurfaceManager.i.waitForImageAvailable(aret,camDev.imgRead);
+        return false;
+    }
+
+    public ByteBuffer getPlaneBufferData(SurfaceManager.ImageOrBitmap img, int planeIndex){
+        return SurfaceManager.i.getPlaneBufferData(img,planeIndex);
     }
 
     public ByteBuffer packPlaneData(Image img){

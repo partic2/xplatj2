@@ -12,7 +12,7 @@ import java.util.HashSet;
 import android.content.Context;
 import android.util.Base64;
 import dalvik.system.DexClassLoader;
-import xplatj.javaplat.pursuer.io.stream.StreamTransmit;
+import xplatj.javaplat.partic2.io.stream.StreamTransmit;
 import xplatj.platform.PlatApi;
 
 public class PlatApiImpl implements PlatApi{

@@ -42,12 +42,12 @@ public class PxprpcService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    public class ServiceBinder extends Binder{
+    public static class ServiceBinder extends Binder{
         @Override
         protected boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
             switch(data.readInt()){
                 case MediaProjection2.ServiceBinderCode:
-                    return ((MediaProjection2)ApiServer.getModule(MediaProjection2.PxprpcNamespace)).mediaProjectionRequest(data,reply);
+                    return MediaProjection2.i.mediaProjectionRequest(data,reply);
             }
             return true;
         }

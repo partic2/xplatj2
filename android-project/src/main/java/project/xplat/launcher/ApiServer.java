@@ -13,7 +13,7 @@ import pxprpc.extend.DefaultFuncMap;
 import pxprpcapi.androidhelper.*;
 import pxprpcapi.jsehelper.JseIo;
 import xplatj.gdxconfig.core.PlatCoreConfig;
-import xplatj.javaplat.pursuer.util.OneArgFunc;
+import xplatj.javaplat.partic2.util.OneArgFunc;
 
 
 import java.io.Closeable;
@@ -40,10 +40,6 @@ public class ApiServer {
             ApiServer.serviceBinder=null;
         }
     };
-    
-    public static SysBase sysbase;
-    public static AndroidCamera2 androidcamera2;
-    public static SurfaceManager surfaceManager;
 
     public static Handler getHandler(){
         return handler;
@@ -66,18 +62,15 @@ public class ApiServer {
         handler.post(new Runnable(){
             @Override
             public void run() {
-            	ApiServer.sysbase=new SysBase();
-            	ApiServer.androidcamera2=new AndroidCamera2();
-                ApiServer.surfaceManager=new SurfaceManager();
-                putModule(SysBase.PxprpcNamespace,sysbase);
-                putModule(AndroidCamera2.PxprpcNamespace,androidcamera2);
+                putModule(SysBase.PxprpcNamespace,new SysBase());
+                putModule(AndroidCamera2.PxprpcNamespace,new AndroidCamera2());
                 putModule(Bluetooth2.PxprpcNamespace,new Bluetooth2());
                 putModule(Intent2.PxprpcNamespace,new Intent2());
                 putModule(Sensor2.PxprpcNamespace,new Sensor2());
                 putModule(Wifi2.PxprpcNamespace,new Wifi2());
                 putModule(Misc2.PxprpcNamespace,new Misc2());
                 putModule(Power2.PxprpcNamespace,new Power2());
-                putModule(SurfaceManager.PxprpcNamespace,surfaceManager);
+                putModule(SurfaceManager.PxprpcNamespace,new SurfaceManager());
                 putModule(MediaProjection2.PxprpcNamespace,new MediaProjection2());
                 putModule(JseIo.PxprpcNamespace,new JseIo());
                 putModule(DisplayManager2.PxprpcNamespace,new DisplayManager2());

@@ -13,13 +13,17 @@ import android.provider.Settings;
 import de.cketti.fileprovider.PublicFileProvider;
 import project.xplat.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
-import xplatj.gdxplat.pursuer.utils.Env;
+import xplatj.gdxplat.partic2.utils.Env;
 
 import java.io.File;
 import java.util.Random;
 
 public class Intent2 {
     public static final String PxprpcNamespace="AndroidHelper.Intent";
+    public static Intent2 i;
+    public Intent2(){
+        i=this;
+    }
     public void requestInstallApk(String apkPath){
         Intent intent = new Intent(Intent.ACTION_VIEW);
         File file = new File(apkPath);

@@ -18,7 +18,7 @@ import project.xplat.launcher.AssetsCopy;
 import project.xplat.launcher.ApiServer;
 import pxprpc.base.ServerContext;
 import xplatj.gdxconfig.core.PlatCoreConfig;
-import xplatj.javaplat.pursuer.util.IFactory;
+import xplatj.javaplat.partic2.util.IFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +62,7 @@ public class MainActivity extends Activity {
         startActivity(intent);
     }
 
-    protected WebView mWebView;
+    public WebView mWebView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +79,8 @@ public class MainActivity extends Activity {
                 }
         );
         initWebView();
+        PlatCoreConfig.get().executor.execute(()->TestCode.do2());
+
     }
 
     protected void initWebView() {

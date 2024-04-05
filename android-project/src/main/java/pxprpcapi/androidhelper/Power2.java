@@ -13,14 +13,14 @@ import java.nio.ByteBuffer;
 public class Power2 extends PxprpcBroadcastReceiverAdapter {
 
     public static final String PxprpcNamespace="AndroidHelper.Power";
-
-
+    public static Power2 i;
     BatteryManager bm;
     PowerManager pm;
 
     public Power2(){
         pm = (PowerManager) ApiServer.defaultAndroidContext.getSystemService(Service.POWER_SERVICE);
         bm = (BatteryManager) ApiServer.defaultAndroidContext.getSystemService(Service.BATTERY_SERVICE);
+        i=this;
     }
 
     @Override
