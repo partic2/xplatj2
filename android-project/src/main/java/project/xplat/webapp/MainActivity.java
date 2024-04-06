@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
                 }
         );
         initWebView();
-        PlatCoreConfig.get().executor.execute(()->TestCode.do2());
+        //PlatCoreConfig.get().executor.execute(()->TestCode.do2());
 
     }
 

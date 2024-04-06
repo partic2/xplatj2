@@ -8,6 +8,7 @@ import pxprpc.extend.TableSerializer;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.partic2.filesystem.FSUtils;
 import xplatj.javaplat.partic2.filesystem.impl.PrefixFS;
+import xplatj.javaplat.partic2.io.stream.StreamTransmit;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -40,10 +41,10 @@ public class JseIo {
     //File handler
     public static class FH implements Closeable{
         File f;
-        FileChannel fc;
+        RandomAccessFile raf;
         @Override
         public void close() throws IOException {
-            if(fc!=null)fc.close();
+            if(raf!=null)raf.close();
         }
     }
     //return fileHandler,path
@@ -58,24 +59,27 @@ public class JseIo {
         }
         FH fh = new FH();
         fh.f=File.createTempFile(prefix,"");
-        fh.fc=FileChannel.open(Paths.get(fh.f.getCanonicalPath()));
+        fh.raf=new RandomAccessFile(fh.f.getCanonicalPath(),"rw");
         return new Object[]{fh,fh.f.getCanonicalPath()};
     }
 
     public ByteBuffer fhRead(FH f,long offset,int length) throws IOException {
+        f.raf.seek(offset);
         ByteBuffer buf = ByteBuffer.allocate(length);
-        f.fc.read(buf,offset);
-        Utils.flip(buf);
+        f.raf.read(buf.array());
         return buf;
     }
     public int fhWrite(FH f,long offset,ByteBuffer buf) throws IOException {
-        return f.fc.write(buf);
+        f.raf.seek(offset);
+        //TODO: supprt native buffer.
+        f.raf.write(buf.array(),buf.position(),buf.remaining());
+        return buf.remaining();
     }
     public void fhClose(FH f) throws IOException {
         f.close();
     }
     public void fhTruncate(FH f,long offset) throws IOException {
-        f.fc.truncate(offset);
+        f.raf.setLength(offset);
     }
     //return type:dir|file,size,modifyTimeStampInSecond
     @MethodTypeDecl("s->sll")
@@ -84,24 +88,20 @@ public class JseIo {
         return new Object[]{f.isFile(),f.isDirectory(),f.length(),f.lastModified()};
     }
     public FH open(String path,String flag,int mode) throws IOException {
-        Set<OpenOption> openModeflag=new HashSet<>();
-        if(flag.contains("r")){
-            openModeflag.add(StandardOpenOption.READ);
-        }
+        String openMode="r";
+        boolean create=false;
         if(flag.contains("+")){
-            openModeflag.add(StandardOpenOption.READ);
-            openModeflag.add(StandardOpenOption.WRITE);
+            openMode="rw";
         }
         if(flag.contains("w")){
-            openModeflag.add(StandardOpenOption.CREATE);
-            openModeflag.add(StandardOpenOption.WRITE);
+            openMode="rw";
         }
         FH fh = new FH();
         fh.f=new File(path);
         if(!(fh.f.exists() && fh.f.isDirectory())){
-            fh.fc=FileChannel.open(Paths.get(path),openModeflag);
+            fh.raf=new RandomAccessFile(fh.f.getCanonicalPath(),openMode);
             if(flag.contains("w")){
-                fh.fc.truncate(0);
+                fh.raf.setLength(0);
             }
         }
         return fh;
@@ -116,9 +116,27 @@ public class JseIo {
             throw new IOException("mkdir failed");
         }
     }
-
+    protected void copyFileRecursively(String path,String newPath) throws IOException {
+        File f1 = new File(path);
+        for(File child : f1.listFiles()){
+            File dstChild=new File(newPath+child.getName());
+            if(child.isDirectory()){
+                if(dstChild.isFile()){
+                    dstChild.delete();
+                }
+                copyFileRecursively(child.getPath(),newPath+child.getName());
+            }else{
+                if(dstChild.isDirectory()){
+                    rm(dstChild.getPath());
+                }
+                new StreamTransmit().setAutoCloseStream(true).start(null,
+                        new FileInputStream(child),new FileOutputStream(dstChild),
+                        16*1024*1024,4096,null);
+            }
+        }
+    }
     public void copyFile(String path,String newPath) throws IOException {
-        Files.copy(Paths.get(path),Paths.get(newPath), StandardCopyOption.REPLACE_EXISTING);
+        copyFileRecursively(path,newPath);
     }
 
     public ByteBuffer readdir(String path) throws IOException{
@@ -173,7 +191,12 @@ public class JseIo {
         return 0;
     }
     public boolean processIsAlive(Process proc){
-        return proc.isAlive();
+        try{
+            proc.exitValue();
+            return false;
+        }catch(Exception e){
+            return true;
+        }
     }
     @MethodTypeDecl("occc->ooo")
     public Object[] processStdio(Process proc,boolean in,boolean out,boolean err){

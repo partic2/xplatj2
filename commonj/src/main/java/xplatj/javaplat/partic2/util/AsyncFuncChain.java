@@ -8,11 +8,23 @@ public class AsyncFuncChain{
 		void next();
 		void throw2(Exception excep);
 	}
-	public interface Cb{
-		void run(Controler ctl);
-	}
 
-	protected ArrayList<Cb> funcChain=new ArrayList<Cb>();
+	protected Controler ctl=new Controler() {
+		@Override
+		public void next() {
+			nextCb++;
+			AsyncFuncChain.this.step();
+		}
+
+		@Override
+		public void throw2(Exception excep) {
+			AsyncFuncChain.this.excep=excep;
+			AsyncFuncChain.this.step();
+		}
+
+	};
+
+	protected ArrayList<OneArgRunnable<Controler>> funcChain=new ArrayList<OneArgRunnable<Controler>>();
 	public Exception excep;
 	public AsyncFuncChain() {
 	}
@@ -20,37 +32,27 @@ public class AsyncFuncChain{
 	public void step(){
 		if(excep!=null){
 			if(errorHandler!=null){
-				errorHandler.call(excep);
+				errorHandler.run(excep);
 			}else{
 				excep.printStackTrace();
 			}
 			return;
 		}
 		try{
-			funcChain.get(nextCb).run(new Controler() {
-				@Override
-				public void next() {
-					nextCb++;
-					AsyncFuncChain.this.step();
-				}
-
-				@Override
-				public void throw2(Exception excep) {
-					AsyncFuncChain.this.excep=excep;
-					AsyncFuncChain.this.step();
-				}
-			});
+			if(nextCb<funcChain.size()){
+				funcChain.get(nextCb).run(ctl);
+			}
 		}catch(Exception e){
 			AsyncFuncChain.this.excep=e;
 			step();
 		}
 	}
-	public AsyncFuncChain then(Cb cb){
+	public AsyncFuncChain then(OneArgRunnable<Controler> cb){
 		funcChain.add(cb);
 		return this;
 	}
-	public OneArgFunc<Boolean,Exception> errorHandler;
-	public AsyncFuncChain catch2(OneArgFunc<Boolean,Exception> errorHandler){
+	public OneArgRunnable<Exception> errorHandler;
+	public AsyncFuncChain catch2(OneArgRunnable<Exception> cb){
 		this.errorHandler=errorHandler;
 		return this;
 	}

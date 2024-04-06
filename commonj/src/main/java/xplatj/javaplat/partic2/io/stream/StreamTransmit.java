@@ -57,6 +57,11 @@ public class StreamTransmit implements Runnable {
 			exec.execute(this);
 		}
 	}
+	boolean autoCloseStream=false;
+	public StreamTransmit setAutoCloseStream(boolean autoCloseStream){
+		this.autoCloseStream=autoCloseStream;
+		return this;
+	}
 
 	public boolean finished() {
 		return finished;
@@ -83,6 +88,17 @@ public class StreamTransmit implements Runnable {
 				}
 			}
 		} catch (IOException e) {
+		}finally {
+			if(autoCloseStream){
+				try {
+					in.close();
+				} catch (IOException e) {
+				}
+				try {
+					out.close();
+				} catch (IOException e) {
+				}
+			}
 		}
 		finished = true;
 		if (int_complete != null) {

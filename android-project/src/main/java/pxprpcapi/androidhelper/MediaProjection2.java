@@ -56,6 +56,7 @@ public class MediaProjection2 {
     public ByteBuffer takeScreenShot(AsyncReturn<ByteBuffer> retPngData){
         final ImageReader[] reader=new ImageReader[1];
         final ByteBuffer[] r=new ByteBuffer[1];
+        final SurfaceManager.ImageOrBitmap[] image=new SurfaceManager.ImageOrBitmap[1];
         new AsyncFuncChain().then((ctl)->{
             if(mediaProjectionToken==null){
                 requestScreenCapture(new AsyncFuncChainPxprpcAdapter<>(null,ctl));
@@ -73,15 +74,18 @@ public class MediaProjection2 {
             startScreenCapture(SurfaceManager.i.newSurfaceFromImageReader(reader[0]));
             SurfaceManager.i.waitForImageAvailable(new AsyncFuncChainPxprpcAdapter<>(null,ctl),reader[0]);
         }).then((ctl)->{
-            SurfaceManager.ImageOrBitmap image = SurfaceManager.i.accuireLastestImage(reader[0]);
-            SurfaceManager.i.toPNG(new AsyncFuncChainPxprpcAdapter<>(r,ctl),image,85);
+            image[0] = SurfaceManager.i.accuireLastestImage(reader[0]);
+            SurfaceManager.i.toPNG(new AsyncFuncChainPxprpcAdapter<>(r,ctl),image[0],85);
         }).then((ctl)->{
+            ApiServer.closeQuietly(image[0]);
             stopScreenCapture();
             retPngData.resolve(r[0]);
         }).catch2((ex)->{
+            if(image[0]!=null){
+                ApiServer.closeQuietly(image[0]);
+            }
             stopScreenCapture();
             retPngData.reject(ex);
-            return true;
         }).step();
         return null;
     }
@@ -94,10 +98,11 @@ public class MediaProjection2 {
         }).then((ctl->{
             SurfaceManager.i.toPNG(new AsyncFuncChainPxprpcAdapter<>(buffer,ctl),img[0],85);
         })).then((ctl)->{
+            ApiServer.closeQuietly(img[0]);
             aret.resolve(buffer[0]);
         }).catch2((err)->{
+            if(img[0]!=null)ApiServer.closeQuietly(img[0]);
             aret.reject(err);
-            return true;
         }).step();
         return null;
     }
