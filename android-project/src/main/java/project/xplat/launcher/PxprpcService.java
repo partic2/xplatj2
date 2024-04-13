@@ -18,6 +18,8 @@ public class PxprpcService extends Service {
         super.onCreate();
         AssetsCopy.init(this);
         ApiServer.port=ApiServer.port+1;
+        ApiServer.portRange[0]++;
+        ApiServer.portRange[1]++;
         ApiServer.defaultAndroidContext=this;
     }
 

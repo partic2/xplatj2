@@ -1,7 +1,9 @@
 package project.xplat.webapp;
 
+import android.app.AlertDialog;
 import android.graphics.PixelFormat;
 import android.media.ImageReader;
+import pxprpcapi.androidhelper.AndroidUIBase;
 import pxprpcapi.androidhelper.DisplayManager2;
 import pxprpcapi.androidhelper.MediaProjection2;
 import pxprpcapi.androidhelper.SurfaceManager;
@@ -62,5 +64,24 @@ public class TestCode {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    public static void showDialog(){
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+        }
+        //while(AndroidUIBase.i==null){}
+        AlertDialog[] dialog=new AlertDialog[1];
+        new AsyncFuncChain().then((ctl)->{
+            AndroidUIBase.i.dialogNew(new AsyncFuncChainPxprpcAdapter<>(dialog,ctl),"","","","");
+        }).then((ctl)->{
+            AndroidUIBase.i.dialogSet(dialog[0],"Hello",true);
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+            }
+            AndroidUIBase.i.dialogSet(dialog[0],"Hello",true);
+        }).step();
+
     }
 }

@@ -18,18 +18,30 @@ import java.net.InetSocketAddress;
 public class ApiServer {
     public static TCPBackend tcpServ;
     public static int port=2050;
-
+    public static int[] portRange=new int[]{2050,2079};
     public static void serve() throws IOException {
         tcpServ = new TCPBackend();
-        if(JMain.debugMode){
-            tcpServ.bindAddr= new InetSocketAddress(
-                    Inet4Address.getByAddress(new byte[]{(byte)0,(byte)0,(byte)0,(byte)0}),port);
-        }else{
-            tcpServ.bindAddr= new InetSocketAddress(
-                    Inet4Address.getByAddress(new byte[]{(byte)127,(byte)0,(byte)0,(byte)1}),port);
+
+        if(JseIo.i==null)new JseIo();
+        putModule(JseIo.PxprpcNamespace,JseIo.i);
+
+        for(port=portRange[0];port<portRange[1];port+=2){
+            try{
+                if(JMain.debugMode){
+                    tcpServ.bindAddr= new InetSocketAddress(
+                            Inet4Address.getByAddress(new byte[]{(byte)0,(byte)0,(byte)0,(byte)0}),port);
+                }else{
+                    tcpServ.bindAddr= new InetSocketAddress(
+                            Inet4Address.getByAddress(new byte[]{(byte)127,(byte)0,(byte)0,(byte)1}),port);
+                }
+                tcpServ.listenAndServe();
+                break;
+            }catch (IOException ex){
+            }
         }
-        putModule(JseIo.PxprpcNamespace,new JseIo());
-        tcpServ.listenAndServe();
+        if(port>=portRange[1]){
+            throw new RuntimeException("No available tcp port.");
+        }
     }
     public static void putModule(String modName,Object module){
         DefaultFuncMap.registered.put(modName,module);

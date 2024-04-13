@@ -2,13 +2,17 @@ package project.xplat.webapp;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.LinearLayout;
 import lib.pursuer.simplewebserver.PxprpcWsServer;
 import lib.pursuer.simplewebserver.XplatHTTPDServer;
 import org.nanohttpd.protocols.http.NanoHTTPD;
@@ -17,28 +21,44 @@ import org.nanohttpd.protocols.http.NanoHTTPD;
 import project.xplat.launcher.AssetsCopy;
 import project.xplat.launcher.ApiServer;
 import pxprpc.base.ServerContext;
+import pxprpcapi.androidhelper.AndroidUIBase;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.partic2.util.IFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 
 public class MainActivity extends Activity {
-    void bgThread() {
+    protected void bgThread() {
         ApiServer.start(this);
         initWebServer();
     }
-    static NanoHTTPD httpd;
-    static int httpdPort = 2080;
+    public static NanoHTTPD httpd;
+    public static int httpdPort = 2080;
+    public static int[] httpdPortRange=new int[]{2080,2095};
     public void initWebServer() {
         try {
             if (httpd == null) {
                 project.xplat.launcher.MainActivity.ensureStartOpts();
+
+                String hostname="127.0.0.1";
                 if(project.xplat.launcher.MainActivity.debugMode){
-                    httpd = new XplatHTTPDServer("0.0.0.0", httpdPort);
-                }else{
-                    httpd = new XplatHTTPDServer("127.0.0.1", httpdPort);
+                    hostname="0.0.0.0";
                 }
+                //check port available
+                for(httpdPort=httpdPortRange[0];httpdPort<httpdPortRange[1];httpdPort++){
+                    try{
+                        ServerSocket ss = new ServerSocket(httpdPort, 1, InetAddress.getByName(hostname));
+                        ss.close();
+                        break;
+                    }catch(Exception ex){}
+                }
+                if(httpdPort>=httpdPortRange[1]){
+                    throw new RuntimeException("No available tcp port.");
+                }
+                httpd = new XplatHTTPDServer("127.0.0.1", httpdPort);
                 PxprpcWsServer.registeredServer.put(Integer.toString(ApiServer.port), new IFactory<ServerContext>() {
 					@Override
 					public ServerContext create() {
@@ -62,7 +82,7 @@ public class MainActivity extends Activity {
         startActivity(intent);
     }
 
-    public WebView mWebView;
+    public View mainWebView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,39 +99,69 @@ public class MainActivity extends Activity {
                 }
         );
         initWebView();
-        //PlatCoreConfig.get().executor.execute(()->TestCode.do2());
+        //PlatCoreConfig.get().executor.execute(()->TestCode.showDialog());
 
     }
 
+
     protected void initWebView() {
-        mWebView = new WebView(this);
-        setContentView(mWebView);
-        mWebView.getSettings().setDefaultTextEncodingName("utf-8");
-        mWebView.getSettings().setJavaScriptEnabled(true);
-        mWebView.setWebViewClient(new WebViewClient() {
+        WebView wv=new WebView(this);
+        mainWebView=wv;
+        setContentView(wv);
+        wv.getSettings().setDefaultTextEncodingName("utf-8");
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.setWebViewClient(new WebViewClient() {
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 handler.proceed();
             }
+
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                if(MainActivity.this.startScript!=null){
+                    MainActivity.this.webviewRunJs(MainActivity.this.startScript);
+                }
+                super.onPageStarted(view, url, favicon);
+            }
+
+
         });
-        mWebView.getSettings().setAllowFileAccess(true);
-        mWebView.getSettings().setAllowContentAccess(true);
-        mWebView.getSettings().setAllowUniversalAccessFromFileURLs(true);
+        wv.getSettings().setAllowFileAccess(true);
+        wv.getSettings().setAllowContentAccess(true);
+        wv.getSettings().setAllowUniversalAccessFromFileURLs(true);
         try {
-            mWebView.loadUrl("http://127.0.0.1:" + httpdPort +XplatHTTPDServer.urlPathForFile(new File(AssetsCopy.assetsDir + "/index.html")));
+            wv.loadUrl("http://127.0.0.1:" + httpdPort +XplatHTTPDServer.urlPathForFile(new File(AssetsCopy.assetsDir + "/index.html")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+    protected void deinitWebView(){
+        WebView wv = ((WebView) mainWebView);
+        if(wv!=null){
+            wv.destroy();
+        }
+    }
+    protected String startScript=null;
+    public void setWebviewStartScript(String jscode){
+        this.startScript=jscode;
+    }
+    public void webviewRunJs(String jscode){
+        WebView wv = ((WebView) mainWebView);
+        wv.evaluateJavascript("javascript:"+jscode,null);
+    }
+
 
     @Override
     protected void onDestroy() {
-
+        deinitWebView();
        PlatCoreConfig.get().executor.execute(new Runnable() {
             @Override
             public void run() {
-                httpd.stop();
-                httpd = null;
+                if(httpd!=null){
+                    httpd.stop();
+                    httpd = null;
+                }
             }
         });
         ApiServer.stop();

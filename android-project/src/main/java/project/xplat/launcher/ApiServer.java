@@ -28,6 +28,7 @@ public class ApiServer {
     public static Context defaultAndroidContext;
     public static HandlerThread handlerThread;
     public static Handler handler;
+    public static int[] portRange=new int[]{2050,2079};
     public static int port=2050;
     public static IBinder serviceBinder;
     public static ServiceConnection serviceConnection=new ServiceConnection() {
@@ -51,29 +52,62 @@ public class ApiServer {
         while(handlerThread.getLooper()==null){}
         handler=new Handler(handlerThread.getLooper());
         MainActivity.ensureStartOpts();
-        if(MainActivity.debugMode){
-            tcpServ.bindAddr= new InetSocketAddress(
-                    Inet4Address.getByAddress(new byte[]{(byte)0,(byte)0,(byte)0,(byte)0}),port);
-        }else{
-            tcpServ.bindAddr= new InetSocketAddress(
-                    Inet4Address.getByAddress(new byte[]{(byte)127,(byte)0,(byte)0,(byte)1}),port);
-        }
         //Put init into handlerThread to avoid Looper error.
         handler.post(new Runnable(){
             @Override
             public void run() {
-                putModule(SysBase.PxprpcNamespace,new SysBase());
-                putModule(AndroidCamera2.PxprpcNamespace,new AndroidCamera2());
-                putModule(Bluetooth2.PxprpcNamespace,new Bluetooth2());
-                putModule(Intent2.PxprpcNamespace,new Intent2());
-                putModule(Sensor2.PxprpcNamespace,new Sensor2());
-                putModule(Wifi2.PxprpcNamespace,new Wifi2());
-                putModule(Misc2.PxprpcNamespace,new Misc2());
-                putModule(Power2.PxprpcNamespace,new Power2());
-                putModule(SurfaceManager.PxprpcNamespace,new SurfaceManager());
-                putModule(MediaProjection2.PxprpcNamespace,new MediaProjection2());
-                putModule(JseIo.PxprpcNamespace,new JseIo());
-                putModule(DisplayManager2.PxprpcNamespace,new DisplayManager2());
+                if(SysBase.i==null){
+                    new SysBase();
+                }
+                if(AndroidCamera2.i==null){
+                    new AndroidCamera2();
+                }
+                if(Bluetooth2.i==null){
+                    new Bluetooth2();
+                }
+                if(Intent2.i==null){
+                    new Intent2();
+                }
+                if(Sensor2.i==null){
+                    new Sensor2();
+                }
+                if(Wifi2.i==null){
+                    new Wifi2();
+                }
+                if(Misc2.i==null){
+                    new Misc2();
+                }
+                if(Power2.i==null) {
+                    new Power2();
+                }
+                if(SurfaceManager.i==null){
+                    new SurfaceManager();
+                }
+                if(MediaProjection2.i==null){
+                    new MediaProjection2();
+                }
+                if(DisplayManager2.i==null){
+                    new DisplayManager2();
+                }
+                if(AndroidUIBase.i==null){
+                    new AndroidUIBase();
+                }
+                if(JseIo.i==null){
+                    new JseIo();
+                }
+                putModule(SysBase.PxprpcNamespace,SysBase.i);
+                putModule(AndroidCamera2.PxprpcNamespace,AndroidCamera2.i);
+                putModule(Bluetooth2.PxprpcNamespace,Bluetooth2.i);
+                putModule(Intent2.PxprpcNamespace,Intent2.i);
+                putModule(Sensor2.PxprpcNamespace,Sensor2.i);
+                putModule(Wifi2.PxprpcNamespace,Wifi2.i);
+                putModule(Misc2.PxprpcNamespace,Misc2.i);
+                putModule(Power2.PxprpcNamespace,Power2.i);
+                putModule(SurfaceManager.PxprpcNamespace,SurfaceManager.i);
+                putModule(MediaProjection2.PxprpcNamespace,MediaProjection2.i);
+                putModule(DisplayManager2.PxprpcNamespace,DisplayManager2.i);
+                putModule(AndroidUIBase.PxprpcNamespace,AndroidUIBase.i);
+                putModule(JseIo.PxprpcNamespace,JseIo.i);
             }
         });
         if(!(ApiServer.defaultAndroidContext instanceof PxprpcService)){
@@ -82,7 +116,23 @@ public class ApiServer {
                     serviceConnection,Context.BIND_AUTO_CREATE);
         }
         Log.d("PxpRpc", "start: listen");
-        tcpServ.listenAndServe();
+        for(port=portRange[0];port<portRange[1];port+=2){
+            try{
+                if(MainActivity.debugMode){
+                    tcpServ.bindAddr= new InetSocketAddress(
+                            Inet4Address.getByAddress(new byte[]{(byte)0,(byte)0,(byte)0,(byte)0}),port);
+                }else{
+                    tcpServ.bindAddr= new InetSocketAddress(
+                            Inet4Address.getByAddress(new byte[]{(byte)127,(byte)0,(byte)0,(byte)1}),port);
+                }
+                tcpServ.listenAndServe();
+                break;
+            }catch (IOException ex){
+            }
+        }
+        if(port>=portRange[1]){
+            throw new RuntimeException("No available tcp port.");
+        }
     }
     public static void putModule(String modName,Object module){
         DefaultFuncMap.registered.put(modName,module);
@@ -113,15 +163,20 @@ public class ApiServer {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                closeQuietly(tcpServ);
-                for(Object mod:DefaultFuncMap.registered.values()){
-                    if(mod instanceof Closeable){
-                        closeQuietly((Closeable) mod);
+                try{
+                    closeQuietly(tcpServ);
+                    for(Object mod:DefaultFuncMap.registered.values()){
+                        if(mod instanceof Closeable){
+                            closeQuietly((Closeable) mod);
+                        }
                     }
-                }
-                tcpServ=null;
-                if(ApiServer.serviceBinder!=null){
-                    ApiServer.defaultAndroidContext.unbindService(ApiServer.serviceConnection);
+                    tcpServ=null;
+                    if(ApiServer.serviceBinder!=null){
+                        ApiServer.defaultAndroidContext.unbindService(ApiServer.serviceConnection);
+                    }
+                }catch(Exception ex){
+                    //mute deinit error for runtime.
+                    ex.printStackTrace();
                 }
             }
         }).start();

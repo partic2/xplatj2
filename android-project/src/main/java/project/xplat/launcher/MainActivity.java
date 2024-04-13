@@ -10,6 +10,9 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
 import android.os.Build;
 import android.os.Bundle;
+import pxprpcapi.androidhelper.AndroidUIBase;
+import xplatj.gdxconfig.core.PlatCoreConfig;
+import xplatj.javaplat.partic2.util.AsyncFuncChain;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -73,28 +76,33 @@ public class MainActivity extends Activity {
 	}
 
 	public void initEnviron(){
-		try{
-			Runtime.getRuntime().exec("chmod 0777 " + context.getFilesDir().getAbsolutePath());
-		}
-		catch (IOException e) {}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try{
+					Runtime.getRuntime().exec("chmod 0777 " + context.getFilesDir().getAbsolutePath());
+				}
+				catch (IOException e) {}
 
-		if(Build.VERSION.SDK_INT>=19){
-			context.getExternalFilesDirs(null);
-		}
-		WifiManager wifiMgr = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
-			multicastLock = wifiMgr.createMulticastLock("xplat");
-			multicastLock.setReferenceCounted(false);
-			multicastLock.acquire();
-		}
-		try {
-			AssetsCopy.loadAssets(this);
-		} catch (IOException e) {
-			e.printStackTrace();
-			finish();
-		}
-		this.startService(new Intent(this,PxprpcService.class));
-		launch();
+				if(Build.VERSION.SDK_INT>=19){
+					context.getExternalFilesDirs(null);
+				}
+				WifiManager wifiMgr = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
+					multicastLock = wifiMgr.createMulticastLock("xplat");
+					multicastLock.setReferenceCounted(false);
+					multicastLock.acquire();
+				}
+				try {
+					AssetsCopy.loadAssets(MainActivity.this);
+				} catch (IOException e) {
+					e.printStackTrace();
+					finish();
+				}
+				MainActivity.this.startService(new Intent(MainActivity.this,PxprpcService.class));
+				launch();
+			}
+		}).start();
 	}
 	String[] dangerousPerm=new String[]{"android.permission.ACCESS_LOCATION_EXTRA_COMMANDS","android.permission.ACCESS_NETWORK_STATE",
 			"android.permission.ACCESS_NOTIFICATION_POLICY","android.permission.ACCESS_WIFI_STATE","android.permission.BLUETOOTH",

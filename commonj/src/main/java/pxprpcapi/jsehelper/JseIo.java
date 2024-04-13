@@ -19,11 +19,13 @@ import java.util.Set;
 import java.util.Stack;
 
 public class JseIo {
+    public static JseIo i;
     public static final String PxprpcNamespace="JseHelper.JseIo";
     public PrefixFS fs;
     public JseIo(){
         fs=new PrefixFS();
         fs.prefix="";
+        i=this;
     }
     public String realpath(String path) throws IOException {
         return new File(path).getCanonicalPath();

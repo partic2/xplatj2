@@ -95,7 +95,7 @@
             android:theme="@style/AppTheme"
             android:usesCleartextTraffic="true">
         <service
-                android:name=".launcher.PxprpcService"
+                android:name="project.xplat.launcher.PxprpcService"
                 android:enabled="true"
                 android:exported="true"
                 android:process=":pxprpcsrv"
@@ -103,7 +103,7 @@
         </service>
 
         <activity
-                android:name=".launcher.MainActivity"
+                android:name="project.xplat.launcher.MainActivity"
                 android:label="@string/app_name" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -112,11 +112,11 @@
             </intent-filter>
         </activity>
         <activity
-                android:name=".sdl.MainActivity"
+                android:name="project.xplat.sdl.MainActivity"
                 android:process=":sdl" android:exported="true">
         </activity>
         <activity
-                android:name=".webapp.MainActivity"
+                android:name="project.xplat.webapp.MainActivity"
                 android:process=":webapp" android:exported="true">
         </activity>
 
