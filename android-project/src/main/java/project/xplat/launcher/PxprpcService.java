@@ -17,6 +17,7 @@ public class PxprpcService extends Service {
     public void onCreate() {
         super.onCreate();
         AssetsCopy.init(this);
+        project.xplat.launcher.MainActivity.startOptsParsed[0]=false;
         ApiServer.port=ApiServer.port+1;
         ApiServer.portRange[0]++;
         ApiServer.portRange[1]++;

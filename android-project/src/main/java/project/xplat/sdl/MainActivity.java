@@ -14,6 +14,7 @@ public class MainActivity extends SDLActivity
 		super.onCreate(savedInstanceState);
 		//ensure this is called when every activity created
 		AssetsCopy.init(this);
+		project.xplat.launcher.MainActivity.startOptsParsed[0]=false;
 		ApiServer.start(this);
 	}
 

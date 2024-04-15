@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
                 if(httpdPort>=httpdPortRange[1]){
                     throw new RuntimeException("No available tcp port.");
                 }
-                httpd = new XplatHTTPDServer("127.0.0.1", httpdPort);
+                httpd = new XplatHTTPDServer(hostname, httpdPort);
                 PxprpcWsServer.registeredServer.put(Integer.toString(ApiServer.port), new IFactory<ServerContext>() {
 					@Override
 					public ServerContext create() {
@@ -90,6 +90,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         //ensure this is called when every activity created
         AssetsCopy.init(this);
+        project.xplat.launcher.MainActivity.startOptsParsed[0]=false;
         PlatCoreConfig.get().executor.execute(
                 new Runnable() {
                     @Override
@@ -165,7 +166,6 @@ public class MainActivity extends Activity {
             }
         });
         ApiServer.stop();
-
         super.onDestroy();
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
