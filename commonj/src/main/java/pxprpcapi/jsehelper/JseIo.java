@@ -1,21 +1,19 @@
 package pxprpcapi.jsehelper;
 
-import pxprpc.base.Serializer2;
 import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
 import xplatj.gdxconfig.core.PlatCoreConfig;
-import xplatj.javaplat.partic2.filesystem.FSUtils;
 import xplatj.javaplat.partic2.filesystem.impl.PrefixFS;
 import xplatj.javaplat.partic2.io.stream.StreamTransmit;
 
 import java.io.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.ServerSocket;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.*;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Stack;
 
 public class JseIo {
@@ -41,7 +39,7 @@ public class JseIo {
         };
     }
     //File handler
-    public static class FH implements Closeable{
+    public static class FH implements Closeable {
         File f;
         RandomAccessFile raf;
         @Override
@@ -87,7 +85,16 @@ public class JseIo {
     @MethodTypeDecl("s->sll")
     public Object[] stat(String path) throws IOException {
         File f=new File(path);
-        return new Object[]{f.isFile(),f.isDirectory(),f.length(),f.lastModified()};
+        String type="";
+        if(!f.exists()){
+            throw new IOException("File not exists");
+        }
+        if(f.isFile()){
+            type="file";
+        }else if(f.isDirectory()){
+            type="dir";
+        }
+        return new Object[]{type,f.length(),f.lastModified()};
     }
     public FH open(String path,String flag,int mode) throws IOException {
         String openMode="r";
@@ -144,7 +151,11 @@ public class JseIo {
     public ByteBuffer readdir(String path) throws IOException{
         //return type:dir|file,size,modifyTimeStampInSeconds
         TableSerializer ser = new TableSerializer().setHeader2(null, new String[]{"name","type","size","mtime"});
-        for(File child:new File(path).listFiles()){
+        File[] children = new File(path).listFiles();
+        if(children==null){
+            throw new IOException("File not exists");
+        }
+        for(File child:children){
             ser.addRow(new Object[]{child.getName(),child.isFile()?"file":"dir",child.isFile()?child.length():0,child.lastModified()});
         }
         return ser.build();
@@ -248,5 +259,43 @@ public class JseIo {
     }
     public String dumpPropNames(){
         return Utils.stringJoin("\n",System.getProperties().stringPropertyNames());
+    }
+
+    public Socket tcpConnect(String host, int port) throws IOException {
+        Socket soc = new Socket();
+        try{
+            soc.connect(new InetSocketAddress(InetAddress.getByName(host),port));
+            return soc;
+        }catch (Exception ex){
+            soc.close();
+            throw ex;
+        }
+    }
+    //return input stream,output stream
+    @MethodTypeDecl("o->oo")
+    public Object[] tcpStreams(Socket soc) throws IOException {
+        InputStream input = soc.getInputStream();
+        OutputStream output = soc.getOutputStream();
+        return new Object[]{input,output};
+    }
+
+    public ServerSocket tcpListen(String host,int port) throws IOException{
+        ServerSocket ss=new ServerSocket(port,8,InetAddress.getByName(host));
+        return ss;
+    }
+    public Socket tcpAccept(ServerSocket ss) throws IOException {
+        return ss.accept();
+    }
+    public String platform(){
+        String osName = System.getProperty("os.name").toLowerCase();
+        if(osName.contains("windows")){
+            return "windows";
+        }else if(osName.contains("linux")){
+            return "linux";
+        }else if(osName.contains("macos")){
+            return "darwin";
+        }else{
+            return "";
+        }
     }
 }
