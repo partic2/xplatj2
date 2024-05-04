@@ -183,17 +183,50 @@ public class SurfaceManager {
             @Override
             public void run() {
                 if(img.bitmap==null && img.image!=null){
-                    if(img.image.getFormat()!=PixelFormat.RGBA_8888){
-                        throw new Error("only RGBA_8888 Image are supported");
-                    }
-                    Image.Plane[] planes=img.image.getPlanes();
-                    int pixelStride = planes[0].getPixelStride();
-                    int rowStride = planes[0].getRowStride();
-                    int rowPadding = rowStride - pixelStride * img.image.getWidth();
+                    if(img.image.getFormat()==PixelFormat.RGBA_8888){
+                        Image.Plane[] planes=img.image.getPlanes();
+                        int pixelStride = planes[0].getPixelStride();
+                        int rowStride = planes[0].getRowStride();
+                        int rowPadding = rowStride - pixelStride * img.image.getWidth();
 
-                    img.bitmap = Bitmap.createBitmap(img.image.getWidth() + rowPadding / pixelStride, img.image.getHeight(),
-                            Bitmap.Config.ARGB_8888);
-                    img.bitmap.copyPixelsFromBuffer(planes[0].getBuffer());
+                        img.bitmap = Bitmap.createBitmap(img.image.getWidth() + rowPadding / pixelStride, img.image.getHeight(),
+                                Bitmap.Config.ARGB_8888);
+                        img.bitmap.copyPixelsFromBuffer(planes[0].getBuffer());
+                    }else if(img.image.getFormat()==ImageFormat.YUV_420_888){
+                        Image.Plane[] planes=img.image.getPlanes();
+                        ByteBuffer yp = planes[0].getBuffer();
+                        int ystride=planes[0].getRowStride();
+                        ByteBuffer up = planes[1].getBuffer();
+                        int ustride=planes[1].getRowStride();
+                        int upstride=planes[1].getPixelStride();
+                        ByteBuffer vp = planes[2].getBuffer();
+                        int vstride=planes[2].getRowStride();
+                        int vpstride=planes[2].getPixelStride();
+                        int w=img.image.getWidth();
+                        int h=img.image.getHeight();
+                        //Caution: pixels is in SRGB, different from PixelFormat.ARGB8888
+                        int[] pixels=new int[w*h];
+                        for(int y1=0;y1<h;y1++){
+                            for(int x1=0;x1<w;x1++){
+                                int y2=(yp.get(yp.position()+x1+y1*ystride)&0xff);
+                                int u2=(up.get(up.position()+x1*upstride/2+(y1/2)*ustride)&0xff);
+                                int v2=(vp.get(vp.position()+x1*vpstride/2+(y1/2)*vstride)&0xff);
+                                int r=(298*(y2-16)+409*(v2-128))>>8;
+                                int g=(298*(y2-16)-100*(u2-128)-208*(v2-128))>>8;
+                                int b=(298*(y2-16)+517*(u2-128))>>8;
+                                if(r>255)r=255;
+                                if(g>255)g=255;
+                                if(b>255)b=255;
+                                if(r<0)r=0;
+                                if(g<0)g=0;
+                                if(b<0)b=0;
+                                pixels[y1*w+x1]=(0xff << 24) | (r<< 16) | (g<< 8) | b;
+                            }
+                        }
+                        img.bitmap = Bitmap.createBitmap(pixels,w , h, Bitmap.Config.ARGB_8888);
+                    }else{
+                        throw new Error("only RGBA_8888 or YUV_420_888 Image are supported");
+                    }
                 }
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 img.bitmap.compress(Bitmap.CompressFormat.PNG,quality,out);

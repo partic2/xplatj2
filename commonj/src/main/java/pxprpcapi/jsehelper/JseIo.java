@@ -156,7 +156,9 @@ public class JseIo {
             throw new IOException("File not exists");
         }
         for(File child:children){
-            ser.addRow(new Object[]{child.getName(),child.isFile()?"file":"dir",child.isFile()?child.length():0,child.lastModified()});
+            try{
+                ser.addRow(new Object[]{child.getName(),child.isFile()?"file":"dir",child.isFile()?child.length():0,child.lastModified()});
+            }catch(Exception e){}
         }
         return ser.build();
     }

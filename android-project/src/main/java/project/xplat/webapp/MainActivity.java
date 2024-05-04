@@ -100,8 +100,7 @@ public class MainActivity extends Activity {
                 }
         );
         initWebView();
-        //PlatCoreConfig.get().executor.execute(()->TestCode.showDialog());
-
+        //PlatCoreConfig.get().executor.execute(()->TestCode.do2());
     }
 
 

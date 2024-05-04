@@ -4,7 +4,9 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.hardware.camera2.*;
+import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
@@ -14,6 +16,7 @@ import android.view.Surface;
 import project.xplat.launcher.ApiServer;
 import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
+import pxprpc.extend.BuiltInFuncList;
 import pxprpc.extend.EventDispatcher;
 import pxprpc.extend.TableSerializer;
 
@@ -24,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/* bugly on some Android 5 Device, maybe fallback to Camera is unavoidable */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class AndroidCamera2 {
     public static final String PxprpcNamespace="AndroidHelper.Camera2";
@@ -50,10 +54,11 @@ public class AndroidCamera2 {
 
 
     public ByteBuffer getBaseCamerasInfo() throws CameraAccessException {
-        TableSerializer ser=new TableSerializer().setHeader("isb",new String[]{"id","features","outputSizes"});
+        TableSerializer ser=new TableSerializer().setHeader("ssss",
+                new String[]{"id","features","outputSizes","sensorActiveSize"});
         for(String id:camSrv.getCameraIdList()){
             CameraCharacteristics info = camSrv.getCameraCharacteristics(id);
-            Object[] row = new Object[3];
+            Object[] row = new Object[4];
             row[0]=id;
             ArrayList<String> features=new ArrayList<String>();
             int face=info.get(CameraCharacteristics.LENS_FACING);
@@ -77,13 +82,15 @@ public class AndroidCamera2 {
                 }
             }
             row[1]= Utils.stringJoin(" ",features);
-            TableSerializer ser2=new TableSerializer().setHeader("ii",new String[]{"w","h"});
             StreamConfigurationMap sscm = info.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             Size[] sizes = sscm.getOutputSizes(ImageFormat.YUV_420_888);
-            for(Size e : sizes){
-                ser2.addRow(new Object[]{e.getWidth(),e.getHeight()});
+            String[] sizeStr=new String[sizes.length];
+            for(int i1=0;i1<sizes.length;i1++){
+                sizeStr[i1]=sizes[i1].getWidth()+"x"+sizes[i1].getHeight();
             }
-            row[2]=Utils.toBytes(ser2.build());
+            row[2]=Utils.stringJoin(",", Arrays.asList(sizeStr));
+            Rect size = info.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE);
+            row[3]=size.right+"x"+size.bottom;
             ser.addRow(row);
         }
         return ser.build();
@@ -91,18 +98,24 @@ public class AndroidCamera2 {
 
     public static class CameraWrap1 extends EventDispatcher implements Closeable{
         public CameraDevice wrapped;
-        AndroidCamera2 ctx;
         CameraCaptureSession capSess;
         ImageReader imgRead;
         int imageWidth;
         int imageHeight;
-        
-        int flashMode=CaptureRequest.FLASH_MODE_OFF;
-        int autoFocusMode=CaptureRequest.CONTROL_AF_MODE_AUTO;
-        public CameraWrap1(AndroidCamera2 ctx, CameraDevice wrapped){
-            this.ctx=ctx;
+        //-1 mean use template default value.
+        int flashMode=-1;
+        int autoFocusMode=-1;
+        public CameraWrap1(CameraDevice wrapped){
             this.wrapped=wrapped;
-            ctx.openedResource.add(this);
+            try {
+                CameraCharacteristics info = AndroidCamera2.i.camSrv.getCameraCharacteristics(this.wrapped.getId());
+                StreamConfigurationMap sscm = info.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+                Size[] sizes = sscm.getOutputSizes(ImageFormat.YUV_420_888);
+                this.imageWidth=sizes[0].getWidth();
+                this.imageHeight=sizes[0].getHeight();
+            } catch (CameraAccessException e) {
+            }
+            AndroidCamera2.i.openedResource.add(this);
         }
         @Override
         public void close() throws IOException {
@@ -116,16 +129,16 @@ public class AndroidCamera2 {
                 wrapped.close();
                 wrapped=null;
             }
-            this.ctx.openedResource.remove(this);
+            AndroidCamera2.i.openedResource.remove(this);
         }
     }
     @SuppressLint("MissingPermission")
-    public Object openCamera(final AsyncReturn<Object> aret, String id) {
+    public CameraWrap1 openCamera(final AsyncReturn<CameraWrap1> aret, String id) {
         try {
             camSrv.openCamera(id, new CameraDevice.StateCallback() {
                 @Override
                 public void onOpened(CameraDevice camera) {
-                    CameraWrap1 c = new CameraWrap1(AndroidCamera2.this, camera);
+                    CameraWrap1 c = new CameraWrap1(camera);
                     aret.resolve(c);
                 }
 
@@ -148,19 +161,48 @@ public class AndroidCamera2 {
         ApiServer.closeQuietly(cam);
     }
 
-    //-1 means not set and use defualt value.
-    public void setCaptureConfig1(CameraWrap1 camWrap,int imageWidth,int imageHeight,int flashMode,int autoFocusMode) {
-    	if(imageWidth>=0) camWrap.imageWidth=imageWidth;
-    	if(imageHeight>=0) camWrap.imageHeight=imageHeight;
-    	camWrap.flashMode=flashMode;
-    	camWrap.flashMode=autoFocusMode;
+    /*
+        //-1 mean use template default value
+    */
+    public void setCaptureConfig1(CameraWrap1 camWrap,
+                                  int imageWidth,int imageHeight,
+                                  int flashMode,int autoFocusMode) {
+        if(imageWidth!=-1)camWrap.imageWidth=imageWidth;
+        if(imageHeight!=-1)camWrap.imageHeight=imageHeight;
+        camWrap.flashMode=flashMode;
+        camWrap.autoFocusMode=autoFocusMode;
     }
-    public Object requestContinuousCapture(final AsyncReturn<Object> aret, final CameraWrap1 camWrap) throws CameraAccessException {
+    public ByteBuffer getCaptureConfigKeyConst() throws IllegalAccessException {
+        return new BuiltInFuncList().listStaticConstField(CaptureRequest.class);
+    }
+    public ByteBuffer getCaptureConfigValueConst() throws IllegalAccessException {
+        return new BuiltInFuncList().listStaticConstField(CameraMetadata.class);
+    }
+    public void requestAutoFocusAndAdjust(final AsyncReturn<Object> aret, final CameraWrap1 camWrap,int x,int y,int width,int height) throws CameraAccessException {
+        MeteringRectangle focusWhere=new MeteringRectangle(x,y,width,height,0);
+        CaptureRequest.Builder capReq = camWrap.wrapped.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+        if(camWrap.flashMode!=-1)capReq.set(CaptureRequest.FLASH_MODE, camWrap.flashMode);
+        if(camWrap.autoFocusMode!=-1)capReq.set(CaptureRequest.CONTROL_AF_MODE, camWrap.autoFocusMode);
+        capReq.set(CaptureRequest.CONTROL_AF_TRIGGER,CaptureRequest.CONTROL_AF_TRIGGER_START);
+        capReq.set(CaptureRequest.CONTROL_AF_REGIONS,new MeteringRectangle[]{focusWhere});
+        capReq.set(CaptureRequest.CONTROL_AE_REGIONS,new MeteringRectangle[]{focusWhere});
+        camWrap.capSess.capture(capReq.build(),null,ApiServer.getHandler());
+        aret.resolve(null);
+    }
+    public void requestDigitScale(final AsyncReturn<Object> aret, final CameraWrap1 camWrap,int l,int t,int r,int b) throws CameraAccessException {
+        Rect rc=new Rect(l,t,r,b);
+        CaptureRequest.Builder capReq = camWrap.wrapped.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
+        if(camWrap.flashMode!=-1)capReq.set(CaptureRequest.FLASH_MODE, camWrap.flashMode);
+        if(camWrap.autoFocusMode!=-1)capReq.set(CaptureRequest.CONTROL_AF_MODE, camWrap.autoFocusMode);
+        capReq.set(CaptureRequest.SCALER_CROP_REGION,rc);
+        camWrap.capSess.capture(capReq.build(),null,ApiServer.getHandler());
+        aret.resolve(null);
+    }
+    public void requestContinuousCapture(final AsyncReturn<Object> aret, final CameraWrap1 camWrap) throws CameraAccessException {
         CameraDevice camDev = camWrap.wrapped;
         ImageReader imgReader = ImageReader.newInstance(camWrap.imageWidth, camWrap.imageHeight, ImageFormat.YUV_420_888, 2);
         if(camWrap.imgRead!=null)camWrap.imgRead.close();
         camWrap.imgRead=imgReader;
-        
         try {
             List<Surface> tarSurf = new ArrayList<Surface>();
             tarSurf.add(imgReader.getSurface());
@@ -170,10 +212,10 @@ public class AndroidCamera2 {
                     try{
                         if(camWrap.capSess!=null)camWrap.capSess.close();
                         CaptureRequest.Builder capReq = camWrap.wrapped.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-                        if(camWrap.flashMode>=0)capReq.set(CaptureRequest.FLASH_MODE, camWrap.flashMode);
-                        if(camWrap.autoFocusMode>=0)capReq.set(CaptureRequest.CONTROL_AF_MODE, camWrap.autoFocusMode);
+                        if(camWrap.flashMode!=-1)capReq.set(CaptureRequest.FLASH_MODE, camWrap.flashMode);
+                        if(camWrap.autoFocusMode!=-1)capReq.set(CaptureRequest.CONTROL_AF_MODE, camWrap.autoFocusMode);
                         capReq.addTarget(camWrap.imgRead.getSurface());
-                        session.setRepeatingRequest(capReq.build(),null,ApiServer.handler);
+                        session.setRepeatingRequest(capReq.build(),null,ApiServer.getHandler());
                         aret.resolve(null);
                     }catch (Exception e) {
                         aret.reject(e);
@@ -187,15 +229,13 @@ public class AndroidCamera2 {
         } catch (Exception e) {
             aret.reject(e);
         }
-        return null;
     }
 
     public void stopContinuousCapture(CameraWrap1 camWrap) throws CameraAccessException {
         camWrap.capSess.stopRepeating();
         camWrap.capSess=null;
     }
-
-    public Object requestOnceCapture(final AsyncReturn<Object> aret, final CameraWrap1 camWrap) throws CameraAccessException {
+    public void requestOnceCapture(final AsyncReturn<Object> aret, final CameraWrap1 camWrap) throws CameraAccessException {
         final CameraDevice camDev = camWrap.wrapped;
         ImageReader imgReader = ImageReader.newInstance(camWrap.imageWidth, camWrap.imageHeight, ImageFormat.YUV_420_888, 2);
         if(camWrap.imgRead!=null)camWrap.imgRead.close();
@@ -209,10 +249,12 @@ public class AndroidCamera2 {
                     try{
                         if(camWrap.capSess!=null)camWrap.capSess.close();
                         CaptureRequest.Builder capReq = camWrap.wrapped.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-                        if(camWrap.flashMode>=0)capReq.set(CaptureRequest.FLASH_MODE, camWrap.flashMode);
-                        if(camWrap.autoFocusMode>=0)capReq.set(CaptureRequest.CONTROL_AF_MODE, camWrap.autoFocusMode);
+                        if(camWrap.flashMode!=-1)capReq.set(CaptureRequest.FLASH_MODE, camWrap.flashMode);
+                        if(camWrap.autoFocusMode!=-1)capReq.set(CaptureRequest.CONTROL_AF_MODE, camWrap.autoFocusMode);
                         capReq.addTarget(camWrap.imgRead.getSurface());
-                        session.capture(capReq.build(), null, ApiServer.handler);
+                        EventDispatcher captureEvent=new EventDispatcher();
+                        captureEvent.setEventType(String.class);
+                        session.capture(capReq.build(), null, ApiServer.getHandler());
                         aret.resolve(null);
                     }catch (Exception e) {
                         aret.reject(e);
@@ -226,7 +268,6 @@ public class AndroidCamera2 {
         } catch (Exception e) {
             aret.reject(e);
         }
-        return null;
     }
 
     public SurfaceManager.ImageOrBitmap accuireLastestImageData(CameraWrap1 camDev){

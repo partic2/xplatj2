@@ -53,7 +53,7 @@ public class AsyncFuncChain{
 	}
 	public OneArgRunnable<Exception> errorHandler;
 	public AsyncFuncChain catch2(OneArgRunnable<Exception> cb){
-		this.errorHandler=errorHandler;
+		this.errorHandler=cb;
 		return this;
 	}
 
