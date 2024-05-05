@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.webkit.MimeTypeMap;
 import de.cketti.fileprovider.PublicFileProvider;
 import project.xplat.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
@@ -134,5 +135,28 @@ public class Intent2 {
         }
         return false;
     }
+    public void requestOpenUniversalTypeFile(String path) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Uri uri = PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
+                    ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", new File(path));
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setDataAndType(uri, getMimeTypeFromUri(uri.toString()));
+        } else {
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Uri uri = Uri.fromFile(new File(path));
+            intent.setDataAndType(uri, getMimeTypeFromUri(uri.toString()));
+        }
+        ApiServer.defaultAndroidContext.startActivity(intent);
+    }
 
+    public String getMimeTypeFromUri(String uri) {
+        String type=null;
+        type=MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(uri));
+        if (type == null) {
+            type = "application/octet-stream";
+        }
+        return type;
+    }
 }

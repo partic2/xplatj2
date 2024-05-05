@@ -18,6 +18,7 @@ import xplatj.gdxconfig.core.PlatCoreConfig;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -143,7 +144,7 @@ public class SurfaceManager {
 
     public ByteBuffer describePlanesInfo(ImageOrBitmap img){
         TableSerializer ser = new TableSerializer().setHeader("ii",
-                new String[]{"pixelStride","rowStride"});
+                new String[]{"pixelStride","rowStride","bufferAddress"});
         if(img.image!=null){
             for(Image.Plane e:img.image.getPlanes()){
                 ser.addRow(new Object[]{
@@ -206,22 +207,27 @@ public class SurfaceManager {
                         int h=img.image.getHeight();
                         //Caution: pixels is in SRGB, different from PixelFormat.ARGB8888
                         int[] pixels=new int[w*h];
-                        for(int y1=0;y1<h;y1++){
-                            for(int x1=0;x1<w;x1++){
-                                int y2=(yp.get(yp.position()+x1+y1*ystride)&0xff);
-                                int u2=(up.get(up.position()+x1*upstride/2+(y1/2)*ustride)&0xff);
-                                int v2=(vp.get(vp.position()+x1*vpstride/2+(y1/2)*vstride)&0xff);
-                                int r=(298*(y2-16)+409*(v2-128))>>8;
-                                int g=(298*(y2-16)-100*(u2-128)-208*(v2-128))>>8;
-                                int b=(298*(y2-16)+517*(u2-128))>>8;
-                                if(r>255)r=255;
-                                if(g>255)g=255;
-                                if(b>255)b=255;
-                                if(r<0)r=0;
-                                if(g<0)g=0;
-                                if(b<0)b=0;
-                                pixels[y1*w+x1]=(0xff << 24) | (r<< 16) | (g<< 8) | b;
+                        try{
+                            for(int y1=0;y1<h;y1++){
+                                for(int x1=0;x1<w;x1++){
+                                    int y2=(yp.get(yp.position()+x1+y1*ystride)&0xff);
+                                    int u2=(up.get(up.position()+x1*upstride/2+(y1/2)*ustride)&0xff);
+                                    int v2=(vp.get(vp.position()+x1*vpstride/2+(y1/2)*vstride)&0xff);
+                                    int r=(298*(y2-16)+409*(v2-128))>>8;
+                                    int g=(298*(y2-16)-100*(u2-128)-208*(v2-128))>>8;
+                                    int b=(298*(y2-16)+517*(u2-128))>>8;
+                                    if(r>255)r=255;
+                                    if(g>255)g=255;
+                                    if(b>255)b=255;
+                                    if(r<0)r=0;
+                                    if(g<0)g=0;
+                                    if(b<0)b=0;
+                                    pixels[y1*w+x1]=(0xff << 24) | (r<< 16) | (g<< 8) | b;
+                                }
                             }
+                        }catch(IndexOutOfBoundsException e){
+                            /* UV Buffer size is smaller than image size on XiaoMi 8 (WHAT?).
+                                In this case, we can only discard the last pixel. */
                         }
                         img.bitmap = Bitmap.createBitmap(pixels,w , h, Bitmap.Config.ARGB_8888);
                     }else{

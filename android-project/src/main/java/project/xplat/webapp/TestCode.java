@@ -7,6 +7,7 @@ import android.media.ImageReader;
 import android.util.Log;
 import project.xplat.launcher.ApiServer;
 import pxprpcapi.androidhelper.*;
+import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.partic2.pxprpc.AsyncFuncChainPxprpcAdapter;
 import xplatj.javaplat.partic2.util.AsyncFuncChain;
 
@@ -14,7 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-
+import java.util.concurrent.TimeUnit;
 
 
 public class TestCode {
@@ -103,10 +104,8 @@ public class TestCode {
                 ctl.throw2(e);
             }
         }).then((ctl)->{
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-            }
+            PlatCoreConfig.get().executor.schedule(()->ctl.next(),1000, TimeUnit.MILLISECONDS);
+        }).then((ctl)->{
             SurfaceManager.ImageOrBitmap img = AndroidCamera2.i.accuireLastestImageData(openCam[0]);
             SurfaceManager.i.toPNG(new AsyncFuncChainPxprpcAdapter<>(pngData,ctl),img,80);
         }).then((ctl)->{
@@ -114,7 +113,8 @@ public class TestCode {
                 ApiServer.closeQuietly(openCam[0]);
                 openCam[0]=null;
             }
-            saveToFile("/sdcard/Download/test1.png",pngData[0]);
+            saveToFile("/data/data/project.xplat/files/test1.png",pngData[0]);
+            Intent2.i.requestOpenUniversalTypeFile("/data/data/project.xplat/files/test1.png");
         }).catch2((e)->{
             e.printStackTrace();
             if(openCam[0]!=null){
