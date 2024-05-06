@@ -18,10 +18,12 @@ import pxprpc.extend.EventDispatcher;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-public class AndroidUIBase {
+public class AndroidUIBase implements Closeable {
     public static final String PxprpcNamespace="AndroidHelper.AndroidUIBase";
     public static AndroidUIBase i;
     public Handler mainTaskQueue;
@@ -35,6 +37,11 @@ public class AndroidUIBase {
             KeyEvent keyEvent = new KeyEvent(action, code);
             activity.dispatchKeyEvent(keyEvent);
         });
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(i==this)i=null;
     }
 
     public static class TouchPointers{

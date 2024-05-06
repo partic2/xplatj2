@@ -22,13 +22,19 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class SurfaceManager {
+public class SurfaceManager implements Closeable{
     public static final String PxprpcNamespace="AndroidHelper.SurfaceManager";
     public static SurfaceManager i;
     public SurfaceManager(){
         super();
         i=this;
     }
+
+    @Override
+    public void close() throws IOException {
+        if(i==this)i=null;
+    }
+
     public static class SurfaceWrap implements SurfaceTexture.OnFrameAvailableListener {
         public Surface androidSurface;
         //prevent reclaimed
@@ -144,7 +150,7 @@ public class SurfaceManager {
 
     public ByteBuffer describePlanesInfo(ImageOrBitmap img){
         TableSerializer ser = new TableSerializer().setHeader("ii",
-                new String[]{"pixelStride","rowStride","bufferAddress"});
+                new String[]{"pixelStride","rowStride"});
         if(img.image!=null){
             for(Image.Plane e:img.image.getPlanes()){
                 ser.addRow(new Object[]{

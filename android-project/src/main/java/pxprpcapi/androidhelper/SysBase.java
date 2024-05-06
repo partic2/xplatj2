@@ -15,11 +15,12 @@ import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class SysBase {
+public class SysBase implements Closeable{
 
 	public static final String PxprpcNamespace="AndroidHelper.Sysbase";
 	public static SysBase i;
@@ -85,5 +86,10 @@ public class SysBase {
 
 	public void close(Closeable c) {
 		ApiServer.closeQuietly(c);
+	}
+
+	@Override
+	public void close() throws IOException {
+		if(i==this)i=null;
 	}
 }

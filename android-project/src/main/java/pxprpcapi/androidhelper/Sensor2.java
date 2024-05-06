@@ -107,6 +107,7 @@ public class Sensor2 extends EventDispatcher implements SensorEventListener, Clo
 
     @Override
     public void close() throws IOException {
+        if(i==this)i=null;
         this.sensorStopAll();
     }
 }

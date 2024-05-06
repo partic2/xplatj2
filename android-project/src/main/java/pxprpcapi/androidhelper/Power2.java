@@ -8,9 +8,11 @@ import android.os.PowerManager;
 import project.xplat.launcher.ApiServer;
 import pxprpc.extend.TableSerializer;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class Power2 extends PxprpcBroadcastReceiverAdapter {
+public class Power2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
 
     public static final String PxprpcNamespace="AndroidHelper.Power";
     public static Power2 i;
@@ -61,5 +63,10 @@ public class Power2 extends PxprpcBroadcastReceiverAdapter {
                 bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
         });
         return ser.build();
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(i==this)i=null;
     }
 }

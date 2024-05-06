@@ -1,8 +1,9 @@
 package pxprpcapi.androidhelper;
 
+import java.io.Closeable;
 import java.io.IOException;
 
-public class PrivilegeMisc2 {
+public class PrivilegeMisc2 implements Closeable {
     public static final String PxprpcNamespace="AndroidHelper.PrivilegeMisc";
     public static PrivilegeMisc2 i;
     public PrivilegeMisc2(){
@@ -24,5 +25,10 @@ public class PrivilegeMisc2 {
     }
     public void inputKeyEvent(int keycode) throws IOException {
         Runtime.getRuntime().exec("input keyevent "+keycode);
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(i==this)i=null;
     }
 }

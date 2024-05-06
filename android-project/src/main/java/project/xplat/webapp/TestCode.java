@@ -8,6 +8,7 @@ import android.util.Log;
 import project.xplat.launcher.ApiServer;
 import pxprpcapi.androidhelper.*;
 import xplatj.gdxconfig.core.PlatCoreConfig;
+import xplatj.javaplat.partic2.filesystem.impl.PrefixFS;
 import xplatj.javaplat.partic2.pxprpc.AsyncFuncChainPxprpcAdapter;
 import xplatj.javaplat.partic2.util.AsyncFuncChain;
 
@@ -99,7 +100,17 @@ public class TestCode {
         }).then((ctl)->{
             try {
                 AndroidCamera2.i.setCaptureConfig1(openCam[0],640,480,-1,-1);
-                AndroidCamera2.i.requestOnceCapture(new AsyncFuncChainPxprpcAdapter<>(null,ctl),openCam[0]);
+                AndroidCamera2.i.requestContinuousCapture(new AsyncFuncChainPxprpcAdapter<>(null,ctl),openCam[0]);
+            } catch (CameraAccessException e) {
+                ctl.throw2(e);
+            }
+        }).then((ctl)->{
+            PlatCoreConfig.get().executor.schedule(()->ctl.next(),1000, TimeUnit.MILLISECONDS);
+        }).then((ctl)->{
+            ctl.next();
+            if(true)return;
+            try {
+                AndroidCamera2.i.requestAutoFocusAndAdjust(new AsyncFuncChainPxprpcAdapter<>(null,ctl),openCam[0],2000,2000,100,100);
             } catch (CameraAccessException e) {
                 ctl.throw2(e);
             }
@@ -113,8 +124,8 @@ public class TestCode {
                 ApiServer.closeQuietly(openCam[0]);
                 openCam[0]=null;
             }
-            saveToFile("/data/data/project.xplat/files/test1.png",pngData[0]);
-            Intent2.i.requestOpenUniversalTypeFile("/data/data/project.xplat/files/test1.png");
+            saveToFile(PrefixFS.defaultPrefix+"/test1.png",pngData[0]);
+            Intent2.i.requestOpenUniversalTypeFile(PrefixFS.defaultPrefix+"/test1.png");
         }).catch2((e)->{
             e.printStackTrace();
             if(openCam[0]!=null){

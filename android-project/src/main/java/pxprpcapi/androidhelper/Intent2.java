@@ -16,10 +16,12 @@ import project.xplat.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
 import xplatj.gdxplat.partic2.utils.Env;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 
-public class Intent2 {
+public class Intent2 implements Closeable {
     public static final String PxprpcNamespace="AndroidHelper.Intent";
     public static Intent2 i;
     public Intent2(){
@@ -158,5 +160,10 @@ public class Intent2 {
             type = "application/octet-stream";
         }
         return type;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(i==this)i=null;
     }
 }

@@ -29,7 +29,7 @@ import java.util.List;
 
 /* bugly on some Android 5 Device, maybe fallback to Camera is unavoidable */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-public class AndroidCamera2 {
+public class AndroidCamera2 implements Closeable{
     public static final String PxprpcNamespace="AndroidHelper.Camera2";
     public static AndroidCamera2 i;
     public CameraManager camSrv;
@@ -40,12 +40,6 @@ public class AndroidCamera2 {
     	camSrv=(CameraManager)ApiServer.defaultAndroidContext.getSystemService(Context.CAMERA_SERVICE);
         i=this;
     }
-    public void init() {}
-
-    public void deinit() {
-    	closeAllOpenedResource();
-    }
-
     public void closeAllOpenedResource() {
     	for(Closeable cam:openedResource) {
     		ApiServer.closeQuietly(cam);
@@ -94,6 +88,12 @@ public class AndroidCamera2 {
             ser.addRow(row);
         }
         return ser.build();
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(i==this)i=null;
+        this.closeAllOpenedResource();
     }
 
     public static class CameraWrap1 extends EventDispatcher implements Closeable{
@@ -186,6 +186,7 @@ public class AndroidCamera2 {
         capReq.set(CaptureRequest.CONTROL_AF_TRIGGER,CaptureRequest.CONTROL_AF_TRIGGER_START);
         capReq.set(CaptureRequest.CONTROL_AF_REGIONS,new MeteringRectangle[]{focusWhere});
         capReq.set(CaptureRequest.CONTROL_AE_REGIONS,new MeteringRectangle[]{focusWhere});
+        capReq.addTarget(camWrap.imgRead.getSurface());
         camWrap.capSess.capture(capReq.build(),null,ApiServer.getHandler());
         aret.resolve(null);
     }
@@ -216,6 +217,7 @@ public class AndroidCamera2 {
                         if(camWrap.autoFocusMode!=-1)capReq.set(CaptureRequest.CONTROL_AF_MODE, camWrap.autoFocusMode);
                         capReq.addTarget(camWrap.imgRead.getSurface());
                         session.setRepeatingRequest(capReq.build(),null,ApiServer.getHandler());
+                        camWrap.capSess=session;
                         aret.resolve(null);
                     }catch (Exception e) {
                         aret.reject(e);
@@ -255,6 +257,7 @@ public class AndroidCamera2 {
                         EventDispatcher captureEvent=new EventDispatcher();
                         captureEvent.setEventType(String.class);
                         session.capture(capReq.build(), null, ApiServer.getHandler());
+                        camWrap.capSess=session;
                         aret.resolve(null);
                     }catch (Exception e) {
                         aret.reject(e);

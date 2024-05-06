@@ -47,9 +47,8 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         ApiServer.defaultAndroidContext.registerReceiver(this, if2);
         i=this;
     }
-    public void init(){
-    }
     public void close(){
+        if(i==this)i=null;
         try {
             ApiServer.defaultAndroidContext.unregisterReceiver(this);
         }catch(Exception e){}

@@ -29,7 +29,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-public class Misc2 {
+public class Misc2 implements Closeable{
 	public static final String PxprpcNamespace="AndroidHelper.Misc";
 	public static Misc2 i;
 	Vibrator vb;
@@ -37,6 +37,11 @@ public class Misc2 {
 	AudioManager am;
 	LocationManager lm;
 	NotificationManager nm;
+
+	@Override
+	public void close() throws IOException {
+		if(i==this)i=null;
+	}
 
 	public static class Light2 {
 		public int id;

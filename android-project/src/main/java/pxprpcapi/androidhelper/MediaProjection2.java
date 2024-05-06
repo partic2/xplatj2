@@ -17,12 +17,13 @@ import xplatj.gdxplat.partic2.utils.Env;
 import xplatj.javaplat.partic2.pxprpc.AsyncFuncChainPxprpcAdapter;
 import xplatj.javaplat.partic2.util.AsyncFuncChain;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
-public class MediaProjection2 {
+public class MediaProjection2 implements Closeable {
     public static final int ServiceBinderCode=1000;
     public static final String PxprpcNamespace="AndroidHelper.MediaProjection";
     public static MediaProjection2 i;
@@ -135,5 +136,10 @@ public class MediaProjection2 {
         });
         ((Activity)ApiServer.defaultAndroidContext).startActivityForResult(mpm.createScreenCaptureIntent(),reqCode);
         return false;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(i==this)i=null;
     }
 }

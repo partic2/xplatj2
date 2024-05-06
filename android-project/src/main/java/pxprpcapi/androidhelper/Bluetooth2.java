@@ -29,10 +29,10 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     public static Bluetooth2 i;
     public BluetoothAdapter adapter;
     public Bluetooth2(){
-        init();
+        initDefault();
         i=this;
     }
-    public void init(){
+    protected void initDefault(){
         if(adapter==null){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 adapter=((BluetoothManager) ApiServer.defaultAndroidContext.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
@@ -54,6 +54,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     }
     public void close(){
         try{
+            if(i==this)i=null;
             ApiServer.defaultAndroidContext.unregisterReceiver(this);
         }catch(Exception e){}
     }

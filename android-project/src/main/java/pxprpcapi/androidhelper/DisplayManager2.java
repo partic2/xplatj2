@@ -17,9 +17,11 @@ import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
 import xplatj.javaplat.partic2.util.AsyncFuncChain;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class DisplayManager2 {
+public class DisplayManager2 implements Closeable {
     public static final String PxprpcNamespace="AndroidHelper.DisplayManager";
     public static DisplayManager2 i;
     public DisplayManager dm;
@@ -75,5 +77,10 @@ public class DisplayManager2 {
     public View getCurrentMainView(){
         Activity at = (Activity) ApiServer.defaultAndroidContext;
         return at.getWindow().getDecorView();
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(i==this)i=null;
     }
 }

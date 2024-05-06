@@ -16,7 +16,7 @@ import java.net.ServerSocket;
 import java.nio.ByteBuffer;
 import java.util.Stack;
 
-public class JseIo {
+public class JseIo implements Closeable{
     public static JseIo i;
     public static final String PxprpcNamespace="JseHelper.JseIo";
     public PrefixFS fs;
@@ -38,6 +38,12 @@ public class JseIo {
             throw new IOException("rename failed");
         };
     }
+
+    @Override
+    public void close() throws IOException {
+        if(i==this)i=null;
+    }
+
     //File handler
     public static class FH implements Closeable {
         File f;
