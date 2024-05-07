@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.view.Surface;
 import project.xplat.launcher.ApiServer;
+import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.BuiltInFuncList;
 import pxprpc.extend.MethodTypeDecl;
@@ -40,7 +41,6 @@ public class SurfaceManager implements Closeable{
         //prevent reclaimed
         public SurfaceTexture tex;
         public int texName;
-
         @Override
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
             surfaceTexture.updateTexImage();
@@ -149,13 +149,14 @@ public class SurfaceManager implements Closeable{
     }
 
     public ByteBuffer describePlanesInfo(ImageOrBitmap img){
-        TableSerializer ser = new TableSerializer().setHeader("ii",
-                new String[]{"pixelStride","rowStride"});
+        TableSerializer ser = new TableSerializer().setHeader("iii",
+                new String[]{"pixelStride","rowStride","planeDataSize"});
         if(img.image!=null){
             for(Image.Plane e:img.image.getPlanes()){
                 ser.addRow(new Object[]{
                         e.getPixelStride()
-                        ,e.getRowStride()});
+                        ,e.getRowStride()
+                        ,e.getBuffer().remaining()});
             }
         }else if(img.bitmap!=null){
             Bitmap.Config bcfg = img.bitmap.getConfig();
@@ -172,6 +173,14 @@ public class SurfaceManager implements Closeable{
 
     public ByteBuffer getPlaneBufferData(ImageOrBitmap img,int planeIndex){
         ByteBuffer buf1 = img.image.getPlanes()[planeIndex].getBuffer();
+        return buf1;
+    }
+    public ByteBuffer getPlaneBufferDataRange(ImageOrBitmap img,int planeIndex,int offset,int len){
+        ByteBuffer buf1 = img.image.getPlanes()[planeIndex].getBuffer();
+        buf1=buf1.duplicate();
+        int pos=buf1.position();
+        Utils.setPos(buf1,pos+offset);
+        Utils.setLimit(buf1,pos+offset+len);
         return buf1;
     }
     public ByteBuffer packPlaneData(List<Image.Plane> planes){
@@ -217,8 +226,8 @@ public class SurfaceManager implements Closeable{
                             for(int y1=0;y1<h;y1++){
                                 for(int x1=0;x1<w;x1++){
                                     int y2=(yp.get(yp.position()+x1+y1*ystride)&0xff);
-                                    int u2=(up.get(up.position()+x1*upstride/2+(y1/2)*ustride)&0xff);
-                                    int v2=(vp.get(vp.position()+x1*vpstride/2+(y1/2)*vstride)&0xff);
+                                    int u2=(up.get(up.position()+(x1>>1)*upstride+(y1/2)*ustride)&0xff);
+                                    int v2=(vp.get(vp.position()+(x1>>1)*vpstride+(y1/2)*vstride)&0xff);
                                     int r=(298*(y2-16)+409*(v2-128))>>8;
                                     int g=(298*(y2-16)-100*(u2-128)-208*(v2-128))>>8;
                                     int b=(298*(y2-16)+517*(u2-128))>>8;
