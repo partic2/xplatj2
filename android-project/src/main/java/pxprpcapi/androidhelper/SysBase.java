@@ -84,10 +84,6 @@ public class SysBase implements Closeable{
 		return ApiServer.defaultAndroidContext.getPackageName();
 	}
 
-	public void close(Closeable c) {
-		ApiServer.closeQuietly(c);
-	}
-
 	@Override
 	public void close() throws IOException {
 		if(i==this)i=null;
