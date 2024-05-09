@@ -38,6 +38,7 @@ libuv_la_SOURCES = src/fs-poll.c \
                    src/random.c \
                    src/strscpy.c \
                    src/strscpy.h \
+                   src/thread-common.c \
                    src/threadpool.c \
                    src/timer.c \
                    src/uv-data-getter-setters.c \
@@ -126,6 +127,7 @@ EXTRA_DIST = test/fixtures/empty_file \
              img \
              CONTRIBUTING.md \
              LICENSE \
+             LICENSE-extra \
              README.md
 
 
@@ -133,6 +135,12 @@ EXTRA_DIST = test/fixtures/empty_file \
 TESTS = test/run-tests
 check_PROGRAMS = test/run-tests
 test_run_tests_CFLAGS = $(AM_CFLAGS)
+
+if WINNT
+check-am: test/run-tests_no_ext
+test/run-tests_no_ext: test/run-tests$(EXEEXT)
+	cp test/run-tests$(EXEEXT) test/run-tests_no_ext
+endif
 
 if SUNOS
 # Can't be turned into a CC_CHECK_CFLAGS in configure.ac, it makes compilers
@@ -190,6 +198,7 @@ test_run_tests_SOURCES = test/blackhole-server.c \
                          test/test-hrtime.c \
                          test/test-idle.c \
                          test/test-idna.c \
+                         test/test-iouring-pollhup.c \
                          test/test-ip4-addr.c \
                          test/test-ip6-addr.c \
                          test/test-ip-name.c \
@@ -284,6 +293,7 @@ test_run_tests_SOURCES = test/blackhole-server.c \
                          test/test-thread-equal.c \
                          test/test-thread.c \
                          test/test-thread-affinity.c \
+                         test/test-thread-priority.c \
                          test/test-threadpool-cancel.c \
                          test/test-threadpool.c \
                          test/test-timer-again.c \
@@ -466,10 +476,6 @@ libuv_la_SOURCES += src/unix/bsd-ifaddrs.c \
                     src/unix/posix-hrtime.c \
                     src/unix/posix-poll.c \
                     src/unix/hurd.c
-endif
-
-if KFREEBSD
-libuv_la_CFLAGS += -D_GNU_SOURCE
 endif
 
 if LINUX

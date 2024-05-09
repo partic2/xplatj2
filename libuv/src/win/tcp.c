@@ -58,11 +58,17 @@ static int uv__tcp_keepalive(uv_tcp_t* handle, SOCKET socket, int enable, unsign
     return WSAGetLastError();
   }
 
-  if (enable && setsockopt(socket,
-                           IPPROTO_TCP,
-                           TCP_KEEPALIVE,
-                           (const char*)&delay,
-                           sizeof delay) == -1) {
+  if (!enable)
+    return 0;
+
+  if (delay < 1)
+    return UV_EINVAL;
+
+  if (setsockopt(socket,
+                 IPPROTO_TCP,
+                 TCP_KEEPALIVE,
+                 (const char*)&delay,
+                 sizeof delay) == -1) {
     return WSAGetLastError();
   }
 
@@ -175,14 +181,14 @@ int uv_tcp_init_ex(uv_loop_t* loop, uv_tcp_t* handle, unsigned int flags) {
     sock = socket(domain, SOCK_STREAM, 0);
     if (sock == INVALID_SOCKET) {
       err = WSAGetLastError();
-      QUEUE_REMOVE(&handle->handle_queue);
+      uv__queue_remove(&handle->handle_queue);
       return uv_translate_sys_error(err);
     }
 
     err = uv__tcp_set_socket(handle->loop, handle, sock, domain, 0);
     if (err) {
       closesocket(sock);
-      QUEUE_REMOVE(&handle->handle_queue);
+      uv__queue_remove(&handle->handle_queue);
       return uv_translate_sys_error(err);
     }
 
@@ -627,7 +633,6 @@ int uv__tcp_listen(uv_tcp_t* handle, int backlog, uv_connection_cb cb) {
 
 
 int uv__tcp_accept(uv_tcp_t* server, uv_tcp_t* client) {
-  uv_loop_t* loop = server->loop;
   int err = 0;
   int family;
 
@@ -1552,11 +1557,6 @@ int uv__tcp_connect(uv_connect_t* req,
   return 0;
 }
 
-#ifndef WSA_FLAG_NO_HANDLE_INHERIT
-/* Added in Windows 7 SP1. Specify this to avoid race conditions, */
-/* but also manually clear the inherit flag in case this failed. */
-#define WSA_FLAG_NO_HANDLE_INHERIT 0x80
-#endif
 
 int uv_socketpair(int type, int protocol, uv_os_sock_t fds[2], int flags0, int flags1) {
   SOCKET server = INVALID_SOCKET;

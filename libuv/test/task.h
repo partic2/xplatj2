@@ -21,6 +21,8 @@
 
 #ifndef TASK_H_
 #define TASK_H_
+/*maybe good place to put compat code*/
+#include "../src/compat/compat.h"
 
 #include "uv.h"
 
@@ -50,9 +52,9 @@
 #define TEST_PORT_3 9125
 
 #ifdef _WIN32
-# define TEST_PIPENAME "\\\\?\\pipe\\uv-test"
-# define TEST_PIPENAME_2 "\\\\?\\pipe\\uv-test2"
-# define TEST_PIPENAME_3 "\\\\?\\pipe\\uv-test3"
+# define TEST_PIPENAME "\\\\.\\pipe\\uv-test"
+# define TEST_PIPENAME_2 "\\\\.\\pipe\\uv-test2"
+# define TEST_PIPENAME_3 "\\\\.\\pipe\\uv-test3"
 #else
 # define TEST_PIPENAME "/tmp/uv-test-sock"
 # define TEST_PIPENAME_2 "/tmp/uv-test-sock2"
@@ -198,6 +200,7 @@ typedef enum {
 #define ASSERT_LE(a, b) ASSERT_BASE(a, <=, b, int64_t, PRId64)
 #define ASSERT_LT(a, b) ASSERT_BASE(a, <, b, int64_t, PRId64)
 #define ASSERT_NE(a, b) ASSERT_BASE(a, !=, b, int64_t, PRId64)
+#define ASSERT_OK(a) ASSERT_BASE(a, ==, 0, int64_t, PRId64)
 
 #define ASSERT_UINT64_EQ(a, b) ASSERT_BASE(a, ==, b, uint64_t, PRIu64)
 #define ASSERT_UINT64_GE(a, b) ASSERT_BASE(a, >=, b, uint64_t, PRIu64)
@@ -243,13 +246,16 @@ typedef enum {
 #define ASSERT_PTR_NE(a, b) \
   ASSERT_BASE(a, !=, b, void*, "p")
 
-/* This macro cleans up the main loop. This is used to avoid valgrind
- * warnings about memory being "leaked" by the main event loop.
+#define ASSERT_PTR_LT(a, b) \
+  ASSERT_BASE(a, <, b, void*, "p")
+
+/* This macro cleans up the event loop. This is used to avoid valgrind
+ * warnings about memory being "leaked" by the event loop.
  */
-#define MAKE_VALGRIND_HAPPY()                       \
+#define MAKE_VALGRIND_HAPPY(loop)                   \
   do {                                              \
-    close_loop(uv_default_loop());                  \
-    ASSERT(0 == uv_loop_close(uv_default_loop()));  \
+    close_loop(loop);                               \
+    ASSERT_EQ(0, uv_loop_close(loop));              \
     uv_library_shutdown();                          \
   } while (0)
 
@@ -266,8 +272,8 @@ typedef enum {
   int run_helper_##name(void);                                                \
   int run_helper_##name(void)
 
-/* Format big numbers nicely. WARNING: leaks memory. */
-const char* fmt(double d);
+/* Format big numbers nicely. */
+char* fmt(char (*buf)[32], double d);
 
 /* Reserved test exit codes. */
 enum test_status {
@@ -371,7 +377,7 @@ UNUSED static int can_ipv6(void) {
 #endif
 
 #if !defined(__linux__) && \
-    !defined(__FreeBSD__) && \
+    !(defined(__FreeBSD__) && __FreeBSD_version >= 1301000) && \
     !defined(_WIN32)
 # define NO_CPU_AFFINITY \
   "affinity not supported on this platform."

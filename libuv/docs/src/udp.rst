@@ -56,7 +56,7 @@ Data types
             /*
              * Indicates if IP_RECVERR/IPV6_RECVERR will be set when binding the handle.
              * This sets IP_RECVERR for IPv4 and IPV6_RECVERR for IPv6 UDP sockets on
-             * Linux. This stops the Linux kernel from supressing some ICMP error messages
+             * Linux. This stops the Linux kernel from suppressing some ICMP error messages
              * and enables full ICMP error reporting for faster failover.
              * This flag is no-op on platforms other than Linux.
              */
@@ -285,7 +285,9 @@ API
     local sockets.
 
     :param handle: UDP handle. Should have been initialized with
-        :c:func:`uv_udp_init`.
+        :c:func:`uv_udp_init_ex` as either ``AF_INET`` or ``AF_INET6``, or have
+        been bound to an address explicitly with :c:func:`uv_udp_bind`, or
+        implicitly with :c:func:`uv_udp_send()` or :c:func:`uv_udp_recv_start`.
 
     :param on: 1 for on, 0 for off.
 
@@ -296,7 +298,9 @@ API
     Set the multicast ttl.
 
     :param handle: UDP handle. Should have been initialized with
-        :c:func:`uv_udp_init`.
+        :c:func:`uv_udp_init_ex` as either ``AF_INET`` or ``AF_INET6``, or have
+        been bound to an address explicitly with :c:func:`uv_udp_bind`, or
+        implicitly with :c:func:`uv_udp_send()` or :c:func:`uv_udp_recv_start`.
 
     :param ttl: 1 through 255.
 
@@ -307,7 +311,9 @@ API
     Set the multicast interface to send or receive data on.
 
     :param handle: UDP handle. Should have been initialized with
-        :c:func:`uv_udp_init`.
+        :c:func:`uv_udp_init_ex` as either ``AF_INET`` or ``AF_INET6``, or have
+        been bound to an address explicitly with :c:func:`uv_udp_bind`, or
+        implicitly with :c:func:`uv_udp_send()` or :c:func:`uv_udp_recv_start`.
 
     :param interface_addr: interface address.
 
@@ -318,7 +324,9 @@ API
     Set broadcast on or off.
 
     :param handle: UDP handle. Should have been initialized with
-        :c:func:`uv_udp_init`.
+        :c:func:`uv_udp_init_ex` as either ``AF_INET`` or ``AF_INET6``, or have
+        been bound to an address explicitly with :c:func:`uv_udp_bind`, or
+        implicitly with :c:func:`uv_udp_send()` or :c:func:`uv_udp_recv_start`.
 
     :param on: 1 for on, 0 for off.
 
@@ -329,7 +337,9 @@ API
     Set the time to live.
 
     :param handle: UDP handle. Should have been initialized with
-        :c:func:`uv_udp_init`.
+        :c:func:`uv_udp_init_ex` as either ``AF_INET`` or ``AF_INET6``, or have
+        been bound to an address explicitly with :c:func:`uv_udp_bind`, or
+        implicitly with :c:func:`uv_udp_send()` or :c:func:`uv_udp_recv_start`.
 
     :param ttl: 1 through 255.
 

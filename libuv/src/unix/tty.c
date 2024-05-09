@@ -81,7 +81,7 @@ int uv__tcsetattr(int fd, int how, const struct termios *term) {
 
 static int uv__tty_is_slave(const int fd) {
   int result;
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+#if defined(__linux__) || defined(__FreeBSD__)
   int dummy;
 
   result = ioctl(fd, TIOCGPTN, &dummy) != 0;
@@ -222,7 +222,7 @@ skip:
     int rc = r;
     if (newfd != -1)
       uv__close(newfd);
-    QUEUE_REMOVE(&tty->handle_queue);
+    uv__queue_remove(&tty->handle_queue);
     do
       r = fcntl(fd, F_SETFL, saved_flags);
     while (r == -1 && errno == EINTR);

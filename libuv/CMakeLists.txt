@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.9)
 
-cmake_policy(SET CMP0057 NEW) # Enable IN_LIST operator
-cmake_policy(SET CMP0064 NEW) # Support if (TEST) operator
 if(POLICY CMP0091)
   cmake_policy(SET CMP0091 NEW) # Enable MSVC_RUNTIME_LIBRARY setting
 endif()
@@ -24,6 +22,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 set(CMAKE_C_STANDARD 90)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 option(LIBUV_BUILD_SHARED "Build shared lib" ON)
 
 cmake_dependent_option(LIBUV_BUILD_TESTS
@@ -43,6 +43,7 @@ endif()
 option(ASAN "Enable AddressSanitizer (ASan)" OFF)
 option(MSAN "Enable MemorySanitizer (MSan)" OFF)
 option(TSAN "Enable ThreadSanitizer (TSan)" OFF)
+option(UBSAN "Enable UndefinedBehaviorSanitizer (UBSan)" OFF)
 
 if(MSAN AND NOT CMAKE_C_COMPILER_ID MATCHES "AppleClang|Clang")
   message(SEND_ERROR "MemorySanitizer requires clang. Try again with -DCMAKE_C_COMPILER=clang")
@@ -76,6 +77,19 @@ if(TSAN)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fno-omit-frame-pointer -fsanitize=thread")
   else()
     message(SEND_ERROR "ThreadSanitizer support requires clang or gcc. Try again with -DCMAKE_C_COMPILER.")
+  endif()
+endif()
+
+if(UBSAN)
+  list(APPEND uv_defines __UBSAN__=1)
+  if(CMAKE_C_COMPILER_ID MATCHES "AppleClang|GNU|Clang")
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-omit-frame-pointer -fsanitize=undefined")
+    set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fno-omit-frame-pointer -fsanitize=undefined")
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fno-omit-frame-pointer -fsanitize=undefined")
+  elseif(MSVC)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=undefined")
+  else()
+    message(SEND_ERROR "UndefinedBehaviorSanitizer support requires clang, gcc, or msvc. Try again with -DCMAKE_C_COMPILER.")
   endif()
 endif()
 
@@ -147,6 +161,11 @@ list(APPEND uv_cflags ${lint-utf8-msvc} )
 check_c_compiler_flag(-fno-strict-aliasing UV_F_STRICT_ALIASING)
 list(APPEND uv_cflags $<$<BOOL:${UV_F_STRICT_ALIASING}>:-fno-strict-aliasing>)
 
+if (MSVC)
+  # Error on calling undeclared functions.
+  list(APPEND uv_cflags "/we4013")
+endif()
+
 set(uv_sources
     src/fs-poll.c
     src/idna.c
@@ -154,6 +173,7 @@ set(uv_sources
     src/random.c
     src/strscpy.c
     src/strtok.c
+    src/thread-common.c
     src/threadpool.c
     src/timer.c
     src/uv-common.c
@@ -162,14 +182,17 @@ set(uv_sources
     src/compat/compat.c)
 
 if(WIN32)
-  list(APPEND uv_defines WIN32_LEAN_AND_MEAN _WIN32_WINNT=0x0602)
+  list(APPEND uv_defines WIN32_LEAN_AND_MEAN _WIN32_WINNT=0x0602 _CRT_DECLARE_NONSTDC_NAMES=0)
   list(APPEND uv_libraries
        psapi
        user32
        advapi32
        iphlpapi
        userenv
-       ws2_32)
+       ws2_32
+       dbghelp
+       ole32
+       shell32)
   list(APPEND uv_sources
        src/win/async.c
        src/win/core.c
@@ -295,11 +318,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "GNU")
        src/unix/hurd.c)
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "kFreeBSD")
-  list(APPEND uv_defines _GNU_SOURCE)
-  list(APPEND uv_libraries dl freebsd-glue)
-endif()
-
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND uv_defines _GNU_SOURCE _POSIX_C_SOURCE=200112)
   list(APPEND uv_libraries dl rt)
@@ -375,6 +393,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "OS400")
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
+  if(CMAKE_SYSTEM_VERSION STREQUAL "5.10")
+    list(APPEND uv_defines SUNOS_NO_IFADDRS)
+    list(APPEND uv_libraries rt)
+  endif()
   list(APPEND uv_defines __EXTENSIONS__ _XOPEN_SOURCE=500 _REENTRANT)
   list(APPEND uv_libraries kstat nsl sendfile socket)
   list(APPEND uv_sources
@@ -409,6 +431,21 @@ if(APPLE OR CMAKE_SYSTEM_NAME MATCHES "DragonFly|FreeBSD|Linux|NetBSD|OpenBSD")
   list(APPEND uv_test_libraries util)
 endif()
 
+#<s>if(CYGWIN OR MSYS)</s> MSYS may use to cross compiling too.
+if(CYGWIN)
+  list(APPEND uv_defines _GNU_SOURCE)
+  list(APPEND uv_sources
+       src/unix/cygwin.c
+       src/unix/bsd-ifaddrs.c
+       src/unix/no-fsevents.c
+       src/unix/no-proctitle.c
+       src/unix/posix-hrtime.c
+       src/unix/posix-poll.c
+       src/unix/procfs-exepath.c
+       src/unix/sysinfo-loadavg.c
+       src/unix/sysinfo-memory.c)
+endif()
+
 if(LIBUV_BUILD_SHARED)
   add_library(uv SHARED ${uv_sources})
   target_compile_definitions(uv
@@ -429,6 +466,7 @@ if(LIBUV_BUILD_SHARED)
     set_target_properties(uv PROPERTIES LINKER_LANGUAGE CXX)
   endif()
   target_link_libraries(uv ${uv_libraries})
+  set_target_properties(uv PROPERTIES OUTPUT_NAME "uv")
 endif()
 
 add_library(uv_a STATIC ${uv_sources})
@@ -445,6 +483,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "OS390")
   set_target_properties(uv_a PROPERTIES LINKER_LANGUAGE CXX)
 endif()
 target_link_libraries(uv_a ${uv_libraries})
+set_target_properties(uv_a PROPERTIES OUTPUT_NAME "uv")
+if(WIN32)
+  set_target_properties(uv_a PROPERTIES PREFIX "lib")
+endif()
 
 if(LIBUV_BUILD_TESTS)
   # Small hack: use ${uv_test_sources} now to get the runner skeleton,
@@ -526,6 +568,7 @@ if(LIBUV_BUILD_TESTS)
        test/test-hrtime.c
        test/test-idle.c
        test/test-idna.c
+       test/test-iouring-pollhup.c
        test/test-ip4-addr.c
        test/test-ip6-addr.c
        test/test-ip-name.c
@@ -619,6 +662,7 @@ if(LIBUV_BUILD_TESTS)
        test/test-thread-affinity.c
        test/test-thread-equal.c
        test/test-thread.c
+       test/test-thread-priority.c
        test/test-threadpool-cancel.c
        test/test-threadpool.c
        test/test-timer-again.c
@@ -666,6 +710,12 @@ if(LIBUV_BUILD_TESTS)
     set_tests_properties(uv_test PROPERTIES ENVIRONMENT
                          "LIBPATH=${CMAKE_BINARY_DIR}:$ENV{LIBPATH}")
   endif()
+  if(WIN32)
+    add_custom_command(TARGET uv_run_tests POST_BUILD
+                       COMMAND "${CMAKE_COMMAND}" -E copy
+                       "$<TARGET_FILE:uv_run_tests>"
+                       "$<TARGET_FILE_DIR:uv_run_tests>/uv_run_tests_no_ext")
+  endif()
   add_executable(uv_run_tests_a ${uv_test_sources} uv_win_longpath.manifest)
   target_compile_definitions(uv_run_tests_a PRIVATE ${uv_defines})
   target_compile_options(uv_run_tests_a PRIVATE ${uv_cflags})
@@ -681,6 +731,12 @@ if(LIBUV_BUILD_TESTS)
     set_target_properties(uv_run_benchmarks_a PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(uv_run_tests PROPERTIES LINKER_LANGUAGE CXX)
     set_target_properties(uv_run_tests_a PROPERTIES LINKER_LANGUAGE CXX)
+  endif()
+  if(WIN32)
+    add_custom_command(TARGET uv_run_tests_a POST_BUILD
+                       COMMAND "${CMAKE_COMMAND}" -E copy
+                       "$<TARGET_FILE:uv_run_tests_a>"
+                       "$<TARGET_FILE_DIR:uv_run_tests_a>/uv_run_tests_a_no_ext")
   endif()
 endif()
 
@@ -701,11 +757,14 @@ configure_file(libuv-static.pc.in libuv-static.pc @ONLY)
 
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DOCDIR})
+install(FILES LICENSE-extra DESTINATION ${CMAKE_INSTALL_DOCDIR})
 install(FILES ${PROJECT_BINARY_DIR}/libuv-static.pc
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 install(TARGETS uv_a EXPORT libuvConfig
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(EXPORT libuvConfig DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libuv)
+install(EXPORT libuvConfig
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libuv
+	NAMESPACE libuv::)
 
 if(LIBUV_BUILD_SHARED)
   # The version in the filename is mirroring the behaviour of autotools.
@@ -723,7 +782,21 @@ endif()
 
 if(MSVC)
   set(CMAKE_DEBUG_POSTFIX d)
+  get_filename_component(CMAKE_C_COMPILER_DIR ${CMAKE_C_COMPILER} DIRECTORY)
+  if(ASAN)
+    file(INSTALL "${CMAKE_C_COMPILER_DIR}/llvm-symbolizer.exe" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+    file(INSTALL "${CMAKE_C_COMPILER_DIR}/clang_rt.asan_dynamic-x86_64.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+    file(INSTALL "${CMAKE_C_COMPILER_DIR}/clang_rt.asan_dbg_dynamic-x86_64.dll" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+  endif()
 endif()
+
+if(BUILD_SHARED_LIBS)
+  set(LIB_SELECTED uv)
+else()
+  set(LIB_SELECTED uv_a)
+endif()
+
+add_library(libuv::libuv ALIAS ${LIB_SELECTED})
 
 message(STATUS "summary of build options:
     Install prefix:  ${CMAKE_INSTALL_PREFIX}

@@ -119,9 +119,33 @@ Threads
 
     .. versionadded:: 1.45.0
 
+.. c:function:: int uv_thread_getcpu(void)
+
+    Gets the CPU number on which the calling thread is running.
+
+    .. note::
+        Currently only implemented on Windows, Linux and FreeBSD.
+
+    .. versionadded:: 1.45.0
+
 .. c:function:: uv_thread_t uv_thread_self(void)
 .. c:function:: int uv_thread_join(uv_thread_t *tid)
 .. c:function:: int uv_thread_equal(const uv_thread_t* t1, const uv_thread_t* t2)
+
+.. c:function:: int uv_thread_setpriority(uv_thread_t tid, int priority)
+    If the function succeeds, the return value is 0.
+    If the function fails, the return value is less than zero.
+    Sets the scheduling priority of the thread specified by tid. It requires elevated
+    privilege to set specific priorities on some platforms.
+    The priority can be set to the following constants. UV_THREAD_PRIORITY_HIGHEST, 
+    UV_THREAD_PRIORITY_ABOVE_NORMAL, UV_THREAD_PRIORITY_NORMAL, 
+    UV_THREAD_PRIORITY_BELOW_NORMAL, UV_THREAD_PRIORITY_LOWEST.
+.. c:function:: int uv_thread_getpriority(uv_thread_t tid, int* priority)
+    If the function succeeds, the return value is 0.
+    If the function fails, the return value is less than zero.
+    Retrieves the scheduling priority of the thread specified by tid. The value in the
+    output parameter priority is platform dependent.
+    For Linux, when schedule policy is SCHED_OTHER (default), priority is 0.
 
 Thread-local storage
 ^^^^^^^^^^^^^^^^^^^^
