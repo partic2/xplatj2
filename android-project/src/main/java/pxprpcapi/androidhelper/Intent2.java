@@ -19,6 +19,7 @@ import xplatj.gdxplat.partic2.utils.Env;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Random;
 
 public class Intent2 implements Closeable {
@@ -30,16 +31,10 @@ public class Intent2 implements Closeable {
     public void requestInstallApk(String apkPath){
         Intent intent = new Intent(Intent.ACTION_VIEW);
         File file = new File(apkPath);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Uri apkUri = PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
-                    ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", file);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
-        } else {
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            Uri uri = Uri.fromFile(file);
-            intent.setDataAndType(uri, "application/vnd.android.package-archive");
-        }
+        Uri apkUri = PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
+                ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", file);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
     public void requestOpenTelephone(String tel){
@@ -52,6 +47,18 @@ public class Intent2 implements Closeable {
         Intent intent=new Intent(Intent.ACTION_SENDTO,uri);
         intent.putExtra("sms_body",body);
         ApiServer.defaultAndroidContext.startActivity(intent);
+    }
+    public void requestSendOthers(String filePath,String mime,String chooserTitle){
+        Uri uri = PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
+                ApiServer.defaultAndroidContext.getPackageName() + ".publicfileprovider", new File(filePath));
+        if(mime==""){
+            mime=getMimeTypeFromUri(uri.toString());
+        }
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, uri.toString());
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Share");
+        ApiServer.defaultAndroidContext.startActivity(Intent.createChooser(shareIntent, chooserTitle));
     }
     public void requestOpenByDefaultHandler(String uris){
         Uri uri=Uri.parse(uris);
@@ -96,7 +103,8 @@ public class Intent2 implements Closeable {
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
     public int requestImageCapture(final AsyncReturn<Integer> ret,String imagePath){
-        Uri uri= Uri.parse(getContentUriForFile(imagePath));
+        Uri uri= PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
+                ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", new File(imagePath));
         Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT,uri);
         int reqCode= Env.i(Random.class).nextInt(0xffffff);
@@ -140,16 +148,10 @@ public class Intent2 implements Closeable {
     public void requestOpenUniversalTypeFile(String path) {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_VIEW);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Uri uri = PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
-                    ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", new File(path));
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.setDataAndType(uri, getMimeTypeFromUri(uri.toString()));
-        } else {
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            Uri uri = Uri.fromFile(new File(path));
-            intent.setDataAndType(uri, getMimeTypeFromUri(uri.toString()));
-        }
+        Uri uri = PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
+                ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", new File(path));
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setDataAndType(uri, getMimeTypeFromUri(uri.toString()));
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
 

@@ -107,7 +107,6 @@
                 android:label="@string/app_name" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
@@ -119,12 +118,26 @@
                 android:name="project.xplat.webapp.MainActivity"
                 android:process=":webapp" android:exported="true">
         </activity>
-
+        <activity
+                android:name="project.xplat.launcher.MainSysShareReceiver"
+                android:label="@string/app_name" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
         <provider
                 android:name="de.cketti.fileprovider.PublicFileProvider"
                 android:authorities="project.xplat.publicfileprovider"
                 android:exported="true">
         </provider>
+
     </application>
 
 </manifest>
