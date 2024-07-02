@@ -269,15 +269,23 @@ public class JseIo implements Closeable{
         return Utils.stringJoin("\n",System.getProperties().stringPropertyNames());
     }
 
-    public Socket tcpConnect(String host, int port) throws IOException {
-        Socket soc = new Socket();
-        try{
-            soc.connect(new InetSocketAddress(InetAddress.getByName(host),port));
-            return soc;
-        }catch (Exception ex){
-            soc.close();
-            throw ex;
-        }
+    public Socket tcpConnect(AsyncReturn<Socket> aret,String host, int port) throws IOException {
+        PlatCoreConfig.get().executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                Socket soc = new Socket();
+                try{
+                    soc.connect(new InetSocketAddress(InetAddress.getByName(host),port));
+                    aret.resolve(soc);
+                }catch (Exception ex){
+                    try {
+                        soc.close();
+                    } catch (IOException e) {}
+                    aret.reject(ex);
+                }
+            }
+        });
+        return null;
     }
     //return input stream,output stream
     @MethodTypeDecl("o->oo")
@@ -291,8 +299,18 @@ public class JseIo implements Closeable{
         ServerSocket ss=new ServerSocket(port,8,InetAddress.getByName(host));
         return ss;
     }
-    public Socket tcpAccept(ServerSocket ss) throws IOException {
-        return ss.accept();
+    public Socket tcpAccept(AsyncReturn<Socket> aret,ServerSocket ss) throws IOException {
+        PlatCoreConfig.get().executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    aret.resolve(ss.accept());
+                } catch (IOException e) {
+                    aret.reject(e);
+                }
+            }
+        });
+        return null;
     }
     public String platform(){
         String osName = System.getProperty("os.name").toLowerCase();
