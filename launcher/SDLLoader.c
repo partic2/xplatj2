@@ -79,6 +79,11 @@ int SDL_main(int argc,char *argv[]){
 
         pwart_wasi_module_set_wasiargs(argc,argv);
         f = fopen(modpath, "rb");
+		
+		if(f==NULL){
+			SDL_Log(".wasm file open failed.");
+			return 1;
+		}
 
         fseek(f,0,SEEK_END);
         filesize=ftell(f);

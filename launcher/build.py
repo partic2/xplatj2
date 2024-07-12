@@ -70,6 +70,9 @@ def BuildEnvironPrepare():
     if 'ANDROID_ABI' not in buildConfig:
         buildConfig['ANDROID_ABI']=['armeabi-v7a','arm64-v8a']
 
+    if not 'PACK_JAVA_RUNTIME' in buildConfig:
+        buildConfig['PACK_JAVA_RUNTIME']=False
+
 
 def BuildAndroidRelease():
     cmake=shutil.which(buildConfig['CMAKE'])
@@ -138,7 +141,20 @@ def BuildNativeRelease():
     shutil.unpack_archive(sourceroot+'/javase-project/build/distributions/xplatj.zip',\
         sourceroot+'/launcher/build/native/jse')
     shutil.copytree(sourceroot+'/launcher/build/native/jse/xplatj',outdir,dirs_exist_ok=True)
-        
+    if buildConfig['PACK_JAVA_RUNTIME']:
+        if not os.path.exists(outdir+'/rt-java/release'):
+            PrintAndRun('jlink --add-modules java.base,java.logging --output '+outdir+'/rt-java')
+        scriptFile=''
+        with io.open(outdir+'/bin/xplatj','r',encoding='utf-8') as f1:
+            scriptFile=f1.read()
+        with io.open(outdir+'/bin/xplatj','w',encoding='utf-8') as f1:
+           #skip shebang
+           shebangEnd=scriptFile.find('\n')
+           f1.write(scriptFile[0:shebangEnd]+'\nexport JAVA_HOME=./rt-java\n'+scriptFile[shebangEnd:])
+        with io.open(outdir+'/bin/xplatj.bat','r',encoding='utf-8') as f1:
+            scriptFile=f1.read()
+        with io.open(outdir+'/bin/xplatj.bat','w',encoding='utf-8') as f1:
+           f1.write('set JAVA_HOME=./rt-java\n'+scriptFile)
     os.chdir(sourceroot+'/launcher')
 
 if __name__=='__main__':

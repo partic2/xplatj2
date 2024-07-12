@@ -76,14 +76,6 @@ public class JMain {
 			httpd=new XplatHTTPDServer("127.0.0.1",httpdPort);
 		}
 		try {
-			PxprpcWsServer.registeredServer.put(Integer.toString(ApiServer.port), new IFactory<ServerContext>() {
-				@Override
-				public ServerContext create() {
-					ServerContext sc=new ServerContext();
-					sc.funcMap=ApiServer.tcpServ.funcMap;
-					return sc;
-				}
-			});
 			httpd.start(60*1000);
 			String entryUrl=XplatHTTPDServer.urlPathForFile(new File(cd.getAbsoluteFile()+"/data/index.html"));
 			entryUrl="http://127.0.0.1:"+httpdPort+(entryUrl.startsWith("/")?"":"/")+entryUrl;

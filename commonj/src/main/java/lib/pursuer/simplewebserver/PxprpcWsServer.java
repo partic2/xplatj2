@@ -12,9 +12,6 @@ import xplatj.javaplat.partic2.util.IFactory;
 
 
 public class PxprpcWsServer extends NanoWSD {
-
-	//Bad scalability, but it's convenient.
-    public static HashMap<String,IFactory<ServerContext>> registeredServer=new HashMap<String,IFactory<ServerContext>>();
     
     public PxprpcWsServer(int port) {
         super(port);

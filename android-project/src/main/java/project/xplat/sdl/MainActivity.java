@@ -12,10 +12,11 @@ public class MainActivity extends SDLActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		//ensure this is called when every activity created
-		AssetsCopy.init(this);
-		project.xplat.launcher.MainActivity.startOptsParsed[0]=false;
-		ApiServer.start(this);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
 	}
 
 	@Override
@@ -25,14 +26,12 @@ public class MainActivity extends SDLActivity
 
 	@Override
 	protected void onDestroy() {
-		ApiServer.stop();
 		super.onDestroy();
 	}
 
 	@Override
 	protected String[] getLibraries() {
 		return new String[] {
-				"hidapi",
 				"SDL2",
 				// "SDL2_image",
 				// "SDL2_mixer",

@@ -1,6 +1,7 @@
 package project.xplat.launcher;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -80,6 +81,18 @@ public class MainSysShareReceiver extends Activity {
                     showSavedMessage();
                 }
             }
+        }
+        try {
+            if(MainActivity.currentTaskId==null){
+                Intent startMain=new Intent();
+                startMain.setClass(this,Class.forName("project.xplat.launcher.MainActivity"));
+                startActivity(startMain);
+            }else{
+                ActivityManager am=(ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
+                am.moveTaskToFront(MainActivity.currentTaskId,0);
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
         finish();
     }

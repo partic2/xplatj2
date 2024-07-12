@@ -7,3 +7,5 @@
 #ANDROID_ABI=['armeabi-v7a','arm64-v8a']
 
 #ANDROID_NATIVE_API_LEVEL='21'
+
+#PACK_JAVA_RUNTIME=False

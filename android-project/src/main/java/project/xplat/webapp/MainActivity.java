@@ -18,8 +18,8 @@ import lib.pursuer.simplewebserver.XplatHTTPDServer;
 import org.nanohttpd.protocols.http.NanoHTTPD;
 
 
-import project.xplat.launcher.AssetsCopy;
 import project.xplat.launcher.ApiServer;
+import project.xplat.launcher.AssetsCopy;
 import pxprpc.base.ServerContext;
 import pxprpcapi.androidhelper.AndroidUIBase;
 import xplatj.gdxconfig.core.PlatCoreConfig;
@@ -32,7 +32,6 @@ import java.net.ServerSocket;
 
 public class MainActivity extends Activity {
     protected void bgThread() {
-        ApiServer.start(this);
         initWebServer();
     }
     public static NanoHTTPD httpd;
@@ -59,14 +58,6 @@ public class MainActivity extends Activity {
                     throw new RuntimeException("No available tcp port.");
                 }
                 httpd = new XplatHTTPDServer(hostname, httpdPort);
-                PxprpcWsServer.registeredServer.put(Integer.toString(ApiServer.port), new IFactory<ServerContext>() {
-					@Override
-					public ServerContext create() {
-						ServerContext sc=new ServerContext();
-						sc.funcMap=ApiServer.tcpServ.funcMap;
-						return sc;
-					}
-				});
                 httpd.start(60 * 1000);
             }
         } catch (IOException e) {
@@ -88,9 +79,6 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-        //ensure this is called when every activity created
-        AssetsCopy.init(this);
-        project.xplat.launcher.MainActivity.startOptsParsed[0]=false;
         PlatCoreConfig.get().executor.execute(
                 new Runnable() {
                     @Override
@@ -103,6 +91,10 @@ public class MainActivity extends Activity {
         //PlatCoreConfig.get().executor.execute(()->TestCode.do2());
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
 
     protected void initWebView() {
         WebView wv=new WebView(this);
@@ -164,7 +156,6 @@ public class MainActivity extends Activity {
                 }
             }
         });
-        ApiServer.stop();
         super.onDestroy();
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

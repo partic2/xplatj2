@@ -35,6 +35,8 @@ public class MainActivity extends Activity {
 	public static String selectedResultAction="shutdown";
 	public static boolean debugMode=false;
 	public static boolean[] startOptsParsed=new boolean[]{false};
+	public static Integer currentTaskId=null;
+
 	public static void ensureStartOpts(){
 		
 		synchronized (startOptsParsed){
@@ -143,8 +145,9 @@ public class MainActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		//ensure this is called when every activity created
+		currentTaskId=getTaskId();
 		AssetsCopy.init(this);
+		ApiServer.start(this);
 		startOptsParsed[0]=false;
 		MainActivity.context = this.getApplicationContext();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -154,6 +157,13 @@ public class MainActivity extends Activity {
 			initEnviron();
 		}
 	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		ApiServer.defaultAndroidContext = this;
+	}
+
 	public void launch(){
 		try {
 			ensureStartOpts();
@@ -172,8 +182,16 @@ public class MainActivity extends Activity {
 		}
 		
 	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+	}
+
 	@Override
 	protected void onDestroy() {
+		ApiServer.stop();
+		currentTaskId=null;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
 			multicastLock.release();
 		}
@@ -182,6 +200,7 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		boolean shutdown=true;
+		ApiServer.defaultAndroidContext=this;
 		try{
 			startOptsParsed[0]=false;
 			ensureStartOpts();

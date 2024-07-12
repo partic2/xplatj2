@@ -31,22 +31,20 @@ public class PxprpcWsTunnel extends WebSocket implements AbstractIo {
     protected void onOpen() {
         String uri = req.getUri();
         String name = uri.substring(1);
-        if(PxprpcWsServer.registeredServer.containsKey(name)) {
-        	this.serv=PxprpcWsServer.registeredServer.get(name).create();
-        	this.serv.init(this,null);
-        	new Thread((new Runnable() {
-        		@Override
-        		public void run() {
-        			try {
-						PxprpcWsTunnel.this.serv.serve();
-					} catch (Exception e) {
-                        PxprpcWsTunnel.this.closeQuietly(CloseCode.InternalServerError, e.toString(), false);
-					}
-        		}
-        	})).start();
-        }else {
-        	this.closeQuietly(CloseCode.InternalServerError, "server name not found", false);
-        }
+
+        this.serv=new ServerContext();
+        this.serv.init(this,null);
+        new Thread((new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    PxprpcWsTunnel.this.serv.serve();
+                } catch (Exception e) {
+                    PxprpcWsTunnel.this.closeQuietly(CloseCode.InternalServerError, e.toString(), false);
+                }
+            }
+        })).start();
+
     }
 
     @Override

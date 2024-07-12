@@ -6,10 +6,22 @@
 
 char *flagfilepath="./data/xplat-flag.txt";
 
+static char *current_dir;
+
+/* free by caller*/
+static char *strconcat2(char *str1,char *str2){
+  int len1=strlen(str1);
+  int len2=strlen(str2);
+  char *r=(char *)malloc(len1+len2+1);
+  memmove(r,str1,len1);
+  memmove(r+len1,str2,len2);
+  r[len1+len2]=0;
+  return r;
+}
+
 int main(int argc, char *argv[]) {
   char *thisPath = argv[0];
   char *pch;
-  char *currentDir;
   char *buf;
   int opType = 0;
   int firstStartup=1;
@@ -20,11 +32,10 @@ int main(int argc, char *argv[]) {
     }
   }
   if(pch>=thisPath){
-    currentDir = (char *)malloc(pch - thisPath + 2);
-    memcpy(currentDir, thisPath, pch - thisPath + 1);
-    currentDir[pch - thisPath + 1] = 0;
-    chdir(currentDir);
-    free(currentDir);
+    current_dir = (char *)malloc(pch - thisPath + 2);
+    memcpy(current_dir, thisPath, pch - thisPath + 1);
+    current_dir[pch - thisPath + 1] = 0;
+    chdir(current_dir);
   }
   
   mkdir("./data");
