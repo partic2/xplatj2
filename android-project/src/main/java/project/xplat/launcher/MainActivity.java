@@ -95,12 +95,6 @@ public class MainActivity extends Activity {
 					multicastLock.setReferenceCounted(false);
 					multicastLock.acquire();
 				}
-				try {
-					AssetsCopy.loadAssets(MainActivity.this);
-				} catch (IOException e) {
-					e.printStackTrace();
-					finish();
-				}
 				MainActivity.this.startService(new Intent(MainActivity.this,PxprpcService.class));
 				launch();
 			}

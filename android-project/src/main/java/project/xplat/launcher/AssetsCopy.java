@@ -25,6 +25,7 @@ public class AssetsCopy {
 		try {
 			mContext=context;
 			AssetsCopy.assetsDir=mContext.getFilesDir().getCanonicalPath();
+			AssetsCopy.loadAssets(context);
 			PrefixFS.defaultPrefix=AssetsCopy.assetsDir+"/";
 			PlatCoreConfig.platApi=new PlatApiImpl(context);
 			if(PlatCoreConfig.get()==null){
