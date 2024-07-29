@@ -81,6 +81,8 @@ public class MainActivity extends Activity {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
+				AssetsCopy.init(context);
+				ApiServer.start(context);
 				try{
 					Runtime.getRuntime().exec("chmod 0777 " + context.getFilesDir().getAbsolutePath());
 				}
@@ -140,9 +142,6 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		currentTaskId=getTaskId();
-		AssetsCopy.init(this);
-		ApiServer.start(this);
-		startOptsParsed[0]=false;
 		MainActivity.context = this.getApplicationContext();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			String[] reqPerms=getPermissionNotGranted();
