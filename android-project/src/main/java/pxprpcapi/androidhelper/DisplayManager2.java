@@ -15,7 +15,6 @@ import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.BuiltInFuncList;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
-import xplatj.javaplat.partic2.util.AsyncFuncChain;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -34,7 +33,7 @@ public class DisplayManager2 implements Closeable {
     }
     public ByteBuffer getDevicesInfo(){
         Display[] displays = dm.getDisplays();
-        TableSerializer ser = new TableSerializer().setHeader(null,new String[]{
+        TableSerializer ser = new TableSerializer().setColumnInfo(null,new String[]{
                 "id", "name", "width", "height","state","refreshRate","realWidth","realHeight","dpiX","dpiY"
         });
         for(Display d:displays){

@@ -56,7 +56,7 @@ public class Power2 extends PxprpcBroadcastReceiverAdapter implements Closeable 
     }
     public ByteBuffer getBatteryState(){
         bm=(BatteryManager) ApiServer.defaultAndroidContext.getSystemService(Service.BATTERY_SERVICE);
-        TableSerializer ser = new TableSerializer().setHeader("iiii", new String[]{"chargeCounter", "currentAverage", "currentNow", "capacity"}).addRow(new Object[]{
+        TableSerializer ser = new TableSerializer().setColumnInfo("iiii", new String[]{"chargeCounter", "currentAverage", "currentNow", "capacity"}).addRow(new Object[]{
                 bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER),
                 bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE),
                 bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW),

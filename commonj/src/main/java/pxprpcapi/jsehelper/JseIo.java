@@ -156,7 +156,7 @@ public class JseIo implements Closeable{
 
     public ByteBuffer readdir(String path) throws IOException{
         //return type:dir|file,size,modifyTimeStampInSeconds
-        TableSerializer ser = new TableSerializer().setHeader2(null, new String[]{"name","type","size","mtime"});
+        TableSerializer ser = new TableSerializer().setColumnInfo2(null, new String[]{"name","type","size","mtime"});
         File[] children = new File(path).listFiles();
         if(children==null){
             throw new IOException("File not exists");

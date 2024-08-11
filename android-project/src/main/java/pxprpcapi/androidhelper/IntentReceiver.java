@@ -1,8 +1,6 @@
 package pxprpcapi.androidhelper;
 
-import project.xplat.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
-import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.partic2.filesystem.IFile;
@@ -99,7 +97,7 @@ public class IntentReceiver implements Closeable {
         }else{
             synchronized (this.waitingQueue){
                 while(this.waitingQueue.size()>20){
-                    this.waitingQueue.poll().resolve(new TableSerializer().setHeader("",new String[0]).build());
+                    this.waitingQueue.poll().resolve(new TableSerializer().setColumnInfo("",new String[0]).build());
                 }
                 waitingQueue.offer(aret);
             }
