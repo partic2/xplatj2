@@ -37,7 +37,21 @@ int main(int argc, char *argv[]) {
     current_dir[pch - thisPath + 1] = 0;
     chdir(current_dir);
   }
-  
+  #if defined __linux__
+    char *ldpath=getenv("LD_LIBRARY_PATH");
+    char *newldpath;
+    if(ldpath!=NULL){
+      newldpath=strconcat2(ldpath,":.");
+    }else{
+      newldpath=".";
+    }
+    char *newldpatheq=strconcat2("LD_LIBRARY_PATH=",newldpath);
+    if(ldpath!=NULL){
+      free(newldpath);
+    }
+    putenv(newldpatheq);
+  #endif
+
   mkdir("./data");
   do {
     flagfile = fopen(flagfilepath, "r");

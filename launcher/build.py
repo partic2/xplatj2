@@ -12,12 +12,12 @@ buildConfig=dict()
 def PrintAndRun(cmd,CaptureOut=False):
     print("execute "+cmd)
     if CaptureOut:
-        cp=subprocess.run(cmd,stdout=subprocess.PIPE)
+        cp=subprocess.run(cmd,stdout=subprocess.PIPE,shell=True)
         if cp.returncode!=0:
             raise Exception('subprocess failed');
         return cp.stdout
     else:
-        cp=subprocess.run(cmd)
+        cp=subprocess.run(cmd,shell=True)
         if cp.returncode!=0:
             raise Exception('subprocess failed');
         return b''
@@ -106,56 +106,70 @@ def BuildAndroidRelease():
     shutil.copytree(sourceroot+'/SDL/android-project/app/src/main/java/org/libsdl',\
         sourceroot+'/android-project/src/main/java/org/libsdl')
     os.chdir(sourceroot+'/android-project')
-    gradle=shutil.which('gradle')
-    assert gradle!=None
+    gradle=os.curdir+os.sep+'gradlew'
     PrintAndRun(gradle+' assembleRelease')
     shutil.copy(sourceroot+'/android-project/build/outputs/apk/release/xplatj-release.apk',\
         sourceroot+'/launcher/build/xplatj-release.apk')
     os.chdir(sourceroot+'/launcher')
 
-def BuildNativeRelease():
+def BuildDesktopRelease(name,toolchain):
+    print('build desktop for '+name+repr(toolchain))
     cmake=shutil.which(buildConfig['CMAKE'])
     assert cmake!=None
     flags=[]
-    flags.append('-DCMAKE_BUILD_TYPE=RELEASE')
-    flags.append('-S '+sourceroot+'/launcher')
-    flags.append('-G "{CMAKE_GENERATOR}"'.format(**buildConfig))
-    builddir=os.path.sep.join([sourceroot,'launcher','build','native'])
-    flags2=flags+['-B '+builddir]
-    PrintAndRun(cmake+' '+' '.join(flags2))
-    os.chdir(builddir)
-    PrintAndRun(buildConfig['MAKE'])
-    os.chdir(sourceroot+'/javase-project')
-    gradle=shutil.which('gradle')
-    assert gradle!=None
-    PrintAndRun(gradle+' distZip')
-    os.chdir(sourceroot+'/launcher')
-    outdir=sourceroot+'/launcher/build/xplatj-native-release'
-    os.makedirs(outdir,exist_ok=True)
-    # TODO: what should I copy on linux?
-    copyFiles=['launcher','launcher.exe','build-sdl/SDL2.dll','SDLLoader.exe','build-sdl/libSDL2.so','SDLLoader']
-    for t1 in copyFiles:
-        if os.path.exists(builddir+'/'+t1):
-            shutil.copy(builddir+'/'+t1,\
-        outdir+'/'+t1.split('/')[-1])
-    shutil.unpack_archive(sourceroot+'/javase-project/build/distributions/xplatj.zip',\
-        sourceroot+'/launcher/build/native/jse')
-    shutil.copytree(sourceroot+'/launcher/build/native/jse/xplatj',outdir,dirs_exist_ok=True)
-    if buildConfig['PACK_JAVA_RUNTIME']:
-        if not os.path.exists(outdir+'/rt-java/release'):
-            PrintAndRun('jlink --add-modules java.base,java.logging --output '+outdir+'/rt-java')
-        scriptFile=''
-        with io.open(outdir+'/bin/xplatj','r',encoding='utf-8') as f1:
-            scriptFile=f1.read()
-        with io.open(outdir+'/bin/xplatj','w',encoding='utf-8') as f1:
-           #skip shebang
-           shebangEnd=scriptFile.find('\n')
-           f1.write(scriptFile[0:shebangEnd]+'\nexport JAVA_HOME=./rt-java\n'+scriptFile[shebangEnd:])
-        with io.open(outdir+'/bin/xplatj.bat','r',encoding='utf-8') as f1:
-            scriptFile=f1.read()
-        with io.open(outdir+'/bin/xplatj.bat','w',encoding='utf-8') as f1:
-           f1.write('set JAVA_HOME=./rt-java\n'+scriptFile)
-    os.chdir(sourceroot+'/launcher')
+    # Setup compiler environment
+    ldpath=set()
+    ldpath.add(os.path.dirname(toolchain['CC']))
+    ldpath.add(os.path.dirname(toolchain['CXX']))
+    ldpathenv='PATH' if 'nt' == os.name else 'LD_LIBRARY_PATH'
+    savedldpath=os.environ[ldpathenv]
+    try:
+        os.environ[ldpathenv]=os.pathsep.join(ldpath)+os.pathsep+savedldpath
+        flags.append('-DCMAKE_BUILD_TYPE=RELEASE')
+        flags.append('"-DCMAKE_C_COMPILER={0}"'.format(toolchain['CC']))
+        flags.append('"-DCMAKE_CXX_COMPILER={0}"'.format(toolchain['CXX']))
+        flags.append('-DXPLATJ_GUESS_TOOLCHAIN_VARIABLE=ON')
+        #flags.append(f'-DCMAKE_TOOLCHAIN_FILE={sourceroot}/launcher/guess_by_compiler.toolchain.cmake')
+        flags.append('-S '+sourceroot+'/launcher')
+        flags.append('-G "{CMAKE_GENERATOR}"'.format(**buildConfig))
+        builddir=os.path.sep.join([sourceroot,'launcher','build',name])
+        flags2=flags+['-B '+builddir]
+        PrintAndRun(cmake+' '+' '.join(flags2))
+        os.chdir(builddir)
+        PrintAndRun(buildConfig['MAKE'])
+        os.chdir(sourceroot+'/javase-project')
+        gradle=os.curdir+os.sep+'gradlew'
+        PrintAndRun(gradle+' distZip')
+        os.chdir(sourceroot+'/launcher')
+        outdir=sourceroot+'/launcher/build/'+name+'_release'
+        os.makedirs(outdir,exist_ok=True)
+        # TODO: what should I copy on linux?
+        copyFiles=['launcher','launcher.exe','build-sdl/SDL2.dll','SDLLoader.exe','build-sdl/libSDL2.so','SDLLoader']
+        for t1 in copyFiles:
+            if os.path.exists(builddir+'/'+t1):
+                shutil.copy(builddir+'/'+t1,\
+            outdir+'/'+t1.split('/')[-1])
+        shutil.unpack_archive(sourceroot+'/javase-project/build/distributions/xplatj.zip',\
+            sourceroot+'/launcher/build/_temp/jse')
+        shutil.copytree(sourceroot+'/launcher/build/_temp/jse/xplatj',outdir,dirs_exist_ok=True)
+        if buildConfig['PACK_JAVA_RUNTIME']:
+            if not os.path.exists(outdir+'/rt-java/release'):
+                PrintAndRun(toolchain['JLINK']+' --add-modules java.base,java.logging --output '+outdir+'/rt-java')
+            scriptFile=''
+            with io.open(outdir+'/bin/xplatj','r',encoding='utf-8') as f1:
+                scriptFile=f1.read()
+            with io.open(outdir+'/bin/xplatj','w',encoding='utf-8') as f1:
+                #skip shebang
+                shebangEnd=scriptFile.find('\n')
+                f1.write(scriptFile[0:shebangEnd]+'\nexport JAVA_HOME=./rt-java\n'+scriptFile[shebangEnd:])
+            with io.open(outdir+'/bin/xplatj.bat','r',encoding='utf-8') as f1:
+                scriptFile=f1.read()
+            with io.open(outdir+'/bin/xplatj.bat','w',encoding='utf-8') as f1:
+                f1.write('set JAVA_HOME=./rt-java\n'+scriptFile)
+        os.chdir(sourceroot+'/launcher')
+    finally:
+        os.environ[ldpathenv]=savedldpath
+    
 
 if __name__=='__main__':
     ReadBuildConfig()
@@ -164,5 +178,6 @@ if __name__=='__main__':
     print(repr(buildConfig))
     if not buildConfig.get('SKIP_ANDROID_BUILD',False):
         BuildAndroidRelease()
-    if not buildConfig.get('SKIP_NATIVE_BUILD',False):
-        BuildNativeRelease()
+    if buildConfig.get('DESKTOP_TOOLCHAIN_LIST',None)!=None:
+        for name,toolchain in buildConfig['DESKTOP_TOOLCHAIN_LIST'].items():
+            BuildDesktopRelease(name,toolchain)

@@ -1,11 +1,28 @@
 # '#' mean comment.
 
-#SKIP_ANDROID_BUILD=False
 
-#SKIP_NATIVE_BUILD=False
+# If specified, Each toolchain in this dict will be used to compile respective release. The key of the dict is the output directory name.
+DESKTOP_TOOLCHAIN_LIST={
+    'CC_MINGW-W64_X86_64':{
+        'CC':'c:/mingw64/bin/gcc',
+        'CXX':'c:/mingw64/bin/g++',
+        'JLINK':'c:/Programe Files/java/bin/jlink'    # jlink is only used when PACK_JAVA_RUNTIME=True
+    },
+    'CC_MINGW-W64_X86':{
+        'CC':'c:/mingw32/bin/gcc',
+        'CXX':'c:/mingw32/bin/g++',
+    },
+    'CC_LINUX-GCC_ARM':{
+        'CC':'c:/cross-compiler/1/bin/arm-linux-gnueabihf-gcc',
+        'CC':'c:/cross-compiler/1/bin/arm-linux-gnueabihf-g++'
+    }
+}
 
-#ANDROID_ABI=['armeabi-v7a','arm64-v8a']
+SKIP_ANDROID_BUILD=False
 
-#ANDROID_NATIVE_API_LEVEL='21'
+ANDROID_ABI=['armeabi-v7a','arm64-v8a']
 
-#PACK_JAVA_RUNTIME=False
+ANDROID_NATIVE_API_LEVEL='21'
+
+#Embed Java runtime with jlink.
+PACK_JAVA_RUNTIME=False

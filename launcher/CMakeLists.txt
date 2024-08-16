@@ -8,6 +8,13 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 project(xplat-launcher)
 
+message("!!!Compiling Note!!!")
+message("If you failed to compile with libffi, you can rename/remove \"./libffi\" directory to diable libffi relative feature.")
+
+if(XPLATJ_GUESS_TOOLCHAIN_VARIABLE)
+include(guess_by_compiler.toolchain.cmake)
+endif()
+
 set(PWART_SYSLIB_ENABLED ON)
 get_filename_component(DEPS_SOURCE_DIRS ../ ABSOLUTE)
 
