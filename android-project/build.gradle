@@ -46,6 +46,8 @@ android {
 		main{
 			java{
 				srcDirs '../commonj/src/main/java'
+				srcDirs '../PxpRpc/java/src'
+				srcDirs '../PxpRpc/runtime_bridge/java'
 			}
 			resources{
 				srcDirs '../commonj/src/main/resources'

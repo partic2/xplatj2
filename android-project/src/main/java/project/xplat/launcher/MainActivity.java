@@ -22,8 +22,6 @@ import java.util.ArrayList;
 
 
 public class MainActivity extends Activity {
-	/** Called when the activity is first created. */
-	public static Context context;
 	private Intent intent;
 	public static String gdxFlag="gdx";
 	public static String sdlFlag="sdl";
@@ -81,15 +79,15 @@ public class MainActivity extends Activity {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				AssetsCopy.init(context);
-				ApiServer.start(context);
+				AssetsCopy.init(MainActivity.this);
+				ApiServer.start(MainActivity.this);
 				try{
-					Runtime.getRuntime().exec("chmod 0777 " + context.getFilesDir().getAbsolutePath());
+					Runtime.getRuntime().exec("chmod 0777 " + MainActivity.this .getFilesDir().getAbsolutePath());
 				}
 				catch (IOException e) {}
 
 				if(Build.VERSION.SDK_INT>=19){
-					context.getExternalFilesDirs(null);
+					MainActivity.this.getExternalFilesDirs(null);
 				}
 				WifiManager wifiMgr = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
@@ -142,7 +140,6 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		currentTaskId=getTaskId();
-		MainActivity.context = this.getApplicationContext();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			String[] reqPerms=getPermissionNotGranted();
 			if(reqPerms.length>0) this.requestPermissions(reqPerms,1);

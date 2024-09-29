@@ -56,19 +56,20 @@ def BuildEnvironPrepare():
     else:
         buildConfig['CMAKE']='cmake'
 
-    if not 'ANDROID_NATIVE_API_LEVEL' in buildConfig:
-        buildConfig['ANDROID_NATIVE_API_LEVEL']='21'
+    if not buildConfig.get('SKIP_ANDROID_BUILD',False):
+        if not 'ANDROID_NATIVE_API_LEVEL' in buildConfig:
+            buildConfig['ANDROID_NATIVE_API_LEVEL']='21'
 
-    androidHome=os.environ['ANDROID_HOME']
-    ndkversion=os.listdir(androidHome+'/ndk')
-    for t1 in ndkversion:
-        if os.path.exists(os.sep.join([androidHome,'ndk',t1,'build','cmake','android.toolchain.cmake'])):
-            #found
-            buildConfig['ANDROID_NDK']=os.sep.join([os.environ['ANDROID_HOME'],'ndk',t1])
-    assert 'ANDROID_NDK' in buildConfig
+        androidHome=os.environ['ANDROID_HOME']
+        ndkversion=os.listdir(androidHome+'/ndk')
+        for t1 in ndkversion:
+            if os.path.exists(os.sep.join([androidHome,'ndk',t1,'build','cmake','android.toolchain.cmake'])):
+                #found
+                buildConfig['ANDROID_NDK']=os.sep.join([os.environ['ANDROID_HOME'],'ndk',t1])
+        assert 'ANDROID_NDK' in buildConfig
 
-    if 'ANDROID_ABI' not in buildConfig:
-        buildConfig['ANDROID_ABI']=['armeabi-v7a','arm64-v8a']
+        if 'ANDROID_ABI' not in buildConfig:
+            buildConfig['ANDROID_ABI']=['armeabi-v7a','arm64-v8a']
 
     if not 'PACK_JAVA_RUNTIME' in buildConfig:
         buildConfig['PACK_JAVA_RUNTIME']=False
@@ -101,6 +102,8 @@ def BuildAndroidRelease():
         sodir=sourceroot+'/launcher/build/android/'+abi
         shutil.copy(sodir+'/libSDLLoader.so',\
                 dstsodir+'/libSDLLoader.so')
+        shutil.copy(sodir+'/build-pxprpc_rtbridge/libpxprpc_rtbridge.so',\
+                dstsodir+'/libpxprpc_rtbridge.so')
     if os.path.exists(sourceroot+'/android-project/src/main/java/org/libsdl'):
         shutil.rmtree(sourceroot+'/android-project/src/main/java/org/libsdl')
     shutil.copytree(sourceroot+'/SDL/android-project/app/src/main/java/org/libsdl',\
@@ -122,7 +125,7 @@ def BuildDesktopRelease(name,toolchain):
     ldpath.add(os.path.dirname(toolchain['CC']))
     ldpath.add(os.path.dirname(toolchain['CXX']))
     ldpathenv='PATH' if 'nt' == os.name else 'LD_LIBRARY_PATH'
-    savedldpath=os.environ[ldpathenv]
+    savedldpath=os.environ.get(ldpathenv,'')
     try:
         os.environ[ldpathenv]=os.pathsep.join(ldpath)+os.pathsep+savedldpath
         flags.append('-DCMAKE_BUILD_TYPE=RELEASE')
@@ -144,11 +147,13 @@ def BuildDesktopRelease(name,toolchain):
         outdir=sourceroot+'/launcher/build/'+name+'_release'
         os.makedirs(outdir,exist_ok=True)
         # TODO: what should I copy on linux?
-        copyFiles=['launcher','launcher.exe','build-sdl/SDL2.dll','SDLLoader.exe','build-sdl/libSDL2.so','SDLLoader']
+        copyFiles=['launcher','launcher.exe','build-sdl/SDL2.dll','SDLLoader.exe','build-sdl/libSDL2.so','SDLLoader',
+                   'build-pxprpc_rtbridge/libpxprpc_rtbridge.dll','build-pxprpc_rtbridge/libpxprpc_rtbridge.so']
         for t1 in copyFiles:
-            if os.path.exists(builddir+'/'+t1):
-                shutil.copy(builddir+'/'+t1,\
-            outdir+'/'+t1.split('/')[-1])
+            filename=t1.split('/')[-1].split('\\')[-1];
+            if os.path.exists(os.path.join(builddir,t1)):
+                shutil.copy(os.path.join(builddir,t1),\
+            os.path.join(outdir,filename))
         shutil.unpack_archive(sourceroot+'/javase-project/build/distributions/xplatj.zip',\
             sourceroot+'/launcher/build/_temp/jse')
         shutil.copytree(sourceroot+'/launcher/build/_temp/jse/xplatj',outdir,dirs_exist_ok=True)

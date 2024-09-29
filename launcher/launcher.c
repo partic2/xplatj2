@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 
 char *flagfilepath="./data/xplat-flag.txt";
@@ -50,9 +52,13 @@ int main(int argc, char *argv[]) {
       free(newldpath);
     }
     putenv(newldpatheq);
+    mkdir("./data",0777);
   #endif
 
-  mkdir("./data");
+  #if defined _WIN32
+    mkdir("./data");
+  #endif
+  
   do {
     flagfile = fopen(flagfilepath, "r");
     if(flagfile==NULL){

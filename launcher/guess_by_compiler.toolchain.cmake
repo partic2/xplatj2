@@ -38,21 +38,24 @@ endif()
 #riscv bit length need detect, So how?
 #check_symbol_exists(__riscv_xlen stdio.h CHECK_COMPILER_DEFINITION___riscv_xlen)
 
-set(CMAKE_SYSTEM_NAME "")
+set(CMAKE_SYSTEM_NAME_GUESS "")
 
-if (CMAKE_SYSTEM_NAME STREQUAL "")
+if (CMAKE_SYSTEM_NAME_GUESS STREQUAL "")
     check_symbol_exists(__linux__ stdio.h CHECK_COMPILER_DEFINITION___linux__)
-    if(result)
-    set(CMAKE_SYSTEM_NAME Linux)
+    if(CHECK_COMPILER_DEFINITION___linux__)
+    set(CMAKE_SYSTEM_NAME_GUESS Linux)
     endif()
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "")
+if (CMAKE_SYSTEM_NAME_GUESS STREQUAL "")
     check_symbol_exists(_WIN32 stdio.h CHECK_COMPILER_DEFINITION__WIN32)
     if(CHECK_COMPILER_DEFINITION__WIN32)
-    set(CMAKE_SYSTEM_NAME Windows)
+    set(CMAKE_SYSTEM_NAME_GUESS Windows)
     endif()
 endif()
 
+if (NOT CMAKE_SYSTEM_NAME_GUESS STREQUAL "")
+    set(CMAKE_SYSTEM_NAME ${CMAKE_SYSTEM_NAME_GUESS})
+endif()
 
 

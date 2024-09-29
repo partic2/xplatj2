@@ -106,15 +106,15 @@ else()
 endif()
 
 ## Shared library target.
-add_library(uvwasi SHARED ${uvwasi_sources})
-target_compile_definitions(uvwasi PRIVATE ${uvwasi_defines})
-target_compile_options(uvwasi PRIVATE ${uvwasi_cflags})
-target_include_directories(uvwasi PRIVATE ${PROJECT_SOURCE_DIR}/include)
-if(CODE_COVERAGE)
-    target_link_libraries(uvwasi PUBLIC ${LIBUV_LIBRARIES} coverage_config)
-else()
-    target_link_libraries(uvwasi PRIVATE ${LIBUV_LIBRARIES})
-endif()
+#add_library(uvwasi SHARED ${uvwasi_sources})
+#target_compile_definitions(uvwasi PRIVATE ${uvwasi_defines})
+#target_compile_options(uvwasi PRIVATE ${uvwasi_cflags})
+#target_include_directories(uvwasi PRIVATE ${PROJECT_SOURCE_DIR}/include)
+#if(CODE_COVERAGE)
+#    target_link_libraries(uvwasi PUBLIC ${LIBUV_LIBRARIES} coverage_config)
+#else()
+#    target_link_libraries(uvwasi PRIVATE ${LIBUV_LIBRARIES})
+#endif()
 
 
 ## Test targets.

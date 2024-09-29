@@ -3,10 +3,13 @@ package project.xplat.launcher;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.util.Log;
+import pxprpc.runtimebridge.NativeHelper;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.partic2.filesystem.impl.PrefixFS;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 
 public class AssetsCopy {
 	private static Context mContext;
@@ -23,6 +26,12 @@ public class AssetsCopy {
 	}
 	public static void init(Context context){
 		try {
+			ByteBuffer errorMessage= ByteBuffer.allocateDirect(255);
+			NativeHelper.loadNativeLibrary();
+			NativeHelper.ensureRtbInited(errorMessage);
+			if(errorMessage.duplicate().get()!=0){
+				Log.e("pxprpc_rtbridge","pxprpc_rtbridge init failed.");
+			}
 			mContext=context;
 			AssetsCopy.assetsDir=mContext.getFilesDir().getCanonicalPath();
 			AssetsCopy.loadAssets(context);

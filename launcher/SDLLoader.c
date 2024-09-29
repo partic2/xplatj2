@@ -9,6 +9,7 @@
 
 
 #include <SDL.h>
+#include <SDL_main.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -51,7 +52,7 @@ FILE *logfile=NULL;
 typedef void *(*entry_func)(void *);
 
 
-int SDL_main(int argc,char *argv[]){
+int main(int argc,char *argv[]){
 	SDL_Init(SDL_INIT_EVERYTHING);
     pwart_namespace ns=NULL;
     FILE *boot0=NULL;
@@ -62,7 +63,32 @@ int SDL_main(int argc,char *argv[]){
     pwart_module_state modstat=NULL;
     pwart_wasm_function startfn=NULL;
 	SDL_Log("SDLLoader startup");
-
+    void *rtbridgeDll=SDL_LoadObject("libpxprpc_rtbridge");
+    if(rtbridgeDll==NULL){
+        SDL_Log("pxprpc runtime bridge first try failed. %s",SDL_GetError());
+        rtbridgeDll=SDL_LoadObject("libpxprpc_rtbridge.so");
+    }
+    if(rtbridgeDll==NULL){
+        SDL_Log("pxprpc runtime bridge second try failed. %s",SDL_GetError());
+        rtbridgeDll=SDL_LoadObject("libpxprpc_rtbridge.dll");
+    }
+    if(rtbridgeDll==NULL){
+        SDL_Log("pxprpc runtime bridge load failed.maybe dependencies(libc++) missing? %s",SDL_GetError());
+    }else{
+        char *(*pxprpc_rtbridge_host_ensureInited)();
+        pxprpc_rtbridge_host_ensureInited=SDL_LoadFunction(rtbridgeDll,"pxprpc_rtbridge_host_ensureInited");
+        if(pxprpc_rtbridge_host_ensureInited==NULL){
+            SDL_Log("pxprpc runtime bridge load failed. No entry found.");
+            SDL_UnloadObject(rtbridgeDll);
+        }else{
+            char *err=pxprpc_rtbridge_host_ensureInited();
+            if(err!=NULL){
+                SDL_Log("pxprpc runtime bridge init failed. %s",err);
+            }else{
+                SDL_Log("pxprpc runtime bridge loaded.");
+            }
+        }
+    }
     {
         //to init wasi module on windows, maybe changed in future.
         freopen(get_data_path("/xplat-flag.txt"),"r",stdin);
