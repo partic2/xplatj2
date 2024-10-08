@@ -30,11 +30,8 @@ public class Intent2 implements Closeable {
     }
     public void requestInstallApk(String apkPath){
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        File file = new File(apkPath);
-        Uri apkUri = PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
-                ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", file);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+        intent.setDataAndType(Uri.parse(getUriForFile(apkPath)), "application/vnd.android.package-archive");
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
     public void requestOpenTelephone(String tel){
@@ -49,8 +46,7 @@ public class Intent2 implements Closeable {
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
     public void requestSendOthers(String filePath,String mime,String chooserTitle){
-        Uri uri = PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
-                ApiServer.defaultAndroidContext.getPackageName() + ".publicfileprovider", new File(filePath));
+        Uri uri = Uri.parse(getUriForFile(filePath));
         if(mime==""){
             mime=getMimeTypeFromUri(uri.toString());
         }
@@ -103,8 +99,7 @@ public class Intent2 implements Closeable {
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
     public int requestImageCapture(final AsyncReturn<Integer> ret,String imagePath){
-        Uri uri= PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
-                ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", new File(imagePath));
+        Uri uri= Uri.parse(getUriForFile(imagePath));
         Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT,uri);
         int reqCode= Env.i(Random.class).nextInt(0xffffff);
@@ -124,6 +119,16 @@ public class Intent2 implements Closeable {
     public String getContentUriForFile(String path){
         return PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
                 ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", new File(path)).toString();
+    }
+    public String getUriForFile(String path){
+        File file = new File(path);
+        if(Build.VERSION.SDK_INT>Build.VERSION_CODES.M){
+            Uri apkUri = PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
+                    ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", file);
+            return apkUri.toString();
+        }else{
+            return Uri.fromFile(file).toString();
+        }
     }
 
     public boolean requestSystemAlertWindowPermission(AsyncReturn<Boolean> ret){
@@ -148,8 +153,7 @@ public class Intent2 implements Closeable {
     public void requestOpenUniversalTypeFile(String path) {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_VIEW);
-        Uri uri = PublicFileProvider.getUriForFile(ApiServer.defaultAndroidContext,
-                ApiServer.defaultAndroidContext.getPackageName()+".publicfileprovider", new File(path));
+        Uri uri = Uri.parse(getUriForFile(path));
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setDataAndType(uri, getMimeTypeFromUri(uri.toString()));
         ApiServer.defaultAndroidContext.startActivity(intent);
