@@ -29,29 +29,24 @@ if(NOT TARGET uv_a)
 add_subdirectory("${DEPS_SOURCE_DIRS}/libuv" ./build-libuv)
 endif()
 
-add_subdirectory(../SDL ./build-sdl)
-add_subdirectory(../pwart ./build-pwart)
-add_subdirectory(../PxpRpc/runtime_bridge ./build-pxprpc_rtbridge)
-
+set(PXPRPC_RTBRIDGE_BUILD_EXE OFF)
 
 if(ANDROID)
 add_library(SDLLoader SHARED SDLLoader.c)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 else()
-add_executable(launcher launcher.c)
 add_executable(SDLLoader SDLLoader.c)
+add_executable(launcher launcher.c)
 endif()
 
+add_subdirectory(../SDL ./build-sdl)
+add_subdirectory(../pwart ./build-pwart)
+#xplat_sdlloader_start is in PxpRpc/runtime_bridge/c-modules/xplat-sdlloader
+add_subdirectory(../PxpRpc/runtime_bridge ./build-pxprpc_rtbridge)
+target_link_libraries(SDLLoader SDL2main SDL2)
 
 
 
-if(WIN32)
-    list(APPEND link_list mingw32)
-endif()
 
-
-list(APPEND link_list pwart pwart_syslib SDL2main SDL2)
-
-target_link_libraries(SDLLoader ${link_list})
 
 
