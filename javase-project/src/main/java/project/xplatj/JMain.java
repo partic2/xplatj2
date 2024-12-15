@@ -5,6 +5,7 @@ import lib.pursuer.simplewebserver.XplatHTTPDServer;
 import project.xplatj.backend.jse.ApiServer;
 import project.xplatj.backend.jse.PlatApiImpl;
 import pxprpc.base.ServerContext;
+import pxprpc.runtimebridge.NativeHelper;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.gdxplat.partic2.utils.Env;
 import xplatj.javaplat.partic2.filesystem.FSUtils;
@@ -13,10 +14,8 @@ import xplatj.javaplat.partic2.filesystem.impl.PrefixFS;
 import xplatj.javaplat.partic2.util.IFactory;
 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.Scanner;
 
 public class JMain {
@@ -96,6 +95,17 @@ public class JMain {
 		}
 	}
 	public static void main(String args[]) {
+		NativeHelper.loadNativeLibrary();
+		ByteBuffer errorMessage = ByteBuffer.allocateDirect(255);
+		NativeHelper.ensureRtbInited(errorMessage);
+		if(errorMessage.get(0)!=0){
+			byte[] err=new byte[255];
+			errorMessage.get(err);
+			try {
+				System.err.println(new String(err,"utf-8"));
+			} catch (UnsupportedEncodingException e) {
+			}
+		}
 		ApiServer.start();
 		processStartupConfig();
 		System.out.println("exit...");

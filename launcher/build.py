@@ -40,7 +40,6 @@ def FindMakeToolChain():
     assert 'CMAKE_GENERATOR' in buildConfig
 
 
-
 def ReadBuildConfig():
     try:
         configFile=io.open_code(sourceroot+'/launcher/build_config.txt')
@@ -175,9 +174,17 @@ def BuildDesktopRelease(name,toolchain):
     finally:
         os.environ[ldpathenv]=savedldpath
     
+def EnsureBuildDeps():
+    sdlexisted=os.path.exists(os.path.join(sourceroot,'SDL','CMakeLists.txt'))
+    if not sdlexisted:
+        gitexec=shutil.which('git')
+        assert gitexec!=None
+        PrintAndRun(gitexec+' clone https://gitee.com/partic/SDL-mirror.git "'+os.path.join(sourceroot,'SDL')+'" -b release-2.30.x --depth=1 ')
+
 
 if __name__=='__main__':
     ReadBuildConfig()
+    EnsureBuildDeps()
     BuildEnvironPrepare()
     FindMakeToolChain()
     print(repr(buildConfig))

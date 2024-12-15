@@ -41,7 +41,7 @@ endif()
 
 add_subdirectory(../SDL ./build-sdl)
 add_subdirectory(../pwart ./build-pwart)
-#xplat_sdlloader_start is in PxpRpc/runtime_bridge/c-modules/xplat-sdlloader
+list(APPEND PXPRPC_RTBIRDGE_MODULES_DIRS ${DEPS_SOURCE_DIRS}/pxprpc-modules)
 add_subdirectory(../PxpRpc/runtime_bridge ./build-pxprpc_rtbridge)
 target_link_libraries(SDLLoader SDL2main SDL2)
 
