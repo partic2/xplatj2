@@ -181,6 +181,11 @@ def EnsureBuildDeps():
         assert gitexec!=None
         PrintAndRun(gitexec+' clone https://gitee.com/partic/SDL-mirror.git "'+os.path.join(sourceroot,'SDL')+'" -b release-2.30.x --depth=1 ')
 
+    webviewexisted=os.path.exists(os.path.join(sourceroot,'pxprpc-modules','pxprpc-webview','webview','CMakeLists.txt'))
+    if not webviewexisted:
+        gitexec=shutil.which('git')
+        assert gitexec!=None
+        PrintAndRun(gitexec+' clone https://gitee.com/partic/webview-mirror.git "'+os.path.join(sourceroot,'pxprpc-modules','pxprpc-webview','webview')+'" -b master --depth=1 ')
 
 if __name__=='__main__':
     ReadBuildConfig()
