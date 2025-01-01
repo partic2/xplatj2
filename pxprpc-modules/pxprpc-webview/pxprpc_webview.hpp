@@ -8,6 +8,8 @@
 #include <pxprpc_pipe.h>
 #include <pxprpc_rtbridge_host.hpp>
 
+#include <iostream>
+
 namespace pxprpc_webview{
 
     class WebViewObject:public pxprpc::PxpObject{
@@ -24,7 +26,7 @@ namespace pxprpc_webview{
     void __runwebview(void *inptr){
         WebViewObject *webviewObj=static_cast<WebViewObject *>(inptr);
         webviewObj->nativeWebview=webview_create(true,nullptr);
-        webviewObj->onWebviewReady();
+        pxprpc_rtbridge_host::postRunnable(webviewObj->onWebviewReady);
         webview_run(webviewObj->nativeWebview);
         webviewObj->nativeWebview=nullptr;
         webview_destroy(webviewObj->nativeWebview);
@@ -52,7 +54,10 @@ namespace pxprpc_webview{
             auto webviewObj=static_cast<WebViewObject *>(para->nextObject());
             auto url=para->nextString();
             postRunnableToWebview(webviewObj->nativeWebview,[webviewObj,url,ret]()->void{
-                ret->resolve(static_cast<int>(webview_navigate(webviewObj->nativeWebview,url.c_str())));
+                auto r=static_cast<int>(webview_navigate(webviewObj->nativeWebview,url.c_str()));
+                pxprpc_rtbridge_host::postRunnable([ret,r]()->void{
+                    ret->resolve(r);
+                });
             });
         }));
         //Injects JavaScript code to be executed immediately upon loading a page.
@@ -61,7 +66,10 @@ namespace pxprpc_webview{
             auto webviewObj=static_cast<WebViewObject *>(para->nextObject());
             auto js=para->nextString();
             postRunnableToWebview(webviewObj->nativeWebview,[webviewObj,js,ret]()->void{
-                ret->resolve(static_cast<int>(webview_init(webviewObj->nativeWebview,js.c_str())));
+                auto r=static_cast<int>(webview_init(webviewObj->nativeWebview,js.c_str()));
+                pxprpc_rtbridge_host::postRunnable([ret,r]()->void{
+                    ret->resolve(r);
+                });
             });
         }));
         pxprpc::defaultFuncMap.add((new pxprpc::NamedFunctionPPImpl1())->init("pxprpc_webview.set_title",
@@ -69,7 +77,10 @@ namespace pxprpc_webview{
             auto webviewObj=static_cast<WebViewObject *>(para->nextObject());
             auto title=para->nextString();
             postRunnableToWebview(webviewObj->nativeWebview,[webviewObj,title,ret]()->void{
-                ret->resolve(static_cast<int>(webview_set_title(webviewObj->nativeWebview,title.c_str())));
+                auto r=static_cast<int>(webview_set_title(webviewObj->nativeWebview,title.c_str()));
+                pxprpc_rtbridge_host::postRunnable([ret,r]()->void{
+                    ret->resolve(r);
+                });
             });
         }));
     }
