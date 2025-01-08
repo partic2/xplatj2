@@ -8,10 +8,8 @@
 #include <pxprpc_pipe.h>
 #include <pxprpc_rtbridge_host.hpp>
 
-#include <iostream>
-
 namespace pxprpc_webview{
-
+    void postRunnableToWebview(webview_t webview,std::function<void()> runnable);
     class WebViewObject:public pxprpc::PxpObject{
         public:
         volatile webview_t nativeWebview=nullptr;
@@ -19,17 +17,21 @@ namespace pxprpc_webview{
         uv_thread_t thread;
         virtual ~WebViewObject(){
             if(nativeWebview!=nullptr){
-                webview_terminate(this->nativeWebview);
+                webview_t wv=this->nativeWebview;
+                postRunnableToWebview(wv,[wv]()->void{
+                    webview_terminate(wv);
+                });
             }
         }
     };
     void __runwebview(void *inptr){
         WebViewObject *webviewObj=static_cast<WebViewObject *>(inptr);
-        webviewObj->nativeWebview=webview_create(true,nullptr);
+        webview_t wvr=webview_create(true,nullptr);
+        webviewObj->nativeWebview=wvr;
         pxprpc_rtbridge_host::postRunnable(webviewObj->onWebviewReady);
-        webview_run(webviewObj->nativeWebview);
-        webviewObj->nativeWebview=nullptr;
-        webview_destroy(webviewObj->nativeWebview);
+        webview_run(wvr);
+        //Here webviewObj has been free,Do NOT access it.
+        webview_destroy(wvr);
     };
     void __runCppFunction(webview_t webview,void *cppFunc){
         auto fn=static_cast<std::function<void()> *>(cppFunc);
