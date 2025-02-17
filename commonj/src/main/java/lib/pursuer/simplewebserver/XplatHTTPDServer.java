@@ -17,6 +17,7 @@ import java.util.Map;
 public class XplatHTTPDServer extends NanoHTTPD {
     protected NanoWSD wsServ;
     protected PxprpcWsServer pxprpcServ;
+    protected CorsBusterServer corsBuster;
     public Map<String,SimpleWebServer> fileServ=new HashMap<>();
 
     public XplatHTTPDServer(String hostname, int port) {
@@ -35,11 +36,13 @@ public class XplatHTTPDServer extends NanoHTTPD {
         }
         wsServ=new WebSocketTunnelServer(port);
         pxprpcServ=new PxprpcWsServer(port);
+        corsBuster=new CorsBusterServer();
     }
 
     public static String fileServerPrefix="/localFile";
     public static String websocketTunnelPrefix="/websocketTunnel";
     public static String pxprpcWsTunnelPrefix="/pxprpc";
+    public static String corsBusterPrefix="/corsBuster";
 
     public static String urlPathForFile(File f) throws IOException {
         String path = f.getCanonicalPath();
@@ -113,6 +116,8 @@ public class XplatHTTPDServer extends NanoHTTPD {
                     return originUrl.substring(websocketTunnelPrefix.length());
                 }
             }.wrap(session));
+        }else if(uri.startsWith(corsBusterPrefix)){
+            return corsBuster.handle(session);
         }else{
             return super.handle(session);
         }
