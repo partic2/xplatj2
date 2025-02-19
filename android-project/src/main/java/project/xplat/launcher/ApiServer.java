@@ -9,7 +9,9 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.util.Log;
 import pxprpc.backend.TCPBackend;
+import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.DefaultFuncMap;
+import pxprpc.extend.EventDispatcher;
 import pxprpcapi.androidhelper.*;
 import pxprpcapi.jsehelper.JseIo;
 import xplatj.gdxconfig.core.PlatCoreConfig;
@@ -68,6 +70,9 @@ public class ApiServer {
                 if(Intent2.i==null){
                     new Intent2();
                 }
+                if(IntentReceiver.i==null){
+                    new IntentReceiver();
+                }
                 if(Sensor2.i==null){
                     new Sensor2();
                 }
@@ -108,6 +113,7 @@ public class ApiServer {
                 putModule(DisplayManager2.PxprpcNamespace,DisplayManager2.i);
                 putModule(AndroidUIBase.PxprpcNamespace,AndroidUIBase.i);
                 putModule(JseIo.PxprpcNamespace,JseIo.i);
+                putModule(IntentReceiver.PxprpcNamespace,IntentReceiver.i);
             }
         });
         if(!(ApiServer.defaultAndroidContext instanceof PxprpcService)){
@@ -196,4 +202,30 @@ public class ApiServer {
             });
         }
     }
+
+    public static <T> void resolveAsync(AsyncReturn<T> aret, final T result){
+        PlatCoreConfig.get().executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                aret.resolve(result);
+            }
+        });
+    }
+    public static void rejectAsync(AsyncReturn<?> aret, final Exception error){
+        PlatCoreConfig.get().executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                aret.reject(error);
+            }
+        });
+    }
+    public static void fireEventAsync(EventDispatcher dispatcher,final Object event){
+        PlatCoreConfig.get().executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                dispatcher.fireEvent(event);
+            }
+        });
+    }
+
 }
