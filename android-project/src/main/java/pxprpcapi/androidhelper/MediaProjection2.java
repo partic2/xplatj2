@@ -80,13 +80,13 @@ public class MediaProjection2 implements Closeable {
         }).then((ctl)->{
             ApiServer.closeQuietly(image[0]);
             stopScreenCapture();
-            retPngData.resolve(r[0]);
+            ApiServer.resolveAsync(retPngData,r[0]);
         }).catch2((ex)->{
             if(image[0]!=null){
                 ApiServer.closeQuietly(image[0]);
             }
             stopScreenCapture();
-            retPngData.reject(ex);
+            ApiServer.rejectAsync(retPngData,ex);
         }).step();
         return null;
     }
@@ -100,10 +100,10 @@ public class MediaProjection2 implements Closeable {
             SurfaceManager.i.toPNG(new AsyncFuncChainPxprpcAdapter<>(buffer,ctl),img[0],85);
         })).then((ctl)->{
             ApiServer.closeQuietly(img[0]);
-            aret.resolve(buffer[0]);
+            ApiServer.resolveAsync(aret,buffer[0]);
         }).catch2((err)->{
             if(img[0]!=null)ApiServer.closeQuietly(img[0]);
-            aret.reject(err);
+            ApiServer.rejectAsync(aret,err);
         }).step();
         return null;
     }
@@ -122,15 +122,15 @@ public class MediaProjection2 implements Closeable {
                     ApiServer.serviceBinder.transact(reqCode,param2,result,0);
                     String errInfo=result.readString();
                     if(errInfo==null){
-                        ret.resolve(true);
+                        ApiServer.resolveAsync(ret,true);
                     }else{
-                        ret.reject(new Exception(errInfo));
+                        ApiServer.rejectAsync(ret,new Exception(errInfo));
                     }
                 } catch (RemoteException e) {
-                    ret.reject(e);
+                    ApiServer.rejectAsync(ret,e);
                 }
             }else{
-                ret.resolve(false);
+                ApiServer.resolveAsync(ret,false);
             }
             return true;
         });

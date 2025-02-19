@@ -68,7 +68,7 @@ public class DisplayManager2 implements Closeable {
                 img.bitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
                 Canvas cvs = new Canvas(img.bitmap);
                 v.draw(cvs);
-                ret.resolve(img);
+                ApiServer.resolveAsync(ret,img);
             }
         });
         return null;

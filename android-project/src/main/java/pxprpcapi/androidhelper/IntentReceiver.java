@@ -1,7 +1,15 @@
 package pxprpcapi.androidhelper;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import project.xplat.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
+import pxprpc.extend.EventDispatcher;
 import pxprpc.extend.TableSerializer;
+import pxprpc.extend.TypeDeclParser;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.partic2.filesystem.IFile;
 import xplatj.javaplat.partic2.filesystem.IFileSystem;
@@ -13,7 +21,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-public class IntentReceiver implements Closeable {
+public class IntentReceiver extends PxprpcBroadcastReceiverAdapter implements Closeable {
     public static final String PxprpcNamespace="AndroidHelper.IntentReceiver";
     public static IntentReceiver i;
     public static class Evt{
@@ -32,6 +40,8 @@ public class IntentReceiver implements Closeable {
         init();
     }
     protected void init(){
+        this.dispatcher=new EventDispatcher();
+        dispatcher.setEventType(ByteBuffer.class);
         IFileSystem fs = PlatCoreConfig.get().fs;
         IFile cfgFile=fs.resolve("pxprpc/"+ IntentReceiver.PxprpcNamespace+"/ecfgs");
         if(cfgFile.exists()){
@@ -104,4 +114,18 @@ public class IntentReceiver implements Closeable {
         }
         return null;
     }
+
+    //To make binding generator happy. We need better way.
+    public EventDispatcher eventDispatcher(){
+        return super.eventDispatcher();
+    }
+
+    public void startListenEvent(String action){
+        SysBase.i.getDefaultContext().registerReceiver(this,new IntentFilter(action));
+    }
+
+    public void stopListenEvent(String action){
+        //TODO
+    }
+
 }

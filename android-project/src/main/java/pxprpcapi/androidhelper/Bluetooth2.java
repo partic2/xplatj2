@@ -156,7 +156,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
                 t.device.setPairingConfirmation(true);
             }
         }
-        this.dispatcher.fireEvent(intent.getAction());
+        super.onReceive(context,intent);
     }
 
     public HashMap<String,DiscoveryResult> discovered =new HashMap<String,DiscoveryResult>();

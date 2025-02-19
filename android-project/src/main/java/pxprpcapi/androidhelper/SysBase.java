@@ -8,17 +8,20 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 import project.xplat.launcher.ApiServer;
 import project.xplat.launcher.AssetsCopy;
 import pxprpc.base.Utils;
+import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
+import pxprpc.extend.TypeDeclParser;
+import xplatj.gdxconfig.core.PlatCoreConfig;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.UUID;
+import java.util.*;
 
 public class SysBase implements Closeable{
 
@@ -82,6 +85,19 @@ public class SysBase implements Closeable{
 	}
 	public String getHostPackageName(){
 		return ApiServer.defaultAndroidContext.getPackageName();
+	}
+
+	public ByteBuffer dumpBundle(Bundle b){
+		HashMap<String,Object> bundleData=new HashMap<String,Object>();
+		for(String key:b.keySet()){
+			Object val=b.get(key);
+			if(TypeDeclParser.jtypeToValueInfo(val.getClass())!='o'){
+				bundleData.put(key,val);
+			}
+		}
+		ArrayList<Map<String, Object>> t1 = new ArrayList<Map<String, Object>>();
+		t1.add(bundleData);
+		return new TableSerializer().fromMapArray(t1).build();
 	}
 
 	@Override

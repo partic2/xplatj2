@@ -17,6 +17,7 @@ import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.EventDispatcher;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
+import xplatj.gdxconfig.core.PlatCoreConfig;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -125,15 +126,15 @@ public class AndroidUIBase implements Closeable {
             builder.setMessage("");
             if(!btn1.equals("")){
                 builder.setPositiveButton(btn1,(dialog, which)->{
-                    dialogEvent.fireEvent(id1);
+                    ApiServer.fireEventAsync(dialogEvent,id1);
                 });
             }
             if(!btn2.equals("")){
                 builder.setNegativeButton(btn2,(dialog, which)->{
-                    dialogEvent.fireEvent(id2);
+                    ApiServer.fireEventAsync(dialogEvent,id1);
                 });
             }
-            aret.resolve(builder.create());
+            ApiServer.resolveAsync(aret,builder.create());
         });
     }
 

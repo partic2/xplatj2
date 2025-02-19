@@ -54,7 +54,7 @@ public class SurfaceManager implements Closeable{
             r.texName=gltex[0];
             r.tex.setDefaultBufferSize(width,height);
             r.tex.setOnFrameAvailableListener(r,new Handler(ApiServer.defaultAndroidContext.getMainLooper()));
-            ret.resolve(r);
+            ApiServer.resolveAsync(ret,r);
         });
         return null;
     }

@@ -106,13 +106,13 @@ public class Intent2 implements Closeable {
         if(ApiServer.defaultAndroidContext instanceof Activity){
             ApiServer.onActivityResultCallback.put(reqCode,(param)->{
                 ApiServer.onActivityResultCallback.remove(reqCode);
-                ret.resolve((Integer)param[1]);
+                ApiServer.resolveAsync(ret,(Integer)param[1]);
                 return true;
             });
             ((Activity) ApiServer.defaultAndroidContext).startActivityForResult(intent,reqCode);
         }else{
             ApiServer.defaultAndroidContext.startActivity(intent);
-            ret.resolve(Activity.RESULT_OK);
+            ApiServer.resolveAsync(ret,(Integer)Activity.RESULT_OK);
         }
         return 0;
     }
@@ -134,19 +134,19 @@ public class Intent2 implements Closeable {
     public boolean requestSystemAlertWindowPermission(AsyncReturn<Boolean> ret){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if(ApiServer.defaultAndroidContext.checkSelfPermission("SYSTEM_OVERLAY_WINDOW")==PackageManager.PERMISSION_GRANTED){
-                ret.resolve(true);
+                ApiServer.resolveAsync(ret,true);
                 return true;
             }
             Intent intent=new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
             intent.setData(Uri.parse("package:"+ApiServer.defaultAndroidContext.getPackageName()));
             int reqCode= Env.i(Random.class).nextInt(0xffffff);
             ApiServer.onActivityResultCallback.put(reqCode,(args)->{
-                ret.resolve(args[1].equals(Activity.RESULT_OK));
+                ApiServer.resolveAsync(ret,args[1].equals(Activity.RESULT_OK));
                 return true;
             });
             ((Activity)ApiServer.defaultAndroidContext).startActivityForResult(intent,reqCode);
         }else{
-            ret.resolve(true);
+            ApiServer.resolveAsync(ret,true);
         }
         return false;
     }

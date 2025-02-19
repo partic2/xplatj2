@@ -25,11 +25,6 @@ public class Power2 extends PxprpcBroadcastReceiverAdapter implements Closeable 
         i=this;
     }
 
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        this.eventDispatcher().fireEvent(intent.getAction());
-    }
-
     public PowerManager.WakeLock cpuWake;
     public PowerManager.WakeLock screenWake;
     public void accuireCpuWakeLock(){
