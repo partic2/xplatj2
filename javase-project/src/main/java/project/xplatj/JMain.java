@@ -78,7 +78,7 @@ public class JMain {
 			httpd.start(60*1000);
 			String entryUrl=XplatHTTPDServer.urlPathForFile(new File(cd.getAbsoluteFile()+"/data/index.html"));
 			entryUrl="http://127.0.0.1:"+httpdPort+(entryUrl.startsWith("/")?"":"/")+entryUrl;
-			System.out.println("Open url "+entryUrl+" in borwser.");
+			System.out.println("Open url "+entryUrl+" in browser.");
 			if(System.getProperty("os.name").contains("Windows")) {
 				Runtime.getRuntime().exec("explorer "+entryUrl);
 			}
