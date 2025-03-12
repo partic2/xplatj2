@@ -103,6 +103,8 @@ def BuildAndroidRelease():
                 dstsodir+'/libSDLLoader.so')
         shutil.copy(sodir+'/build-pxprpc_rtbridge/libpxprpc_rtbridge.so',\
                 dstsodir+'/libpxprpc_rtbridge.so')
+        shutil.copy(sodir+'/launcher',\
+                dstsodir+'/launcher')
     if os.path.exists(sourceroot+'/android-project/src/main/java/org/libsdl'):
         shutil.rmtree(sourceroot+'/android-project/src/main/java/org/libsdl')
     shutil.copytree(sourceroot+'/SDL/android-project/app/src/main/java/org/libsdl',\

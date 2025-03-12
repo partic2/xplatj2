@@ -36,8 +36,9 @@ add_library(SDLLoader SHARED SDLLoader.c)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 else()
 add_executable(SDLLoader SDLLoader.c)
-add_executable(launcher launcher.c)
 endif()
+
+add_executable(launcher launcher.c)
 
 add_subdirectory(../SDL ./build-sdl)
 add_subdirectory(../pwart ./build-pwart)
