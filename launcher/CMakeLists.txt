@@ -8,7 +8,7 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 project(xplat-launcher)
 
-
+set(BUILD_TESTING OFF)
 
 message("!!!Compiling Note!!!")
 message("If you failed to compile with libffi, you can rename/remove \"./libffi\" directory to diable libffi relative feature.")
