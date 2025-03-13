@@ -24,19 +24,23 @@ def PrintAndRun(cmd,CaptureOut=False):
 
 
 def FindMakeToolChain():
-    make=shutil.which('make')
-    if make!=None:
-        out=PrintAndRun(make+' -v',CaptureOut=True)
-        if out.find(b'msys')<0:
-            buildConfig['CMAKE_GENERATOR']='Unix Makefiles'
-        else:
-            buildConfig['CMAKE_GENERATOR']='MSYS Makefiles'
-        buildConfig['MAKE']=make
-    else:
+    make=None
+    if 'CMAKE_GENERATOR' in buildConfig:
+        return
+    if os.name=='nt':
         make=shutil.which('mingw32-make')
         if make!=None:
             buildConfig['CMAKE_GENERATOR']='MinGW Makefiles'
         buildConfig['MAKE']=make
+    if make==None:
+        make=shutil.which('make')
+        if make!=None:
+            out=PrintAndRun(make+' -v',CaptureOut=True)
+            if out.find(b'msys')<0:
+                buildConfig['CMAKE_GENERATOR']='Unix Makefiles'
+            else:
+                buildConfig['CMAKE_GENERATOR']='MSYS Makefiles'
+            buildConfig['MAKE']=make
     assert 'CMAKE_GENERATOR' in buildConfig
 
 
@@ -111,6 +115,8 @@ def BuildAndroidRelease():
         sourceroot+'/android-project/src/main/java/org/libsdl')
     os.chdir(sourceroot+'/android-project')
     gradle=os.curdir+os.sep+'gradlew'
+    if os.name=='posix':
+        os.chmod(gradle,0o777)
     PrintAndRun(gradle+' assembleRelease')
     shutil.copy(sourceroot+'/android-project/build/outputs/apk/release/xplatj-release.apk',\
         sourceroot+'/launcher/build/xplatj-release.apk')
@@ -143,6 +149,8 @@ def BuildDesktopRelease(name,toolchain):
         PrintAndRun(buildConfig['MAKE'])
         os.chdir(sourceroot+'/javase-project')
         gradle=os.curdir+os.sep+'gradlew'
+        if os.name=='posix':
+            os.chmod(gradle,0o777)
         PrintAndRun(gradle+' distZip')
         os.chdir(sourceroot+'/launcher')
         outdir=sourceroot+'/launcher/build/'+name+'_release'
