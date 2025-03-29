@@ -4,8 +4,13 @@ import lib.pursuer.simplewebserver.PxprpcWsServer;
 import lib.pursuer.simplewebserver.XplatHTTPDServer;
 import project.xplatj.backend.jse.ApiServer;
 import project.xplatj.backend.jse.PlatApiImpl;
+import pxprpc.base.AbstractIo;
 import pxprpc.base.ServerContext;
+import pxprpc.base.Utils;
+import pxprpc.runtimebridge.Io;
 import pxprpc.runtimebridge.NativeHelper;
+import pxprpc.runtimebridge.Pipe;
+import pxprpc.runtimebridge.PipeServer;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.gdxplat.partic2.utils.Env;
 import xplatj.javaplat.partic2.filesystem.FSUtils;
@@ -93,6 +98,57 @@ public class JMain {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	public static void testPxprpcServe() throws IOException {
+		PipeServer serv = new PipeServer("test pipe server 1");
+		serv.serve();
+		while(true){
+			AbstractIo conn = serv.acceptBlock();
+			try{
+				while(true){
+					ByteBuffer[] b=new ByteBuffer[1];
+					conn.receive(b);
+					conn.send(b);
+				}
+			}catch(Exception e){
+				e.printStackTrace();
+			};
+		}
+	}
+	public static void testPxprpcClient() throws IOException{
+		try{
+			PlatCoreConfig.get().executor.execute(()-> {
+				try {
+					testPxprpcServe();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			});
+			Thread.sleep(1000);
+			Io io1 = Pipe.connect("test pipe server 1");
+			io1.send(new ByteBuffer[]{ByteBuffer.wrap("Hello server".getBytes("utf-8"))});
+			ByteBuffer[] bb = new ByteBuffer[1];
+			io1.receive(bb);
+			System.out.println(new String(Utils.toBytes(bb[0]),"utf-8"));
+			io1.send(new ByteBuffer[]{ByteBuffer.wrap("Hello client".getBytes("utf-8"))});
+			bb = new ByteBuffer[1];
+			io1.receive(bb);
+			System.out.println(new String(Utils.toBytes(bb[0]),"utf-8"));
+			io1.close();
+
+			io1 = Pipe.connect("test pipe server 1");
+			io1.send(new ByteBuffer[]{ByteBuffer.wrap("Hello server".getBytes("utf-8"))});
+			bb = new ByteBuffer[1];
+			io1.receive(bb);
+			System.out.println(new String(Utils.toBytes(bb[0]),"utf-8"));
+			io1.send(new ByteBuffer[]{ByteBuffer.wrap("Hello client".getBytes("utf-8"))});
+			bb = new ByteBuffer[1];
+			io1.receive(bb);
+			System.out.println(new String(Utils.toBytes(bb[0]),"utf-8"));
+			io1.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		};
 	}
 	public static void main(String args[]) {
 		NativeHelper.loadNativeLibrary();
