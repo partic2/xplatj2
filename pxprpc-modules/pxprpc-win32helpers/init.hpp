@@ -1,22 +1,24 @@
+#pragma once
+
 #include <pxprpc_pp.hpp>
 #include <pxprpc_ext.hpp>
 #include <pxprpc_rtbridge_host.hpp>
 #include <windows.h>
 #include <pxprpc_rtbridge_base/init.hpp>
 
+#include "codec.hpp"
+
 namespace pxprpc_win32helpers{
-    //Caller take response to delete the buffer.
     
     class FileOutputStream:public pxprpc_rtbridge_base::OutputStream{
         public:
         HANDLE hf=INVALID_HANDLE_VALUE;
         const char *open(const std::string& path){
-            wchar_t *filename=getWideChar(path);
-            if(filename==nullptr){
-                return "getWideChar failed";
+            auto filename=Utf8ToWchar(path);
+            if(filename.length()==0){
+                return "utf8towchar failed";
             }
-            hf = CreateFileW(filename, GENERIC_READ | GENERIC_WRITE, (DWORD)0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
-            delete[] filename;
+            hf = CreateFileW(filename.c_str(), GENERIC_READ | GENERIC_WRITE, (DWORD)0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, (HANDLE)NULL);
             if (hf == INVALID_HANDLE_VALUE)
                 return "CreateFile failed";
             return nullptr;
@@ -112,8 +114,9 @@ namespace pxprpc_win32helpers{
         pxprpc_rtbridge_host::resolveTS(ret,outputStream.pos);
     }
 
-
+    int inited=0;
     void init(){
+        if(inited)return;
         pxprpc::defaultFuncMap.add(
             (new pxprpc::NamedFunctionPPImpl1())
                 ->init("pxprpc_win32helpers.TakeScreenShot", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, pxprpc::NamedFunctionPPImpl1::AsyncReturn *ret) -> void {
@@ -123,5 +126,6 @@ namespace pxprpc_win32helpers{
                 });
             })
         );
+        inited=1;
     }
 }
