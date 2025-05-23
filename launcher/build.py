@@ -2,6 +2,7 @@ import io
 import os
 import subprocess
 import shutil
+import functools
 
 sourceroot=os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 print("source root:"+sourceroot)
@@ -9,15 +10,15 @@ print("source root:"+sourceroot)
 buildConfig=dict()
 
 
-def PrintAndRun(cmd,CaptureOut=False):
+def PrintAndRun(cmd,CaptureOut=False,cwd=None):
     print("execute "+cmd)
     if CaptureOut:
-        cp=subprocess.run(cmd,stdout=subprocess.PIPE,shell=True)
+        cp=subprocess.run(cmd,stdout=subprocess.PIPE,shell=True,cwd=cwd)
         if cp.returncode!=0:
             raise Exception('subprocess failed');
         return cp.stdout
     else:
-        cp=subprocess.run(cmd,shell=True)
+        cp=subprocess.run(cmd,shell=True,cwd=cwd)
         if cp.returncode!=0:
             raise Exception('subprocess failed');
         return b''
@@ -111,7 +112,7 @@ def BuildAndroidRelease():
                 dstsodir+'/launcher')
     if os.path.exists(sourceroot+'/android-project/src/main/java/org/libsdl'):
         shutil.rmtree(sourceroot+'/android-project/src/main/java/org/libsdl')
-    shutil.copytree(sourceroot+'/SDL/android-project/app/src/main/java/org/libsdl',\
+    shutil.copytree(sourceroot+'/deps/SDL/android-project/app/src/main/java/org/libsdl',\
         sourceroot+'/android-project/src/main/java/org/libsdl')
     os.chdir(sourceroot+'/android-project')
     gradle=os.curdir+os.sep+'gradlew'
@@ -183,23 +184,34 @@ def BuildDesktopRelease(name,toolchain):
         os.chdir(sourceroot+'/launcher')
     finally:
         os.environ[ldpathenv]=savedldpath
-    
-def EnsureBuildDeps():
-    sdlexisted=os.path.exists(os.path.join(sourceroot,'SDL','CMakeLists.txt'))
-    if not sdlexisted:
-        gitexec=shutil.which('git')
-        assert gitexec!=None
-        PrintAndRun(gitexec+' clone https://gitee.com/partic/SDL-mirror.git "'+os.path.join(sourceroot,'SDL')+'" -b release-2.30.x --depth=1 ')
 
-    webviewexisted=os.path.exists(os.path.join(sourceroot,'pxprpc-modules','pxprpc-webview','webview','CMakeLists.txt'))
-    if not webviewexisted:
-        gitexec=shutil.which('git')
-        assert gitexec!=None
-        PrintAndRun(gitexec+' clone https://gitee.com/partic/webview-mirror.git "'+os.path.join(sourceroot,'pxprpc-modules','pxprpc-webview','webview')+'" -b master --depth=1 ')
+@functools.cache
+def getGitExec():
+    gitexec=shutil.which('git')
+    assert gitexec!=None
+    return gitexec
+
+def EnsureBuildDepSingle(repoName,branch,localDirName=None):
+    if localDirName==None:
+        localDirName=repoName
+
+    gitexec=getGitExec()
+    depExisted=os.path.exists(os.path.join(sourceroot,localDirName))
+    if not depExisted:
+        PrintAndRun(' '.join([gitexec, 'clone',buildConfig['DEPS_REPOSITORY_PULL_URL'].format(name=repoName)+
+                    '"'+os.path.join(sourceroot,localDirName)+'"',
+                     '-b',branch,'--depth=1']))
+    else:
+        try:
+            PrintAndRun(' '.join([gitexec,
+                    'pull','--rebase']),
+                    cwd=os.path.join(sourceroot,localDirName))
+        except Exception:
+            pass
+
 
 if __name__=='__main__':
     ReadBuildConfig()
-    EnsureBuildDeps()
     BuildEnvironPrepare()
     FindMakeToolChain()
     print(repr(buildConfig))

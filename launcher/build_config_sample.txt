@@ -26,3 +26,7 @@ ANDROID_NATIVE_API_LEVEL='21'
 
 #Embed Java runtime with jlink.
 PACK_JAVA_RUNTIME=False
+
+#Where to pull the dependencies.
+DEPS_REPOSITORY_PULL_URL='https://gitee.com/partic/{name}.git'
+#DEPS_REPOSITORY_PULL_URL='https://github.com/partic2/{name}.git'

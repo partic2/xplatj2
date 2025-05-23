@@ -8,7 +8,7 @@ this repository is a fork from XPLATJ1(https://github.com/partic2/xplatj1), and 
 
 ### prerequire
 
-C Compiler(GCC CLANG)
+C Compiler(GCC/CLANG)
 
 CMake
 
@@ -18,16 +18,13 @@ Android SDK
 
 Android NDK
 
-SDL2 Source
-
 Python3(to run build script)
 
 ### Step1
 
 ```
 cd $XPLATJ_SOURCE_DIR
-export ANDROID_HOME=AndroidSdkDir  #set Android sdk location, android ndk should be installed at $ANDROID_HOME/ndk
-cp $SDL_SOURCE_DIR $XPLATJ_SOURCE_DIR/SDL  #copy SDL source
+python deps/pull_deps.py
 ```
 
 ### Step2
