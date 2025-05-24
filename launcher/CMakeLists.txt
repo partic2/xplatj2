@@ -26,7 +26,15 @@ include(guess_by_compiler.toolchain.cmake)
 endif()
 
 set(PWART_SYSLIB_ENABLED ON)
-get_filename_component(DEPS_SOURCE_DIRS ../deps ABSOLUTE)
+
+if("${DEPS_SOURCE_DIRS}" STREQUAL "")
+  if(NOT ("$ENV{DEPS_SOURCE_DIRS}" STREQUAL ""))
+    set(DEPS_SOURCE_DIRS $ENV{DEPS_SOURCE_DIRS})
+  else()
+    get_filename_component(DEPS_SOURCE_DIRS ../deps ABSOLUTE)
+  endif()
+endif()
+
 
 if(NOT TARGET uv_a)
 add_subdirectory("${DEPS_SOURCE_DIRS}/libuv" ./build-libuv EXCLUDE_FROM_ALL)
@@ -46,7 +54,7 @@ add_executable(launcher launcher.c)
 add_subdirectory(../deps/SDL ./build-sdl EXCLUDE_FROM_ALL)
 add_subdirectory(../deps/pwart ./build-pwart EXCLUDE_FROM_ALL)
 
-list(APPEND PXPRPC_RTBIRDGE_MODULES_DIRS ${DEPS_SOURCE_DIRS}/pxprpc-modules)
+list(APPEND PXPRPC_RTBIRDGE_MODULES_DIRS ${CMAKE_CURRENT_LIST_DIR}/../pxprpc-modules)
 add_subdirectory(../deps/PxpRpc/runtime_bridge ./build-pxprpc_rtbridge)
 target_link_libraries(SDLLoader SDL2main SDL2)
 

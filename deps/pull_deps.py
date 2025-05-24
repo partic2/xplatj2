@@ -6,7 +6,10 @@ def url_replacer(url):
 
 git='git'
 
-deps_dir=os.environ.get('DEPS_SOURCE_DIR',os.path.dirname(os.path.abspath(__file__)))
+if os.environ.get('DEPS_SOURCE_DIRS','')=='':
+    os.environ['DEPS_SOURCE_DIRS']=os.path.join(os.path.dirname(os.path.abspath(__file__)))
+
+deps_dir=os.environ.get('DEPS_SOURCE_DIRS')
 
 def pull(dep_name, repo_url, branch="main"):
     """
@@ -29,6 +32,7 @@ def pull(dep_name, repo_url, branch="main"):
                 git, 'pull',
                 '--rebase'
             ]
+            print(f'[INFO] Update {target_dir}')
             subprocess.run(cmd, check=True,cwd=target_dir)
             print(f"[OK] Successfully pulled {dep_name} @{branch}")
             
@@ -46,6 +50,7 @@ def pull(dep_name, repo_url, branch="main"):
                 repo_url,
                 target_dir
             ]
+            print(f'[INFO] Clone into {target_dir}')
             subprocess.run(cmd, check=True)
             print(f"[OK] Successfully pulled {dep_name} @{branch}")
             
@@ -53,14 +58,19 @@ def pull(dep_name, repo_url, branch="main"):
             print(f"[ERROR] Failed to pull {dep_name}: {str(e)}")
         except Exception as e:
             print(f"[ERROR] Unexpected error: {str(e)}")
+    return target_dir
 
 def main():
-    pull('libffi','https://gitee.com/partic/libffi','main')
+    import runpy
     pull('libuv','https://gitee.com/partic/libuv-patched','v1.x')
-    pull('pwart','https://gitee.com/partic/pwart','main')
-    pull('PxpRpc','https://gitee.com/partic/PxpRpc','main')
+
+    targetdir=pull('pwart','https://gitee.com/partic/pwart','main')
+    runpy.run_path(os.path.join(targetdir,'deps','pull_deps.py'),run_name='__main__')
+
+    targetdir=pull('PxpRpc','https://gitee.com/partic/PxpRpc','main')
+    runpy.run_path(os.path.join(targetdir,'runtime_bridge','deps','pull_deps.py'),run_name='__main__')
+
     pull('SDL','https://gitee.com/partic/SDL-mirror','release-2.32.x')
-    pull('uvwasi','https://gitee.com/partic/uvwasi','main')
     pull('webview','https://gitee.com/partic/webview-mirror.git','master')
 
 if __name__=='__main__':
