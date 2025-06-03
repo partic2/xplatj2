@@ -1,0 +1,12 @@
+CompileFlags:
+  Add: [-O2, -Wall, 
+  -IC:\Users\user1\Repository\xplatj\pxprpc-modules,
+  -IC:\Users\user1\Repository\PxpRpc\c\include,
+  -IC:\Users\user1\Repository\PxpRpc\runtime_bridge\c-modules,
+  -IC:\Users\user1\Repository\PxpRpc\runtime_bridge\include,
+  -IC:\Users\user1\Repository\PxpRpc\runtime_bridge\build\dep_libwebsockets\include]
+  Remove: [-Werror]
+Diagnostics:
+  UnusedIncludes: Strict
+Index:
+  Threads: 4

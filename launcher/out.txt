@@ -1,0 +1,1371 @@
+-- The C compiler identification is Clang 17.0.2
+-- The CXX compiler identification is Clang 17.0.2
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Users/user1/Application/AndroidSdk/ndk/26.0/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Users/user1/Application/AndroidSdk/ndk/26.0/toolchains/llvm/prebuilt/windows-x86_64/bin/clang++.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test UV_LINT_W4
+-- Performing Test UV_LINT_W4 - Failed
+-- Performing Test UV_LINT_NO_UNUSED_PARAMETER_MSVC
+-- Performing Test UV_LINT_NO_UNUSED_PARAMETER_MSVC - Failed
+-- Performing Test UV_LINT_NO_CONDITIONAL_CONSTANT_MSVC
+-- Performing Test UV_LINT_NO_CONDITIONAL_CONSTANT_MSVC - Failed
+-- Performing Test UV_LINT_NO_NONSTANDARD_MSVC
+-- Performing Test UV_LINT_NO_NONSTANDARD_MSVC - Failed
+-- Performing Test UV_LINT_NO_NONSTANDARD_EMPTY_TU_MSVC
+-- Performing Test UV_LINT_NO_NONSTANDARD_EMPTY_TU_MSVC - Failed
+-- Performing Test UV_LINT_NO_NONSTANDARD_FILE_SCOPE_MSVC
+-- Performing Test UV_LINT_NO_NONSTANDARD_FILE_SCOPE_MSVC - Failed
+-- Performing Test UV_LINT_NO_NONSTANDARD_NONSTATIC_DLIMPORT_MSVC
+-- Performing Test UV_LINT_NO_NONSTANDARD_NONSTATIC_DLIMPORT_MSVC - Failed
+-- Performing Test UV_LINT_NO_HIDES_LOCAL
+-- Performing Test UV_LINT_NO_HIDES_LOCAL - Failed
+-- Performing Test UV_LINT_NO_HIDES_PARAM
+-- Performing Test UV_LINT_NO_HIDES_PARAM - Failed
+-- Performing Test UV_LINT_NO_HIDES_GLOBAL
+-- Performing Test UV_LINT_NO_HIDES_GLOBAL - Failed
+-- Performing Test UV_LINT_NO_CONDITIONAL_ASSIGNMENT_MSVC
+-- Performing Test UV_LINT_NO_CONDITIONAL_ASSIGNMENT_MSVC - Failed
+-- Performing Test UV_LINT_NO_UNSAFE_MSVC
+-- Performing Test UV_LINT_NO_UNSAFE_MSVC - Failed
+-- Performing Test UV_LINT_WALL
+-- Performing Test UV_LINT_WALL - Success
+-- Performing Test UV_LINT_NO_UNUSED_PARAMETER
+-- Performing Test UV_LINT_NO_UNUSED_PARAMETER - Success
+-- Performing Test UV_LINT_STRICT_PROTOTYPES
+-- Performing Test UV_LINT_STRICT_PROTOTYPES - Success
+-- Performing Test UV_LINT_EXTRA
+-- Performing Test UV_LINT_EXTRA - Success
+-- Performing Test UV_LINT_UTF8_MSVC
+-- Performing Test UV_LINT_UTF8_MSVC - Failed
+-- Performing Test UV_F_STRICT_ALIASING
+-- Performing Test UV_F_STRICT_ALIASING - Success
+-- summary of build options:
+    Install prefix:  C:/Program Files (x86)/xplat-launcher
+    Target system:   Android
+    Compiler:
+      C compiler:    C:/Users/user1/Application/AndroidSdk/ndk/26.0/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe (Clang)
+      CFLAGS:         -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security 
+
+-- Could NOT find PkgConfig (missing: PKG_CONFIG_EXECUTABLE) 
+-- Looking for __GLIBC__
+-- Looking for __GLIBC__ - not found
+-- Performing Test CHECK_CPU_ARCHITECTURE_X86
+-- Performing Test CHECK_CPU_ARCHITECTURE_X86 - Failed
+-- Performing Test CHECK_CPU_ARCHITECTURE_X64
+-- Performing Test CHECK_CPU_ARCHITECTURE_X64 - Failed
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM32
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM32 - Success
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM64
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM64 - Failed
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM64EC
+-- Performing Test CHECK_CPU_ARCHITECTURE_ARM64EC - Failed
+-- Performing Test CHECK_CPU_ARCHITECTURE_LOONGARCH64
+-- Performing Test CHECK_CPU_ARCHITECTURE_LOONGARCH64 - Failed
+-- Performing Test HAVE_GCC_WALL
+-- Performing Test HAVE_GCC_WALL - Success
+-- Performing Test HAVE_GCC_WUNDEF
+-- Performing Test HAVE_GCC_WUNDEF - Success
+-- Performing Test HAVE_GCC_NO_STRICT_ALIASING
+-- Performing Test HAVE_GCC_NO_STRICT_ALIASING - Success
+-- Performing Test HAVE_GCC_WDOCUMENTATION
+-- Performing Test HAVE_GCC_WDOCUMENTATION - Success
+-- Performing Test HAVE_GCC_WDOCUMENTATION_UNKNOWN_COMMAND
+-- Performing Test HAVE_GCC_WDOCUMENTATION_UNKNOWN_COMMAND - Success
+-- Performing Test HAVE_GCC_COMMENT_BLOCK_COMMANDS
+-- Performing Test HAVE_GCC_COMMENT_BLOCK_COMMANDS - Success
+-- Performing Test HAVE_GCC_WDECLARATION_AFTER_STATEMENT
+-- Performing Test HAVE_GCC_WDECLARATION_AFTER_STATEMENT - Success
+-- Performing Test HAVE_GCC_ATOMICS
+-- Performing Test HAVE_GCC_ATOMICS - Success
+-- Performing Test HAVE_GCC_FVISIBILITY
+-- Performing Test HAVE_GCC_FVISIBILITY - Success
+-- Performing Test HAVE_GCC_WSHADOW
+-- Performing Test HAVE_GCC_WSHADOW - Success
+-- Performing Test HAVE_GCC_WUNUSED_LOCAL_TYPEDEFS
+-- Performing Test HAVE_GCC_WUNUSED_LOCAL_TYPEDEFS - Success
+-- Performing Test HAVE_NO_UNDEFINED
+-- Performing Test HAVE_NO_UNDEFINED - Success
+-- Looking for immintrin.h
+-- Looking for immintrin.h - not found
+-- Performing Test HAVE_ALTIVEC_H_HDR
+-- Performing Test HAVE_ALTIVEC_H_HDR - Failed
+-- Performing Test CPU_SUPPORTS_ALTIVEC
+-- Performing Test CPU_SUPPORTS_ALTIVEC - Failed
+-- Looking for ctype.h
+-- Looking for ctype.h - found
+-- Looking for float.h
+-- Looking for float.h - found
+-- Looking for iconv.h
+-- Looking for iconv.h - found
+-- Looking for inttypes.h
+-- Looking for inttypes.h - found
+-- Looking for limits.h
+-- Looking for limits.h - found
+-- Looking for malloc.h
+-- Looking for malloc.h - found
+-- Looking for math.h
+-- Looking for math.h - found
+-- Looking for memory.h
+-- Looking for memory.h - found
+-- Looking for signal.h
+-- Looking for signal.h - found
+-- Looking for stdarg.h
+-- Looking for stdarg.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for stdio.h
+-- Looking for stdio.h - found
+-- Looking for stdlib.h
+-- Looking for stdlib.h - found
+-- Looking for string.h
+-- Looking for string.h - found
+-- Looking for strings.h
+-- Looking for strings.h - found
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for wchar.h
+-- Looking for wchar.h - found
+-- Looking for 7 include files stddef.h, ..., float.h
+-- Looking for 7 include files stddef.h, ..., float.h - found
+-- Looking for M_PI
+-- Looking for M_PI - found
+-- Performing Test HAVE_MPROTECT
+-- Performing Test HAVE_MPROTECT - Success
+-- Looking for strtod
+-- Looking for strtod - found
+-- Looking for malloc
+-- Looking for malloc - found
+-- Looking for calloc
+-- Looking for calloc - found
+-- Looking for realloc
+-- Looking for realloc - found
+-- Looking for free
+-- Looking for free - found
+-- Looking for getenv
+-- Looking for getenv - found
+-- Looking for setenv
+-- Looking for setenv - found
+-- Looking for putenv
+-- Looking for putenv - found
+-- Looking for unsetenv
+-- Looking for unsetenv - found
+-- Looking for bsearch
+-- Looking for bsearch - found
+-- Looking for qsort
+-- Looking for qsort - found
+-- Looking for abs
+-- Looking for abs - found
+-- Looking for bcopy
+-- Looking for bcopy - found
+-- Looking for memset
+-- Looking for memset - found
+-- Looking for memcpy
+-- Looking for memcpy - found
+-- Looking for memmove
+-- Looking for memmove - found
+-- Looking for memcmp
+-- Looking for memcmp - found
+-- Looking for strlen
+-- Looking for strlen - found
+-- Looking for strlcpy
+-- Looking for strlcpy - found
+-- Looking for strlcat
+-- Looking for strlcat - found
+-- Looking for _strrev
+-- Looking for _strrev - not found
+-- Looking for _strupr
+-- Looking for _strupr - not found
+-- Looking for _strlwr
+-- Looking for _strlwr - not found
+-- Looking for index
+-- Looking for index - not found
+-- Looking for rindex
+-- Looking for rindex - not found
+-- Looking for strchr
+-- Looking for strchr - found
+-- Looking for strrchr
+-- Looking for strrchr - found
+-- Looking for strstr
+-- Looking for strstr - found
+-- Looking for strtok_r
+-- Looking for strtok_r - found
+-- Looking for itoa
+-- Looking for itoa - not found
+-- Looking for _ltoa
+-- Looking for _ltoa - not found
+-- Looking for _uitoa
+-- Looking for _uitoa - not found
+-- Looking for _ultoa
+-- Looking for _ultoa - not found
+-- Looking for strtol
+-- Looking for strtol - found
+-- Looking for strtoul
+-- Looking for strtoul - found
+-- Looking for _i64toa
+-- Looking for _i64toa - not found
+-- Looking for _ui64toa
+-- Looking for _ui64toa - not found
+-- Looking for strtoll
+-- Looking for strtoll - found
+-- Looking for strtoull
+-- Looking for strtoull - found
+-- Looking for atoi
+-- Looking for atoi - found
+-- Looking for atof
+-- Looking for atof - found
+-- Looking for strcmp
+-- Looking for strcmp - found
+-- Looking for strncmp
+-- Looking for strncmp - found
+-- Looking for _stricmp
+-- Looking for _stricmp - not found
+-- Looking for strcasecmp
+-- Looking for strcasecmp - found
+-- Looking for _strnicmp
+-- Looking for _strnicmp - not found
+-- Looking for strncasecmp
+-- Looking for strncasecmp - found
+-- Looking for strcasestr
+-- Looking for strcasestr - found
+-- Looking for wcscmp
+-- Looking for wcscmp - found
+-- Looking for _wcsdup
+-- Looking for _wcsdup - not found
+-- Looking for wcsdup
+-- Looking for wcsdup - found
+-- Looking for wcslcat
+-- Looking for wcslcat - found
+-- Looking for wcslcpy
+-- Looking for wcslcpy - found
+-- Looking for wcslen
+-- Looking for wcslen - found
+-- Looking for wcsncmp
+-- Looking for wcsncmp - found
+-- Looking for wcsstr
+-- Looking for wcsstr - found
+-- Looking for wcscasecmp
+-- Looking for wcscasecmp - found
+-- Looking for _wcsicmp
+-- Looking for _wcsicmp - not found
+-- Looking for wcsncasecmp
+-- Looking for wcsncasecmp - found
+-- Looking for _wcsnicmp
+-- Looking for _wcsnicmp - not found
+-- Looking for sscanf
+-- Looking for sscanf - found
+-- Looking for vsscanf
+-- Looking for vsscanf - found
+-- Looking for vsnprintf
+-- Looking for vsnprintf - found
+-- Looking for fopen64
+-- Looking for fopen64 - not found
+-- Looking for fseeko
+-- Looking for fseeko - not found
+-- Looking for fseeko64
+-- Looking for fseeko64 - not found
+-- Looking for _Exit
+-- Looking for _Exit - found
+-- Looking for sigaction
+-- Looking for sigaction - found
+-- Looking for setjmp
+-- Looking for setjmp - found
+-- Looking for nanosleep
+-- Looking for nanosleep - found
+-- Looking for sysconf
+-- Looking for sysconf - found
+-- Looking for sysctlbyname
+-- Looking for sysctlbyname - not found
+-- Looking for getauxval
+-- Looking for getauxval - found
+-- Looking for elf_aux_info
+-- Looking for elf_aux_info - not found
+-- Looking for poll
+-- Looking for poll - found
+-- Looking for memfd_create
+-- Looking for memfd_create - not found
+-- Looking for posix_fallocate
+-- Looking for posix_fallocate - found
+-- Looking for pow in m
+-- Looking for pow in m - found
+-- Looking for atan
+-- Looking for atan - found
+-- Looking for atan2
+-- Looking for atan2 - found
+-- Looking for atanf
+-- Looking for atanf - found
+-- Looking for atan2f
+-- Looking for atan2f - found
+-- Looking for ceil
+-- Looking for ceil - found
+-- Looking for ceilf
+-- Looking for ceilf - found
+-- Looking for copysign
+-- Looking for copysign - found
+-- Looking for copysignf
+-- Looking for copysignf - found
+-- Looking for cos
+-- Looking for cos - found
+-- Looking for cosf
+-- Looking for cosf - found
+-- Looking for exp
+-- Looking for exp - found
+-- Looking for expf
+-- Looking for expf - found
+-- Looking for fabs
+-- Looking for fabs - found
+-- Looking for fabsf
+-- Looking for fabsf - found
+-- Looking for floor
+-- Looking for floor - found
+-- Looking for floorf
+-- Looking for floorf - found
+-- Looking for fmod
+-- Looking for fmod - found
+-- Looking for fmodf
+-- Looking for fmodf - found
+-- Looking for log
+-- Looking for log - found
+-- Looking for logf
+-- Looking for logf - found
+-- Looking for log10
+-- Looking for log10 - found
+-- Looking for log10f
+-- Looking for log10f - found
+-- Looking for lround
+-- Looking for lround - found
+-- Looking for lroundf
+-- Looking for lroundf - found
+-- Looking for pow
+-- Looking for pow - found
+-- Looking for powf
+-- Looking for powf - found
+-- Looking for round
+-- Looking for round - found
+-- Looking for roundf
+-- Looking for roundf - found
+-- Looking for scalbn
+-- Looking for scalbn - found
+-- Looking for scalbnf
+-- Looking for scalbnf - found
+-- Looking for sin
+-- Looking for sin - found
+-- Looking for sinf
+-- Looking for sinf - found
+-- Looking for sqrt
+-- Looking for sqrt - found
+-- Looking for sqrtf
+-- Looking for sqrtf - found
+-- Looking for tan
+-- Looking for tan - found
+-- Looking for tanf
+-- Looking for tanf - found
+-- Looking for acos
+-- Looking for acos - found
+-- Looking for acosf
+-- Looking for acosf - found
+-- Looking for asin
+-- Looking for asin - found
+-- Looking for asinf
+-- Looking for asinf - found
+-- Looking for trunc
+-- Looking for trunc - found
+-- Looking for truncf
+-- Looking for truncf - found
+-- Performing Test ICONV_IN_LIBC
+-- Performing Test ICONV_IN_LIBC - Failed
+-- Performing Test ICONV_IN_LIBICONV
+-- Performing Test ICONV_IN_LIBICONV - Failed
+-- Looking for alloca.h
+-- Looking for alloca.h - found
+-- Looking for alloca
+-- Looking for alloca - found
+-- Looking for alloca
+-- Looking for alloca - found
+-- Looking for alloca
+-- Looking for alloca - not found
+-- Performing Test HAVE_SA_SIGACTION
+-- Performing Test HAVE_SA_SIGACTION - Success
+-- Looking for dlopen
+-- Looking for dlopen - found
+-- Performing Test HAVE_O_CLOEXEC
+-- Performing Test HAVE_O_CLOEXEC - Success
+-- Performing Test HAVE_ARM_MODE
+-- Performing Test HAVE_ARM_MODE - Success
+-- Performing Test VULKAN_PASSED_ANDROID_CHECKS
+-- Performing Test VULKAN_PASSED_ANDROID_CHECKS - Success
+-- Performing Test HAVE_PTHREADS
+-- Performing Test HAVE_PTHREADS - Success
+-- Performing Test HAVE_RECURSIVE_MUTEXES
+-- Performing Test HAVE_RECURSIVE_MUTEXES - Success
+-- Performing Test HAVE_PTHREADS_SEM
+-- Performing Test HAVE_PTHREADS_SEM - Success
+-- Performing Test HAVE_SEM_TIMEDWAIT
+-- Performing Test HAVE_SEM_TIMEDWAIT - Success
+-- Looking for include file pthread.h
+-- Looking for include file pthread.h - found
+-- Looking for include file pthread_np.h
+-- Looking for include file pthread_np.h - not found
+-- Performing Test HAVE_PTHREAD_SETNAME_NP
+-- Performing Test HAVE_PTHREAD_SETNAME_NP - Success
+-- Found Git: C:/Users/user1/Application/git/bin/git.exe (found version "2.30.0.windows.2") 
+-- 
+-- SDL2 was configured with the following options:
+-- 
+-- Platform: Android-1
+-- 64-bit:   FALSE
+-- Compiler: C:/Users/user1/Application/AndroidSdk/ndk/26.0/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe
+-- Revision: SDL-2.32.7-g213b074
+-- 
+-- Subsystems:
+--   Atomic:	ON
+--   Audio:	ON
+--   Video:	ON
+--   Render:	ON
+--   Events:	ON
+--   Joystick:	ON
+--   Haptic:	ON
+--   Hidapi:	ON
+--   Power:	ON
+--   Threads:	ON
+--   Timers:	ON
+--   File:	ON
+--   Loadso:	ON
+--   CPUinfo:	ON
+--   Filesystem:	ON
+--   Sensor:	ON
+--   Locale:	ON
+--   Misc:	ON
+-- 
+-- Options:
+--   SDL2_DISABLE_INSTALL        (Wanted: ON): OFF
+--   SDL2_DISABLE_SDL2MAIN       (Wanted: OFF): OFF
+--   SDL2_DISABLE_UNINSTALL      (Wanted: OFF): OFF
+--   SDL_3DNOW                   (Wanted: OFF): OFF
+--   SDL_ALSA                    (Wanted: OFF): OFF
+--   SDL_ALSA_SHARED             (Wanted: OFF): OFF
+--   SDL_ALTIVEC                 (Wanted: ON): OFF
+--   SDL_ARMNEON                 (Wanted: OFF): OFF
+--   SDL_ARMSIMD                 (Wanted: OFF): OFF
+--   SDL_ARTS                    (Wanted: OFF): OFF
+--   SDL_ARTS_SHARED             (Wanted: OFF): OFF
+--   SDL_ASAN                    (Wanted: OFF): OFF
+--   SDL_ASSEMBLY                (Wanted: ON): ON
+--   SDL_ASSERTIONS              (Wanted: auto): auto
+--   SDL_BACKGROUNDING_SIGNAL    (Wanted: OFF): OFF
+--   SDL_CCACHE                  (Wanted: ON): OFF
+--   SDL_CLOCK_GETTIME           (Wanted: ON): ON
+--   SDL_COCOA                   (Wanted: OFF): OFF
+--   SDL_DBUS                    (Wanted: OFF): OFF
+--   SDL_DIRECTFB                (Wanted: OFF): OFF
+--   SDL_DIRECTFB_SHARED         (Wanted: OFF): OFF
+--   SDL_DIRECTX                 (Wanted: OFF): OFF
+--   SDL_DISKAUDIO               (Wanted: ON): ON
+--   SDL_DUMMYAUDIO              (Wanted: ON): ON
+--   SDL_DUMMYVIDEO              (Wanted: ON): ON
+--   SDL_ESD                     (Wanted: OFF): OFF
+--   SDL_ESD_SHARED              (Wanted: OFF): OFF
+--   SDL_FOREGROUNDING_SIGNAL    (Wanted: OFF): OFF
+--   SDL_FUSIONSOUND             (Wanted: OFF): OFF
+--   SDL_FUSIONSOUND_SHARED      (Wanted: OFF): OFF
+--   SDL_GCC_ATOMICS             (Wanted: ON): ON
+--   SDL_HIDAPI                  (Wanted: ON): ON
+--   SDL_HIDAPI_JOYSTICK         (Wanted: ON): ON
+--   SDL_HIDAPI_LIBUSB           (Wanted: OFF): OFF
+--   SDL_IBUS                    (Wanted: OFF): OFF
+--   SDL_INSTALL_TESTS           (Wanted: OFF): OFF
+--   SDL_JACK                    (Wanted: OFF): OFF
+--   SDL_JACK_SHARED             (Wanted: OFF): OFF
+--   SDL_KMSDRM                  (Wanted: OFF): OFF
+--   SDL_KMSDRM_SHARED           (Wanted: OFF): OFF
+--   SDL_LASX                    (Wanted: OFF): OFF
+--   SDL_LIBC                    (Wanted: ON): ON
+--   SDL_LIBICONV                (Wanted: OFF): OFF
+--   SDL_LIBSAMPLERATE           (Wanted: OFF): OFF
+--   SDL_LIBSAMPLERATE_SHARED    (Wanted: OFF): OFF
+--   SDL_LIBUDEV                 (Wanted: ON): OFF
+--   SDL_LSX                     (Wanted: OFF): OFF
+--   SDL_METAL                   (Wanted: OFF): OFF
+--   SDL_MMX                     (Wanted: OFF): OFF
+--   SDL_NAS                     (Wanted: OFF): OFF
+--   SDL_NAS_SHARED              (Wanted: OFF): OFF
+--   SDL_OFFSCREEN               (Wanted: ON): ON
+--   SDL_OPENGL                  (Wanted: ON): OFF
+--   SDL_OPENGLES                (Wanted: ON): ON
+--   SDL_OSS                     (Wanted: OFF): OFF
+--   SDL_PIPEWIRE                (Wanted: OFF): OFF
+--   SDL_PIPEWIRE_SHARED         (Wanted: OFF): OFF
+--   SDL_PTHREADS                (Wanted: ON): ON
+--   SDL_PTHREADS_SEM            (Wanted: ON): ON
+--   SDL_PULSEAUDIO              (Wanted: OFF): OFF
+--   SDL_PULSEAUDIO_SHARED       (Wanted: OFF): OFF
+--   SDL_RENDER_D3D              (Wanted: OFF): OFF
+--   SDL_RENDER_METAL            (Wanted: OFF): OFF
+--   SDL_RPATH                   (Wanted: OFF): OFF
+--   SDL_RPI                     (Wanted: OFF): OFF
+--   SDL_SNDIO                   (Wanted: OFF): OFF
+--   SDL_SNDIO_SHARED            (Wanted: OFF): OFF
+--   SDL_SSE                     (Wanted: OFF): OFF
+--   SDL_SSE2                    (Wanted: OFF): OFF
+--   SDL_SSE3                    (Wanted: OFF): OFF
+--   SDL_SSEMATH                 (Wanted: OFF): OFF
+--   SDL_STATIC_PIC              (Wanted: ON): ON
+--   SDL_SYSTEM_ICONV            (Wanted: ON): OFF
+--   SDL_TESTS                   (Wanted: OFF): OFF
+--   SDL_VENDOR_INFO             (Wanted: ): OFF
+--   SDL_VIRTUAL_JOYSTICK        (Wanted: ON): ON
+--   SDL_VIVANTE                 (Wanted: OFF): OFF
+--   SDL_VULKAN                  (Wanted: ON): ON
+--   SDL_WASAPI                  (Wanted: OFF): OFF
+--   SDL_WAYLAND                 (Wanted: OFF): OFF
+--   SDL_WAYLAND_LIBDECOR        (Wanted: OFF): OFF
+--   SDL_WAYLAND_LIBDECOR_SHARED (Wanted: OFF): OFF
+--   SDL_WAYLAND_QT_TOUCH        (Wanted: OFF): OFF
+--   SDL_WAYLAND_SHARED          (Wanted: OFF): OFF
+--   SDL_X11                     (Wanted: OFF): OFF
+--   SDL_X11_SHARED              (Wanted: OFF): OFF
+--   SDL_X11_XCURSOR             (Wanted: OFF): OFF
+--   SDL_X11_XDBE                (Wanted: OFF): OFF
+--   SDL_X11_XFIXES              (Wanted: OFF): OFF
+--   SDL_X11_XINPUT              (Wanted: OFF): OFF
+--   SDL_X11_XRANDR              (Wanted: OFF): OFF
+--   SDL_X11_XSCRNSAVER          (Wanted: OFF): OFF
+--   SDL_X11_XSHAPE              (Wanted: OFF): OFF
+--   SDL_XINPUT                  (Wanted: OFF): OFF
+-- 
+--  CFLAGS:        -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security  -idirafter "C:/Users/user1/Repository/xplatj/deps/SDL/src/video/khronos"
+--  EXTRA_CFLAGS:   -Wall -Wundef -fno-strict-aliasing -Wdocumentation -Wdocumentation-unknown-command -fcomment-block-commands=threadsafety -fcomment-block-commands=deprecated -Wdeclaration-after-statement -fvisibility=hidden -Wshadow -Wno-unused-local-typedefs
+--  EXTRA_LDFLAGS:  -Wl,--no-undefined
+--  EXTRA_LIBS:    m;OpenSLES;dl;log;android;GLESv1_CM;GLESv2
+-- 
+--  Build Shared Library: ON
+--  Build Static Library: ON
+--  Build Static Library with Position Independent Code: ON
+-- 
+-- If something was not detected, although the libraries
+-- were installed, then make sure you have set the
+-- CFLAGS and LDFLAGS environment variables correctly.
+-- 
+-- Building for TARGET_PLATFORM: ARM
+-- Check size of size_t
+-- Check size of size_t - done
+-- The ASM compiler identification is Clang with GNU-like command-line
+-- Found assembler: C:/Users/user1/Application/AndroidSdk/ndk/26.0/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe
+-- Check size of double
+-- Check size of double - done
+-- Check size of long double
+-- Check size of long double - done
+-- Looking for alloca
+-- Looking for alloca - not found
+-- Looking for mmap
+-- Looking for mmap - found
+-- Looking for MAP_ANON
+-- Looking for MAP_ANON - found
+-- Performing Test HAVE_ALLOCA
+-- Performing Test HAVE_ALLOCA - Success
+-- Looking for dlfcn.h
+-- Looking for dlfcn.h - found
+-- Looking for sys/mman.h
+-- Looking for sys/mman.h - found
+-- Looking for sys/stat.h
+-- Looking for sys/stat.h - found
+-- Looking for unistd.h
+-- Looking for unistd.h - found
+-- Looking for mkostemp
+-- Looking for mkostemp - not found
+-- Checking if .eh_frame section is read-only - no
+-- Checking HAVE_AS_X86_PCREL - yes
+-- Checking HAVE_AS_X86_64_UNWIND_SECTION_TYPE - no
+-- Checking HAVE_HIDDEN_VISIBILITY_ATTRIBUTE - no
+-- Checking if symbols are underscored - no
+-- Performing Test HAVE_AS_CFI_PSEUDO_OP
+-- Performing Test HAVE_AS_CFI_PSEUDO_OP - Success
+-- summary of uvwasi build options:
+
+    Install prefix:  C:/Program Files (x86)/xplat-launcher
+    Target system:   Android
+    Compiler:
+      C compiler:    C:/Users/user1/Application/AndroidSdk/ndk/26.0/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe
+      CFLAGS:         -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security 
+
+    System libuv:    OFF
+    Debug logging:   OFF
+    Code coverage:   OFF
+    ASAN:            OFF
+    Build tests:     OFF
+
+-- Building in RELEASE mode
+-- Building with Clang 17.0.2 on Android-1
+--   USE_EXTERNAL_FFI: OFF
+-- Building in RELEASE mode
+-- Building with Clang 17.0.2 on Android-1
+-- Performing Test COMPILER_SUPPORTS_Wall
+-- Performing Test COMPILER_SUPPORTS_Wall - Success
+-- Performing Test COMPILER_SUPPORTS_Werror
+-- Performing Test COMPILER_SUPPORTS_Werror - Success
+-- Performing Test COMPILER_SUPPORTS_Wextra
+-- Performing Test COMPILER_SUPPORTS_Wextra - Success
+-- Performing Test COMPILER_SUPPORTS_Wformat=2
+-- Performing Test COMPILER_SUPPORTS_Wformat=2 - Success
+-- Performing Test COMPILER_SUPPORTS_Wnoimplicitfallthrough
+-- Performing Test COMPILER_SUPPORTS_Wnoimplicitfallthrough - Success
+-- Performing Test COMPILER_SUPPORTS_Wnosigncompare
+-- Performing Test COMPILER_SUPPORTS_Wnosigncompare - Success
+-- Performing Test COMPILER_SUPPORTS_Wnomissingfieldinitializers
+-- Performing Test COMPILER_SUPPORTS_Wnomissingfieldinitializers - Success
+-- Performing Test COMPILER_SUPPORTS_Wnounusedparameter
+-- Performing Test COMPILER_SUPPORTS_Wnounusedparameter - Success
+-- Performing Test COMPILER_SUPPORTS_Wnounusedbutsetvariable
+-- Performing Test COMPILER_SUPPORTS_Wnounusedbutsetvariable - Success
+-- Performing Test COMPILER_SUPPORTS_Wnounusedresult
+-- Performing Test COMPILER_SUPPORTS_Wnounusedresult - Success
+-- Performing Test COMPILER_SUPPORTS_Wnostringoptruncation
+-- Performing Test COMPILER_SUPPORTS_Wnostringoptruncation - Failed
+-- Performing Test COMPILER_SUPPORTS_Wnoarraybounds
+-- Performing Test COMPILER_SUPPORTS_Wnoarraybounds - Success
+-- Performing Test COMPILER_SUPPORTS_funsignedchar
+-- Performing Test COMPILER_SUPPORTS_funsignedchar - Success
+--   BUILD_SHARED_LIBS: OFF
+--   QJS_BUILD_EXAMPLES: OFF
+--   QJS_BUILD_CLI_STATIC: OFF
+--   QJS_BUILD_CLI_WITH_MIMALLOC: OFF
+--   QJS_BUILD_CLI_WITH_STATIC_MIMALLOC: OFF
+--   QJS_DISABLE_PARSER: OFF
+--   QJS_ENABLE_ASAN: OFF
+--   QJS_ENABLE_MSAN: OFF
+--   QJS_ENABLE_TSAN: OFF
+--   QJS_ENABLE_UBSAN: OFF
+--   QJS_BUILD_LIBC: OFF
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - not found
+-- Check if compiler accepts -pthread
+-- Check if compiler accepts -pthread - yes
+-- Found Threads: TRUE  
+-- Using CMake version 3.28.1
+-- CMake platform flags: UNIX CROSS
+-- Cross-compiling: Windows/AMD64 -> Android/armv7-a
+-- curl version=[8.11.0-DEV]
+-- Picky compiler options: -Werror-implicit-function-declaration -Wextra -Wall -pedantic -Wbad-function-cast -Wconversion -Winline -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wno-long-long -Wno-multichar -Wpointer-arith -Wshadow -Wsign-compare -Wundef -Wunused -Wwrite-strings -Waddress -Wattributes -Wcast-align -Wdeclaration-after-statement -Wdiv-by-zero -Wempty-body -Wendif-labels -Wfloat-equal -Wformat-security -Wignored-qualifiers -Wmissing-field-initializers -Wmissing-noreturn -Wno-format-nonliteral -Wno-system-headers -Wold-style-definition -Wredundant-decls -Wsign-conversion -Wno-error=sign-conversion -Wstrict-prototypes -Wtype-limits -Wunreachable-code -Wunused-parameter -Wvla -Wshift-sign-overflow -Wshorten-64-to-32 -Wlanguage-extension-token -Wformat=2 -Wdouble-promotion -Wenum-conversion -Wpragmas -Wunused-const-variable -Wunreachable-code-break -Wheader-guard -Wsometimes-uninitialized -Wcomma -Wmissing-variable-declarations -Wassign-enum -Wextra-semi-stmt -Wimplicit-fallthrough
+-- Performing Test HAVE_SOCKADDR_IN6_SIN6_ADDR
+-- Performing Test HAVE_SOCKADDR_IN6_SIN6_ADDR - Success
+-- Performing Test HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
+-- Performing Test HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID - Success
+-- Could NOT find Perl (missing: PERL_EXECUTABLE) 
+-- Looking for connect in socket
+-- Looking for connect in socket - not found
+-- Looking for gethostname
+-- Looking for gethostname - found
+-- Found Python3: C:/Users/user1/Application/Python/python.exe (found version "3.8.10") found components: Interpreter 
+-- Found ZLIB: C:/Users/user1/Application/AndroidSdk/ndk/26.0/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/arm-linux-androideabi/21/libz.so (found version "1.2.13")  
+-- Could NOT find NGHTTP2 (missing: NGHTTP2_INCLUDE_DIR NGHTTP2_LIBRARY) 
+-- Looking for ldap_init in ldap
+-- Looking for ldap_init in ldap - not found
+-- Looking for ber_init in lber
+-- Looking for ber_init in lber - not found
+-- Looking for include file ldap.h
+-- Looking for include file ldap.h - not found
+-- Looking for include file lber.h
+-- Looking for include file lber.h - not found
+-- LDAP_H not found CURL_DISABLE_LDAP set ON
+-- LDAP needs to be enabled to support LDAPS
+-- Could NOT find Libidn2 (missing: LIBIDN2_INCLUDE_DIR LIBIDN2_LIBRARY) (found version "")
+-- Could NOT find Libpsl (missing: LIBPSL_INCLUDE_DIR LIBPSL_LIBRARY) 
+-- Could NOT find Libssh2 (missing: LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY) 
+-- Performing Test USE_UNIX_SOCKETS
+-- Performing Test USE_UNIX_SOCKETS - Success
+-- Looking for include file sys/eventfd.h
+-- Looking for include file sys/eventfd.h - found
+-- Looking for include files sys/eventfd.h, sys/filio.h
+-- Looking for include files sys/eventfd.h, sys/filio.h - not found
+-- Looking for include files sys/eventfd.h, sys/wait.h
+-- Looking for include files sys/eventfd.h, sys/wait.h - found
+-- Looking for 3 include files sys/eventfd.h, ..., sys/ioctl.h
+-- Looking for 3 include files sys/eventfd.h, ..., sys/ioctl.h - found
+-- Looking for 4 include files sys/eventfd.h, ..., sys/param.h
+-- Looking for 4 include files sys/eventfd.h, ..., sys/param.h - found
+-- Looking for 5 include files sys/eventfd.h, ..., sys/poll.h
+-- Looking for 5 include files sys/eventfd.h, ..., sys/poll.h - found
+-- Looking for 6 include files sys/eventfd.h, ..., sys/resource.h
+-- Looking for 6 include files sys/eventfd.h, ..., sys/resource.h - found
+-- Looking for 7 include files sys/eventfd.h, ..., sys/select.h
+-- Looking for 7 include files sys/eventfd.h, ..., sys/select.h - found
+-- Looking for 8 include files sys/eventfd.h, ..., sys/socket.h
+-- Looking for 8 include files sys/eventfd.h, ..., sys/socket.h - found
+-- Looking for 9 include files sys/eventfd.h, ..., sys/sockio.h
+-- Looking for 9 include files sys/eventfd.h, ..., sys/sockio.h - not found
+-- Looking for 10 include files sys/eventfd.h, ..., sys/time.h
+-- Looking for 10 include files sys/eventfd.h, ..., sys/time.h - found
+-- Looking for 12 include files sys/eventfd.h, ..., sys/un.h
+-- Looking for 12 include files sys/eventfd.h, ..., sys/un.h - found
+-- Looking for 13 include files sys/eventfd.h, ..., sys/utime.h
+-- Looking for 13 include files sys/eventfd.h, ..., sys/utime.h - not found
+-- Looking for 13 include files sys/eventfd.h, ..., sys/xattr.h
+-- Looking for 13 include files sys/eventfd.h, ..., sys/xattr.h - found
+-- Looking for 14 include files sys/eventfd.h, ..., arpa/inet.h
+-- Looking for 14 include files sys/eventfd.h, ..., arpa/inet.h - found
+-- Looking for 15 include files sys/eventfd.h, ..., dirent.h
+-- Looking for 15 include files sys/eventfd.h, ..., dirent.h - found
+-- Looking for 16 include files sys/eventfd.h, ..., fcntl.h
+-- Looking for 16 include files sys/eventfd.h, ..., fcntl.h - found
+-- Looking for 17 include files sys/eventfd.h, ..., ifaddrs.h
+-- Looking for 17 include files sys/eventfd.h, ..., ifaddrs.h - found
+-- Looking for 18 include files sys/eventfd.h, ..., io.h
+-- Looking for 18 include files sys/eventfd.h, ..., io.h - not found
+-- Looking for 18 include files sys/eventfd.h, ..., libgen.h
+-- Looking for 18 include files sys/eventfd.h, ..., libgen.h - found
+-- Looking for 19 include files sys/eventfd.h, ..., locale.h
+-- Looking for 19 include files sys/eventfd.h, ..., locale.h - found
+-- Looking for 20 include files sys/eventfd.h, ..., net/if.h
+-- Looking for 20 include files sys/eventfd.h, ..., net/if.h - found
+-- Looking for 21 include files sys/eventfd.h, ..., netdb.h
+-- Looking for 21 include files sys/eventfd.h, ..., netdb.h - found
+-- Looking for 22 include files sys/eventfd.h, ..., netinet/in.h
+-- Looking for 22 include files sys/eventfd.h, ..., netinet/in.h - found
+-- Looking for 23 include files sys/eventfd.h, ..., netinet/tcp.h
+-- Looking for 23 include files sys/eventfd.h, ..., netinet/tcp.h - found
+-- Looking for 24 include files sys/eventfd.h, ..., netinet/udp.h
+-- Looking for 24 include files sys/eventfd.h, ..., netinet/udp.h - found
+-- Looking for linux/tcp.h
+-- Looking for linux/tcp.h - found
+-- Looking for 25 include files sys/eventfd.h, ..., poll.h
+-- Looking for 25 include files sys/eventfd.h, ..., poll.h - found
+-- Looking for 26 include files sys/eventfd.h, ..., pwd.h
+-- Looking for 26 include files sys/eventfd.h, ..., pwd.h - found
+-- Looking for 27 include files sys/eventfd.h, ..., stdatomic.h
+-- Looking for 27 include files sys/eventfd.h, ..., stdatomic.h - found
+-- Looking for 28 include files sys/eventfd.h, ..., stdbool.h
+-- Looking for 28 include files sys/eventfd.h, ..., stdbool.h - found
+-- Looking for 30 include files sys/eventfd.h, ..., stropts.h
+-- Looking for 30 include files sys/eventfd.h, ..., stropts.h - not found
+-- Looking for 30 include files sys/eventfd.h, ..., termio.h
+-- Looking for 30 include files sys/eventfd.h, ..., termio.h - found
+-- Looking for 31 include files sys/eventfd.h, ..., termios.h
+-- Looking for 31 include files sys/eventfd.h, ..., termios.h - found
+-- Looking for 33 include files sys/eventfd.h, ..., utime.h
+-- Looking for 33 include files sys/eventfd.h, ..., utime.h - found
+-- Check size of ssize_t
+-- Check size of ssize_t - done
+-- Check size of long long
+-- Check size of long long - done
+-- Check size of long
+-- Check size of long - done
+-- Check size of int
+-- Check size of int - done
+-- Check size of __int64
+-- Check size of __int64 - failed
+-- Check size of time_t
+-- Check size of time_t - done
+-- Check size of suseconds_t
+-- Check size of suseconds_t - done
+-- Looking for fnmatch
+-- Looking for fnmatch - found
+-- Looking for basename
+-- Looking for basename - found
+-- Looking for opendir
+-- Looking for opendir - found
+-- Looking for socket
+-- Looking for socket - found
+-- Looking for sched_yield
+-- Looking for sched_yield - found
+-- Looking for socketpair
+-- Looking for socketpair - found
+-- Looking for recv
+-- Looking for recv - found
+-- Looking for send
+-- Looking for send - found
+-- Looking for sendmsg
+-- Looking for sendmsg - found
+-- Looking for select
+-- Looking for select - found
+-- Looking for strdup
+-- Looking for strdup - found
+-- Looking for stricmp
+-- Looking for stricmp - not found
+-- Looking for strcmpi
+-- Looking for strcmpi - not found
+-- Looking for memrchr
+-- Looking for memrchr - found
+-- Looking for alarm
+-- Looking for alarm - found
+-- Looking for fcntl
+-- Looking for fcntl - found
+-- Looking for getppid
+-- Looking for getppid - found
+-- Looking for utimes
+-- Looking for utimes - found
+-- Looking for gettimeofday
+-- Looking for gettimeofday - found
+-- Looking for closesocket
+-- Looking for closesocket - not found
+-- Looking for sigsetjmp
+-- Looking for sigsetjmp - found
+-- Looking for getpass_r
+-- Looking for getpass_r - not found
+-- Looking for getpwuid
+-- Looking for getpwuid - found
+-- Looking for getpwuid_r
+-- Looking for getpwuid_r - found
+-- Looking for geteuid
+-- Looking for geteuid - found
+-- Looking for utime
+-- Looking for utime - found
+-- Looking for gmtime_r
+-- Looking for gmtime_r - found
+-- Looking for gethostbyname_r
+-- Looking for gethostbyname_r - found
+-- Looking for signal
+-- Looking for signal - found
+-- Looking for strerror_r
+-- Looking for strerror_r - found
+-- Looking for siginterrupt
+-- Looking for siginterrupt - found
+-- Looking for getaddrinfo
+-- Looking for getaddrinfo - found
+-- Looking for getifaddrs
+-- Looking for getifaddrs - not found
+-- Looking for freeaddrinfo
+-- Looking for freeaddrinfo - found
+-- Looking for pipe
+-- Looking for pipe - found
+-- Looking for eventfd
+-- Looking for eventfd - found
+-- Looking for ftruncate
+-- Looking for ftruncate - found
+-- Looking for _fseeki64
+-- Looking for _fseeki64 - not found
+-- Looking for getpeername
+-- Looking for getpeername - found
+-- Looking for getsockname
+-- Looking for getsockname - found
+-- Looking for if_nametoindex
+-- Looking for if_nametoindex - found
+-- Looking for getrlimit
+-- Looking for getrlimit - found
+-- Looking for setlocale
+-- Looking for setlocale - found
+-- Looking for setmode
+-- Looking for setmode - not found
+-- Looking for setrlimit
+-- Looking for setrlimit - found
+-- Looking for snprintf
+-- Looking for snprintf - found
+-- Looking for mach_absolute_time
+-- Looking for mach_absolute_time - not found
+-- Looking for inet_ntop
+-- Looking for inet_ntop - found
+-- Looking for inet_pton
+-- Looking for inet_pton - found
+-- Looking for fsetxattr
+-- Looking for fsetxattr - found
+-- Performing Test HAVE_FSETXATTR_5
+-- Performing Test HAVE_FSETXATTR_5 - Success
+-- Performing Test HAVE_FSETXATTR_6
+-- Performing Test HAVE_FSETXATTR_6 - Failed
+-- Check size of sa_family_t
+-- Check size of sa_family_t - done
+-- Performing Test HAVE_FCNTL_O_NONBLOCK
+-- Performing Test HAVE_FCNTL_O_NONBLOCK - Success
+-- Performing Test HAVE_IOCTLSOCKET
+-- Performing Test HAVE_IOCTLSOCKET - Failed
+-- Performing Test HAVE_IOCTLSOCKET_CAMEL
+-- Performing Test HAVE_IOCTLSOCKET_CAMEL - Failed
+-- Performing Test HAVE_IOCTLSOCKET_CAMEL_FIONBIO
+-- Performing Test HAVE_IOCTLSOCKET_CAMEL_FIONBIO - Failed
+-- Performing Test HAVE_IOCTLSOCKET_FIONBIO
+-- Performing Test HAVE_IOCTLSOCKET_FIONBIO - Failed
+-- Performing Test HAVE_IOCTL_FIONBIO
+-- Performing Test HAVE_IOCTL_FIONBIO - Success
+-- Performing Test HAVE_IOCTL_SIOCGIFADDR
+-- Performing Test HAVE_IOCTL_SIOCGIFADDR - Success
+-- Performing Test HAVE_SETSOCKOPT_SO_NONBLOCK
+-- Performing Test HAVE_SETSOCKOPT_SO_NONBLOCK - Failed
+-- Performing Test HAVE_O_NONBLOCK
+-- Performing Test HAVE_O_NONBLOCK - Failed
+-- Performing Test HAVE_GETHOSTBYNAME_R_3
+-- Performing Test HAVE_GETHOSTBYNAME_R_3 - Failed
+-- Performing Test HAVE_GETHOSTBYNAME_R_5
+-- Performing Test HAVE_GETHOSTBYNAME_R_5 - Failed
+-- Performing Test HAVE_GETHOSTBYNAME_R_6
+-- Performing Test HAVE_GETHOSTBYNAME_R_6 - Success
+-- Performing Test HAVE_GETHOSTBYNAME_R_3_REENTRANT
+-- Performing Test HAVE_GETHOSTBYNAME_R_3_REENTRANT - Failed
+-- Performing Test HAVE_GETHOSTBYNAME_R_5_REENTRANT
+-- Performing Test HAVE_GETHOSTBYNAME_R_5_REENTRANT - Failed
+-- Performing Test HAVE_GETHOSTBYNAME_R_6_REENTRANT
+-- Performing Test HAVE_GETHOSTBYNAME_R_6_REENTRANT - Success
+-- Performing Test HAVE_IN_ADDR_T
+-- Performing Test HAVE_IN_ADDR_T - Success
+-- Performing Test HAVE_BOOL_T
+-- Performing Test HAVE_BOOL_T - Success
+-- Performing Test HAVE_FILE_OFFSET_BITS
+-- Performing Test HAVE_FILE_OFFSET_BITS - Success
+-- Performing Test HAVE_ATOMIC
+-- Performing Test HAVE_ATOMIC - Success
+-- Check size of off_t
+-- Check size of off_t - done
+-- Check size of curl_off_t
+-- Check size of curl_off_t - done
+-- Check size of curl_socket_t
+-- Check size of curl_socket_t - done
+-- Performing Test HAVE_GLIBC_STRERROR_R
+-- Performing Test HAVE_GLIBC_STRERROR_R - Failed
+-- Performing Test HAVE_POSIX_STRERROR_R
+-- Performing Test HAVE_POSIX_STRERROR_R - Success
+-- Performing Test HAVE_CLOCK_GETTIME_MONOTONIC
+-- Performing Test HAVE_CLOCK_GETTIME_MONOTONIC - Success
+-- Check size of struct sockaddr_storage
+-- Check size of struct sockaddr_storage - done
+-- Performing Test HAVE_MSG_NOSIGNAL
+-- Performing Test HAVE_MSG_NOSIGNAL - Success
+-- Performing Test HAVE_STRUCT_TIMEVAL
+-- Performing Test HAVE_STRUCT_TIMEVAL - Success
+-- Performing Test HAVE_POLL_FINE
+-- Performing Test HAVE_POLL_FINE - Success
+-- Performing Test HAVE_H_ERRNO
+-- Performing Test HAVE_H_ERRNO - Success
+-- Performing Test HAVE_CLOCK_GETTIME_MONOTONIC_RAW
+-- Performing Test HAVE_CLOCK_GETTIME_MONOTONIC_RAW - Success
+-- Protocols: dict file ftp ftps gopher gophers http https imap imaps ipfs ipns mqtt pop3 pop3s rtsp smb smbs smtp smtps telnet tftp ws wss
+-- Features: alt-svc AsynchDNS HSTS HTTPS-proxy IPv6 Largefile libz NTLM SSL threadsafe UnixSockets
+-- Enabled SSL backends: mbedTLS
+-- Looking for C++ include jni.h
+-- Looking for C++ include jni.h - found
+-- Configuring done (148.3s)
+-- Generating done (1.8s)
+-- Build files have been written to: C:/Users/user1/Repository/xplatj/launcher/build/android/armeabi-v7a
+[ 12%] Built target sdl_headers_copy
+[ 12%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/SDL.c.o
+[ 12%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/SDL_assert.c.o
+[ 12%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/SDL_dataqueue.c.o
+[ 12%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/SDL_error.c.o
+[ 12%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/SDL_guid.c.o
+[ 12%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/SDL_hints.c.o
+[ 12%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/SDL_list.c.o
+[ 12%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/SDL_log.c.o
+[ 12%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/SDL_utils.c.o
+[ 12%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/atomic/SDL_atomic.c.o
+[ 14%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/atomic/SDL_spinlock.c.o
+[ 14%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/audio/SDL_audio.c.o
+[ 14%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/audio/SDL_audiocvt.c.o
+[ 14%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/audio/SDL_audiodev.c.o
+[ 14%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/audio/SDL_audiotypecvt.c.o
+[ 14%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/audio/SDL_mixer.c.o
+[ 14%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/audio/SDL_wave.c.o
+[ 14%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/cpuinfo/SDL_cpuinfo.c.o
+[ 14%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/dynapi/SDL_dynapi.c.o
+[ 14%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_clipboardevents.c.o
+[ 15%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_displayevents.c.o
+[ 15%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_dropevents.c.o
+[ 15%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_events.c.o
+[ 15%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_gesture.c.o
+[ 15%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_keyboard.c.o
+[ 15%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_keysym_to_scancode.c.o
+[ 15%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_mouse.c.o
+[ 15%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_quit.c.o
+[ 15%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_scancode_tables.c.o
+[ 15%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_touch.c.o
+[ 15%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/SDL_windowevents.c.o
+[ 17%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/events/imKStoUCS.c.o
+[ 17%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/file/SDL_rwops.c.o
+[ 17%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/haptic/SDL_haptic.c.o
+[ 17%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/hidapi/SDL_hidapi.c.o
+[ 17%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/SDL_gamecontroller.c.o
+[ 17%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/SDL_joystick.c.o
+[ 17%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/SDL_steam_virtual_gamepad.c.o
+[ 17%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/controller_type.c.o
+[ 17%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/e_atan2.c.o
+[ 17%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/e_exp.c.o
+[ 19%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/e_fmod.c.o
+[ 19%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/e_log.c.o
+[ 19%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/e_log10.c.o
+[ 19%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/e_pow.c.o
+[ 19%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/e_rem_pio2.c.o
+[ 19%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/e_sqrt.c.o
+[ 19%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/k_cos.c.o
+[ 19%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/k_rem_pio2.c.o
+[ 19%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/k_sin.c.o
+[ 19%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/k_tan.c.o
+[ 20%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/s_atan.c.o
+[ 20%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/s_copysign.c.o
+[ 20%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/s_cos.c.o
+[ 20%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/s_fabs.c.o
+[ 20%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/s_floor.c.o
+[ 20%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/s_scalbn.c.o
+[ 20%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/s_sin.c.o
+[ 20%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/libm/s_tan.c.o
+[ 20%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/locale/SDL_locale.c.o
+[ 20%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/misc/SDL_url.c.o
+[ 20%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/power/SDL_power.c.o
+[ 22%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/SDL_d3dmath.c.o
+[ 22%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/SDL_render.c.o
+[ 22%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/SDL_yuv_sw.c.o
+[ 22%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/direct3d/SDL_render_d3d.c.o
+[ 22%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/direct3d/SDL_shaders_d3d.c.o
+[ 22%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/direct3d11/SDL_render_d3d11.c.o
+[ 22%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/direct3d11/SDL_shaders_d3d11.c.o
+[ 22%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/direct3d12/SDL_render_d3d12.c.o
+[ 22%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/direct3d12/SDL_shaders_d3d12.c.o
+[ 22%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/opengl/SDL_render_gl.c.o
+[ 23%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/opengl/SDL_shaders_gl.c.o
+[ 23%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/opengles/SDL_render_gles.c.o
+[ 23%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/opengles2/SDL_render_gles2.c.o
+[ 23%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/opengles2/SDL_shaders_gles2.c.o
+[ 23%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/ps2/SDL_render_ps2.c.o
+[ 23%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/psp/SDL_render_psp.c.o
+[ 23%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/software/SDL_blendfillrect.c.o
+[ 23%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/software/SDL_blendline.c.o
+[ 23%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/software/SDL_blendpoint.c.o
+[ 23%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/software/SDL_drawline.c.o
+[ 23%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/software/SDL_drawpoint.c.o
+[ 25%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/software/SDL_render_sw.c.o
+[ 25%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/software/SDL_rotate.c.o
+[ 25%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/software/SDL_triangle.c.o
+[ 25%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/vitagxm/SDL_render_vita_gxm.c.o
+[ 25%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/vitagxm/SDL_render_vita_gxm_memory.c.o
+[ 25%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/render/vitagxm/SDL_render_vita_gxm_tools.c.o
+[ 25%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/sensor/SDL_sensor.c.o
+[ 25%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/stdlib/SDL_crc16.c.o
+[ 25%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/stdlib/SDL_crc32.c.o
+[ 25%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/stdlib/SDL_getenv.c.o
+[ 26%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/stdlib/SDL_iconv.c.o
+[ 26%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/stdlib/SDL_malloc.c.o
+[ 26%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/stdlib/SDL_mslibc.c.o
+[ 26%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/stdlib/SDL_qsort.c.o
+[ 26%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/stdlib/SDL_stdlib.c.o
+[ 26%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/stdlib/SDL_string.c.o
+[ 26%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/stdlib/SDL_strtokr.c.o
+[ 26%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/thread/SDL_thread.c.o
+[ 26%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/timer/SDL_timer.c.o
+[ 26%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_RLEaccel.c.o
+[ 28%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_blit.c.o
+[ 28%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_blit_0.c.o
+[ 28%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_blit_1.c.o
+[ 28%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_blit_A.c.o
+[ 28%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_blit_N.c.o
+[ 28%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_blit_auto.c.o
+[ 28%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_blit_copy.c.o
+[ 28%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_blit_slow.c.o
+[ 28%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_bmp.c.o
+[ 28%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_clipboard.c.o
+[ 28%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_egl.c.o
+[ 30%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_fillrect.c.o
+[ 30%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_pixels.c.o
+[ 30%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_rect.c.o
+[ 30%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_shape.c.o
+[ 30%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_stretch.c.o
+[ 30%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_surface.c.o
+[ 30%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_video.c.o
+[ 30%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_vulkan_utils.c.o
+[ 30%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/SDL_yuv.c.o
+[ 30%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/yuv2rgb/yuv_rgb_lsx.c.o
+[ 31%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/yuv2rgb/yuv_rgb_sse.c.o
+[ 31%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/yuv2rgb/yuv_rgb_std.c.o
+[ 31%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/audio/dummy/SDL_dummyaudio.c.o
+[ 31%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/audio/disk/SDL_diskaudio.c.o
+[ 31%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/loadso/dlopen/SDL_sysloadso.c.o
+[ 31%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/virtual/SDL_virtualjoystick.c.o
+[ 31%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/dummy/SDL_nullevents.c.o
+[ 31%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/dummy/SDL_nullframebuffer.c.o
+[ 31%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/dummy/SDL_nullvideo.c.o
+[ 31%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/offscreen/SDL_offscreenevents.c.o
+[ 31%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/offscreen/SDL_offscreenframebuffer.c.o
+[ 33%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/offscreen/SDL_offscreenopengles.c.o
+[ 33%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/offscreen/SDL_offscreenvideo.c.o
+[ 33%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/offscreen/SDL_offscreenwindow.c.o
+[ 33%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/core/android/SDL_android.c.o
+[ 33%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/misc/android/SDL_sysurl.c.o
+[ 33%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/audio/android/SDL_androidaudio.c.o
+[ 33%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/audio/openslES/SDL_openslES.c.o
+[ 33%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/audio/aaudio/SDL_aaudio.c.o
+[ 33%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/filesystem/android/SDL_sysfilesystem.c.o
+[ 34%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/haptic/android/SDL_syshaptic.c.o
+[ 34%] Building CXX object build-sdl/CMakeFiles/SDL2.dir/src/hidapi/android/hid.cpp.o
+[ 34%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_combined.c.o
+[ 34%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_gamecube.c.o
+[ 34%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_luna.c.o
+[ 34%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_ps3.c.o
+[ 34%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_ps4.c.o
+[ 34%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_ps5.c.o
+[ 34%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_rumble.c.o
+[ 34%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_shield.c.o
+[ 36%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_stadia.c.o
+[ 36%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_steam.c.o
+[ 36%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_steamdeck.c.o
+[ 36%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_switch.c.o
+[ 36%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_wii.c.o
+[ 36%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_xbox360.c.o
+[ 36%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_xbox360w.c.o
+[ 36%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapi_xboxone.c.o
+[ 36%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/hidapi/SDL_hidapijoystick.c.o
+[ 36%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/android/SDL_sysjoystick.c.o
+[ 36%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/joystick/steam/SDL_steamcontroller.c.o
+[ 38%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/power/android/SDL_syspower.c.o
+[ 38%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/locale/android/SDL_syslocale.c.o
+[ 38%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/timer/unix/SDL_systimer.c.o
+[ 38%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/sensor/android/SDL_androidsensor.c.o
+[ 38%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/android/SDL_androidclipboard.c.o
+[ 38%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/android/SDL_androidevents.c.o
+[ 38%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/android/SDL_androidgl.c.o
+[ 38%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/android/SDL_androidkeyboard.c.o
+[ 38%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/android/SDL_androidmessagebox.c.o
+[ 38%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/android/SDL_androidmouse.c.o
+[ 39%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/android/SDL_androidtouch.c.o
+[ 39%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/android/SDL_androidvideo.c.o
+[ 39%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/android/SDL_androidvulkan.c.o
+[ 39%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/video/android/SDL_androidwindow.c.o
+[ 39%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/thread/pthread/SDL_systhread.c.o
+[ 39%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/thread/pthread/SDL_sysmutex.c.o
+[ 39%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/thread/pthread/SDL_syscond.c.o
+[ 39%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/thread/pthread/SDL_systls.c.o
+[ 39%] Building C object build-sdl/CMakeFiles/SDL2.dir/src/thread/pthread/SDL_syssem.c.o
+[ 39%] Linking CXX shared library libSDL2.so
+[ 39%] Built target SDL2
+[ 39%] Built target SDL2main
+[ 39%] Building C object CMakeFiles/SDLLoader.dir/SDLLoader.c.o
+[ 39%] Linking C shared library libSDLLoader.so
+[ 39%] Built target SDLLoader
+[ 39%] Built target launcher
+[ 39%] Built target pxprpc
+[ 46%] Built target uv_a
+[ 46%] Built target pxprpc_libuv
+[ 47%] Built target uvwasi_a
+[ 47%] Built target pwart
+[ 49%] Built target objlib
+[ 50%] Built target ffi_static
+[ 50%] Built target pwart_syslib
+[ 50%] Built target everest
+[ 50%] Built target p256m
+[ 63%] Built target mbedcrypto
+[ 65%] Built target mbedx509
+[ 68%] Built target mbedtls
+[ 68%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/altsvc.c.o
+[ 68%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/amigaos.c.o
+[ 68%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/asyn-ares.c.o
+[ 68%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/asyn-thread.c.o
+[ 68%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/base64.c.o
+[ 69%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/bufq.c.o
+[ 69%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/bufref.c.o
+[ 69%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/c-hyper.c.o
+[ 69%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/cf-h1-proxy.c.o
+[ 69%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/cf-h2-proxy.c.o
+[ 69%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/cf-haproxy.c.o
+[ 69%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/cf-https-connect.c.o
+[ 69%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/cf-socket.c.o
+[ 69%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/cfilters.c.o
+[ 69%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/conncache.c.o
+[ 71%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/connect.c.o
+[ 71%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/content_encoding.c.o
+[ 71%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/cookie.c.o
+[ 71%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_addrinfo.c.o
+[ 71%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_des.c.o
+[ 71%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_endian.c.o
+[ 71%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_fnmatch.c.o
+[ 71%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_get_line.c.o
+[ 71%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_gethostname.c.o
+[ 71%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_gssapi.c.o
+[ 73%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_memrchr.c.o
+[ 73%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_multibyte.c.o
+[ 73%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_ntlm_core.c.o
+[ 73%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_path.c.o
+[ 73%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_range.c.o
+[ 73%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_rtmp.c.o
+[ 73%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_sasl.c.o
+[ 73%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_sha512_256.c.o
+[ 73%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_sspi.c.o
+[ 73%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_threads.c.o
+[ 73%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/curl_trc.c.o
+[ 74%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/cw-out.c.o
+[ 74%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/dict.c.o
+[ 74%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/doh.c.o
+[ 74%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/dynbuf.c.o
+[ 74%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/dynhds.c.o
+[ 74%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/easy.c.o
+[ 74%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/easygetopt.c.o
+[ 74%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/easyoptions.c.o
+[ 74%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/escape.c.o
+[ 74%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/file.c.o
+[ 76%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/fileinfo.c.o
+[ 76%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/fopen.c.o
+[ 76%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/formdata.c.o
+[ 76%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/ftp.c.o
+[ 76%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/ftplistparser.c.o
+[ 76%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/getenv.c.o
+[ 76%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/getinfo.c.o
+[ 76%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/gopher.c.o
+[ 76%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/hash.c.o
+[ 76%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/headers.c.o
+[ 76%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/hmac.c.o
+[ 77%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/hostasyn.c.o
+[ 77%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/hostip.c.o
+[ 77%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/hostip4.c.o
+[ 77%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/hostip6.c.o
+[ 77%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/hostsyn.c.o
+[ 77%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/hsts.c.o
+[ 77%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/http.c.o
+[ 77%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/http1.c.o
+[ 77%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/http2.c.o
+[ 77%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/http_aws_sigv4.c.o
+[ 79%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/http_chunks.c.o
+[ 79%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/http_digest.c.o
+[ 79%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/http_negotiate.c.o
+[ 79%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/http_ntlm.c.o
+[ 79%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/http_proxy.c.o
+[ 79%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/idn.c.o
+[ 79%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/if2ip.c.o
+[ 79%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/imap.c.o
+[ 79%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/inet_ntop.c.o
+[ 79%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/inet_pton.c.o
+[ 80%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/krb5.c.o
+[ 80%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/ldap.c.o
+[ 80%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/llist.c.o
+[ 80%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/macos.c.o
+[ 80%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/md4.c.o
+[ 80%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/md5.c.o
+[ 80%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/memdebug.c.o
+[ 80%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/mime.c.o
+[ 80%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/mprintf.c.o
+[ 80%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/mqtt.c.o
+[ 80%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/multi.c.o
+[ 82%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/netrc.c.o
+[ 82%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/nonblock.c.o
+[ 82%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/noproxy.c.o
+[ 82%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/openldap.c.o
+[ 82%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/parsedate.c.o
+[ 82%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/pingpong.c.o
+[ 82%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/pop3.c.o
+[ 82%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/progress.c.o
+[ 82%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/psl.c.o
+[ 82%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/rand.c.o
+[ 84%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/rename.c.o
+[ 84%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/request.c.o
+[ 84%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/rtsp.c.o
+[ 84%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/select.c.o
+[ 84%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/sendf.c.o
+[ 84%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/setopt.c.o
+[ 84%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/sha256.c.o
+[ 84%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/share.c.o
+[ 84%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/slist.c.o
+[ 84%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/smb.c.o
+[ 84%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/smtp.c.o
+[ 85%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/socketpair.c.o
+[ 85%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/socks.c.o
+[ 85%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/socks_gssapi.c.o
+[ 85%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/socks_sspi.c.o
+[ 85%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/speedcheck.c.o
+[ 85%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/splay.c.o
+[ 85%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/strcase.c.o
+[ 85%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/strdup.c.o
+[ 85%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/strerror.c.o
+[ 85%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/strtok.c.o
+[ 87%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/strtoofft.c.o
+[ 87%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/system_win32.c.o
+[ 87%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/telnet.c.o
+[ 87%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/tftp.c.o
+[ 87%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/timediff.c.o
+[ 87%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/timeval.c.o
+[ 87%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/transfer.c.o
+[ 87%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/url.c.o
+[ 87%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/urlapi.c.o
+[ 87%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/version.c.o
+[ 88%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/version_win32.c.o
+[ 88%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/warnless.c.o
+[ 88%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/ws.c.o
+[ 88%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/cleartext.c.o
+[ 88%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/cram.c.o
+[ 88%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/digest.c.o
+[ 88%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/digest_sspi.c.o
+[ 88%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/gsasl.c.o
+[ 88%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/krb5_gssapi.c.o
+[ 88%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/krb5_sspi.c.o
+[ 88%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/ntlm.c.o
+[ 90%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/ntlm_sspi.c.o
+[ 90%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/oauth2.c.o
+[ 90%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/spnego_gssapi.c.o
+[ 90%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/spnego_sspi.c.o
+[ 90%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vauth/vauth.c.o
+[ 90%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/bearssl.c.o
+[ 90%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/cipher_suite.c.o
+[ 90%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/gtls.c.o
+[ 90%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/hostcheck.c.o
+[ 90%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/keylog.c.o
+[ 92%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/mbedtls.c.o
+[ 92%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/mbedtls_threadlock.c.o
+[ 92%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/openssl.c.o
+[ 92%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/rustls.c.o
+[ 92%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/schannel.c.o
+[ 92%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/schannel_verify.c.o
+[ 92%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/sectransp.c.o
+[ 92%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/vtls.c.o
+[ 92%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/wolfssl.c.o
+[ 92%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vtls/x509asn1.c.o
+[ 93%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vquic/curl_msh3.c.o
+[ 93%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vquic/curl_ngtcp2.c.o
+[ 93%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vquic/curl_osslq.c.o
+[ 93%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vquic/curl_quiche.c.o
+[ 93%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vquic/vquic.c.o
+[ 93%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vquic/vquic-tls.c.o
+[ 93%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vssh/libssh.c.o
+[ 93%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vssh/libssh2.c.o
+[ 93%] Building C object build-txiki.js/deps/curl/lib/CMakeFiles/libcurl_static.dir/vssh/wolfssh.c.o
+[ 93%] Linking C static library libcurl.a
+[ 93%] Built target libcurl_static
+[ 93%] Built target qjs
+[ 93%] Built target sqlite3
+[ 93%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/builtins.c.o
+[ 93%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/curl-utils.c.o
+[ 93%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/curl-websocket.c.o
+[ 93%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/error.c.o
+[ 95%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/eval.c.o
+[ 95%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mem.c.o
+[ 95%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/modules.c.o
+[ 95%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/sha1.c.o
+[ 95%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/signals.c.o
+[ 95%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/timers.c.o
+[ 95%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/utils.c.o
+[ 95%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/version.c.o
+[ 95%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/vm.c.o
+[ 95%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/worker.c.o
+[ 96%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/ws.c.o
+[ 96%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/xhr.c.o
+[ 96%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_dns.c.o
+[ 96%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_engine.c.o
+[ 96%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_ffi.c.o
+[ 96%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_fs.c.o
+[ 96%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_fswatch.c.o
+[ 96%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_os.c.o
+[ 96%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_process.c.o
+[ 96%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_sqlite3.c.o
+[ 96%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_streams.c.o
+[ 98%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_sys.c.o
+[ 98%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_udp.c.o
+[ 98%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/bundles/c/core/core.c.o
+[ 98%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/bundles/c/core/polyfills.c.o
+[ 98%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/bundles/c/core/run-main.c.o
+[ 98%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/bundles/c/core/run-repl.c.o
+[ 98%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/bundles/c/core/worker-bootstrap.c.o
+[ 98%] Building C object build-txiki.js/CMakeFiles/tjs.dir/deps/quickjs/cutils.c.o
+[ 98%] Building C object build-txiki.js/CMakeFiles/tjs.dir/src/mod_posix-socket.c.o
+[ 98%] Linking C static library libtjs.a
+[ 98%] Built target tjs
+[ 98%] Built target pxprpc_pipe
+[ 98%] Building C object build-pxprpc_rtbridge/CMakeFiles/pxprpc_rtbridge.dir/src/pxprpc_rtbridge.c.o
+[ 98%] Building CXX object build-pxprpc_rtbridge/CMakeFiles/pxprpc_rtbridge.dir/src/pxprpc_rtbridge_host.cpp.o
+[100%] Building C object build-pxprpc_rtbridge/CMakeFiles/pxprpc_rtbridge.dir/C_/Users/user1/Repository/xplatj/deps/txiki.js/src/mod_posix-socket.c.o
+[100%] Linking CXX shared library libpxprpc_rtbridge.so
+source root:C:\Users\user1\Repository\xplatj
+{'DESKTOP_TOOLCHAIN_LIST': {'CC_MINGW-W64_X86_64': {'CC': 'c:/mingw64/bin/gcc', 'CXX': 'c:/mingw64/bin/g++', 'JLINK': 'c:/Programe Files/java/bin/jlink'}, 'CC_MINGW-W64_X86': {'CC': 'c:/mingw32/bin/gcc', 'CXX': 'c:/mingw32/bin/g++'}, 'CC_LINUX-GCC_ARM': {'CC': 'c:/cross-compiler/1/bin/arm-linux-gnueabihf-g++'}}, 'SKIP_ANDROID_BUILD': False, 'ANDROID_ABI': ['armeabi-v7a', 'arm64-v8a'], 'ANDROID_NATIVE_API_LEVEL': '21', 'PACK_JAVA_RUNTIME': False, 'DEPS_REPOSITORY_PULL_URL': 'https://gitee.com/partic/{name}.git', 'CMAKE': 'cmake', 'ANDROID_NDK': 'C:\\Users\\user1\\Application\\AndroidSdk\\ndk\\26.0', 'CMAKE_GENERATOR': 'MinGW Makefiles', 'MAKE': 'C:\\Users\\Public\\fs\\msys\\mingw\\bin\\mingw32-make.EXE'}
+build android target for armeabi-v7a
+execute C:\Users\user1\Application\cmake\bin\cmake.EXE -DANDROID_NATIVE_API_LEVEL=21 -DCMAKE_TOOLCHAIN_FILE=C:\Users\user1\Application\AndroidSdk\ndk\26.0/build/cmake/android.toolchain.cmake -DCMAKE_BUILD_TYPE=RELEASE -G "MinGW Makefiles" -S C:\Users\user1\Repository\xplatj/launcher -DANDROID_ABI=armeabi-v7a -B C:\Users\user1\Repository\xplatj\launcher\build\android\armeabi-v7a
+execute C:\Users\Public\fs\msys\mingw\bin\mingw32-make.EXE

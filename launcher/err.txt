@@ -1,0 +1,134 @@
+!!!Compiling Note!!!
+If you failed to compile with libffi, you can rename/remove "./libffi" directory to diable libffi relative feature.
+libffi found, libffi binding is enabled.
+CMake Warning at C:/Users/user1/Repository/xplatj/deps/txiki.js/deps/curl/CMakeLists.txt:428 (message):
+  Perl not found.  Will not build manuals.
+
+
+CMake Warning at C:/Users/user1/Repository/xplatj/deps/txiki.js/deps/curl/CMakeLists.txt:1079 (message):
+  libpsl is enabled, but not found.
+
+
+java jnibridge enabled
+C:\Users\user1\Repository\xplatj\deps\txiki.js\deps\curl\lib\file.c:332:41: warning: implicit conversion loses integer precision: 'unsigned int' to 'mode_t' (aka 'unsigned short') [-Wimplicit-int-conversion]
+  fd = open(file->path, mode, data->set.new_file_perms);
+       ~~~~                   ~~~~~~~~~~^~~~~~~~~~~~~~
+1 warning generated.
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:98:14: warning: case value not in enumerated type 'ffi_status' [-Wswitch]
+        case 3:
+             ^
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:380:17: warning: passing 'uint64_t *' (aka 'unsigned long long *') to parameter of type 'int64_t *' (aka 'long long *') converts between pointers to integer types with different sign [-Wpointer-sign]
+                JS_TO_UINTPTR_T(ctx, &bla, val);
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:39:28: note: expanded from macro 'JS_TO_UINTPTR_T'
+        JS_ToBigInt64(ctx, &v, val);                                                                                   \
+                           ^~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\deps\quickjs\include/quickjs.h:782:54: note: passing argument to parameter 'pres' here
+JS_EXTERN int JS_ToBigInt64(JSContext *ctx, int64_t *pres, JSValueConst val);
+                                                     ^
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:381:17: warning: passing 'uint64_t *' (aka 'unsigned long long *') to parameter of type 'int64_t *' (aka 'long long *') converts between pointers to integer types with different sign [-Wpointer-sign]
+                JS_TO_UINTPTR_T(ctx, (void *) buf, val);
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:39:28: note: expanded from macro 'JS_TO_UINTPTR_T'
+        JS_ToBigInt64(ctx, &v, val);                                                                                   \
+                           ^~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\deps\quickjs\include/quickjs.h:782:54: note: passing argument to parameter 'pres' here
+JS_EXTERN int JS_ToBigInt64(JSContext *ctx, int64_t *pres, JSValueConst val);
+                                                     ^
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:408:9: warning: passing 'uint64_t *' (aka 'unsigned long long *') to parameter of type 'int64_t *' (aka 'long long *') converts between pointers to integer types with different sign [-Wpointer-sign]
+        JS_TO_UINTPTR_T(ctx, &bla, argv[0]);
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:39:28: note: expanded from macro 'JS_TO_UINTPTR_T'
+        JS_ToBigInt64(ctx, &v, val);                                                                                   \
+                           ^~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\deps\quickjs\include/quickjs.h:782:54: note: passing argument to parameter 'pres' here
+JS_EXTERN int JS_ToBigInt64(JSContext *ctx, int64_t *pres, JSValueConst val);
+                                                     ^
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:506:70: warning: format specifies type 'unsigned long' but the argument has type 'size_t' (aka 'unsigned int') [-Wformat]
+        JS_ThrowRangeError(ctx, "expected buffer to be of size %lu", typesz);
+                                                               ~~~   ^~~~~~
+                                                               %zu
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:694:13: warning: passing 'uint64_t *' (aka 'unsigned long long *') to parameter of type 'int64_t *' (aka 'long long *') converts between pointers to integer types with different sign [-Wpointer-sign]
+            JS_TO_UINTPTR_T(ctx, ptr, func_argv[i]);
+            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:39:28: note: expanded from macro 'JS_TO_UINTPTR_T'
+        JS_ToBigInt64(ctx, &v, val);                                                                                   \
+                           ^~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\deps\quickjs\include/quickjs.h:782:54: note: passing argument to parameter 'pres' here
+JS_EXTERN int JS_ToBigInt64(JSContext *ctx, int64_t *pres, JSValueConst val);
+                                                     ^
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:842:5: warning: passing 'uint64_t *' (aka 'unsigned long long *') to parameter of type 'int64_t *' (aka 'long long *') converts between pointers to integer types with different sign [-Wpointer-sign]
+    JS_TO_UINTPTR_T(ctx, &ptr, argv[0]);
+    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:39:28: note: expanded from macro 'JS_TO_UINTPTR_T'
+        JS_ToBigInt64(ctx, &v, val);                                                                                   \
+                           ^~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\deps\quickjs\include/quickjs.h:782:54: note: passing argument to parameter 'pres' here
+JS_EXTERN int JS_ToBigInt64(JSContext *ctx, int64_t *pres, JSValueConst val);
+                                                     ^
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:859:5: warning: passing 'uint64_t *' (aka 'unsigned long long *') to parameter of type 'int64_t *' (aka 'long long *') converts between pointers to integer types with different sign [-Wpointer-sign]
+    JS_TO_UINTPTR_T(ctx, &ptr, argv[0]);
+    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:39:28: note: expanded from macro 'JS_TO_UINTPTR_T'
+        JS_ToBigInt64(ctx, &v, val);                                                                                   \
+                           ^~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\deps\quickjs\include/quickjs.h:782:54: note: passing argument to parameter 'pres' here
+JS_EXTERN int JS_ToBigInt64(JSContext *ctx, int64_t *pres, JSValueConst val);
+                                                     ^
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:878:5: warning: passing 'uint64_t *' (aka 'unsigned long long *') to parameter of type 'int64_t *' (aka 'long long *') converts between pointers to integer types with different sign [-Wpointer-sign]
+    JS_TO_UINTPTR_T(ctx, &ptr, argv[0]);
+    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_ffi.c:39:28: note: expanded from macro 'JS_TO_UINTPTR_T'
+        JS_ToBigInt64(ctx, &v, val);                                                                                   \
+                           ^~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\deps\quickjs\include/quickjs.h:782:54: note: passing argument to parameter 'pres' here
+JS_EXTERN int JS_ToBigInt64(JSContext *ctx, int64_t *pres, JSValueConst val);
+                                                     ^
+9 warnings generated.
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_posix-socket.c:204:50: warning: passing 'socklen_t *' (aka 'int *') to parameter of type 'uint32_t *' (aka 'unsigned int *') converts between pointers to integer types with different sign [-Wpointer-sign]
+        TJS_CHECK_ARG_RET(ctx, !JS_ToUint32(ctx, &optlen, argv[2]) && optlen > 0, 2, "(optional) positive integer");
+                                                 ^~~~~~~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src/utils.h:137:11: note: expanded from macro 'TJS_CHECK_ARG_RET'
+    if (!(check)) {                                                                                                    \
+          ^~~~~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\deps\quickjs\include/quickjs.h:774:57: note: passing argument to parameter 'pres' here
+static inline int JS_ToUint32(JSContext *ctx, uint32_t *pres, JSValueConst val)
+                                                        ^
+1 warning generated.
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src\mod_posix-socket.c:204:50: warning: passing 'socklen_t *' (aka 'int *') to parameter of type 'uint32_t *' (aka 'unsigned int *') converts between pointers to integer types with different sign [-Wpointer-sign]
+        TJS_CHECK_ARG_RET(ctx, !JS_ToUint32(ctx, &optlen, argv[2]) && optlen > 0, 2, "(optional) positive integer");
+                                                 ^~~~~~~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\src/utils.h:137:11: note: expanded from macro 'TJS_CHECK_ARG_RET'
+    if (!(check)) {                                                                                                    \
+          ^~~~~
+C:\Users\user1\Repository\xplatj\deps\txiki.js\deps\quickjs\include/quickjs.h:774:57: note: passing argument to parameter 'pres' here
+static inline int JS_ToUint32(JSContext *ctx, uint32_t *pres, JSValueConst val)
+                                                        ^
+1 warning generated.
+ld.lld: error: undefined symbol: TJS_NewRuntime()
+>>> referenced by pxprpc_txikijs.hpp:41 (C:/Users/user1/Repository/xplatj/pxprpc-modules/pxprpc-txikijs/pxprpc_txikijs.hpp:41)
+>>>               CMakeFiles/pxprpc_rtbridge.dir/src/pxprpc_rtbridge_host.cpp.o:(pxprpc_txikijs::TjsRuntimeWrap::init(std::__ndk1::vector<std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>>, std::__ndk1::allocator<std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>>>>&))
+>>> did you mean: extern "C" TJS_NewRuntime
+>>> defined in: ..\build-txiki.js\libtjs.a(vm.c.o)
+
+ld.lld: error: undefined symbol: TJS_Initialize(int, char**)
+>>> referenced by pxprpc_txikijs.hpp:42 (C:/Users/user1/Repository/xplatj/pxprpc-modules/pxprpc-txikijs/pxprpc_txikijs.hpp:42)
+>>>               CMakeFiles/pxprpc_rtbridge.dir/src/pxprpc_rtbridge_host.cpp.o:(pxprpc_txikijs::TjsRuntimeWrap::init(std::__ndk1::vector<std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>>, std::__ndk1::allocator<std::__ndk1::basic_string<char, std::__ndk1::char_traits<char>, std::__ndk1::allocator<char>>>>&))
+>>> did you mean: extern "C" TJS_Initialize
+>>> defined in: ..\build-txiki.js\libtjs.a(vm.c.o)
+
+ld.lld: error: undefined symbol: TJS_FreeRuntime(TJSRuntime*)
+>>> referenced by pxprpc_txikijs.hpp:68 (C:/Users/user1/Repository/xplatj/pxprpc-modules/pxprpc-txikijs/pxprpc_txikijs.hpp:68)
+>>>               CMakeFiles/pxprpc_rtbridge.dir/src/pxprpc_rtbridge_host.cpp.o:(pxprpc_txikijs::TjsRuntimeWrap::~TjsRuntimeWrap())
+clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+mingw32-make.EXE[2]: *** [build-pxprpc_rtbridge\CMakeFiles\pxprpc_rtbridge.dir\build.make:148: build-pxprpc_rtbridge/libpxprpc_rtbridge.so] Error 1
+mingw32-make.EXE[1]: *** [CMakeFiles\Makefile2:1609: build-pxprpc_rtbridge/CMakeFiles/pxprpc_rtbridge.dir/all] Error 2
+mingw32-make.EXE: *** [Makefile:135: all] Error 2
+Traceback (most recent call last):
+  File "build.py", line 219, in <module>
+    BuildAndroidRelease()
+  File "build.py", line 98, in BuildAndroidRelease
+    PrintAndRun(buildConfig['MAKE'])
+  File "build.py", line 23, in PrintAndRun
+    raise Exception('subprocess failed');
+Exception: subprocess failed
