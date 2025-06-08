@@ -185,7 +185,7 @@ def BuildDesktopRelease(name,toolchain):
     finally:
         os.environ[ldpathenv]=savedldpath
 
-@functools.cache
+@functools.lru_cache
 def getGitExec():
     gitexec=shutil.which('git')
     assert gitexec!=None

@@ -50,16 +50,8 @@ typedef void *(*entry_func)(void *);
 
 char* cmd_argv[]={NULL};
 void start(){
-    pwart_namespace ns=NULL;
-    FILE *boot0=NULL;
-    void *wasmbuf=NULL;
-    void *stackbase=NULL;
-    int nread=0;
-    char *errmsg=NULL;
-    pwart_module_state modstat=NULL;
-    pwart_wasm_function startfn=NULL;
+    SDL_Init(SDL_INIT_EVERYTHING);
     SDL_Log("SDLLoader startup");
-
     {
         //to init wasi module on windows, maybe changed in future.
         freopen(get_data_path("/xplat-flag.txt"),"r",stdin);
@@ -68,11 +60,9 @@ void start(){
         char *modpath=get_data_path("/boot0.wasm");
         void *stackbase = pwart_allocate_stack(64 * 1024);
         char *err=NULL;
-        void *sp;
         long filesize;
         FILE *f;
         int len;
-        int returncode;
 
         pwart_wasi_module_set_wasiargs(0,cmd_argv);
         f = fopen(modpath, "rb");
@@ -128,6 +118,7 @@ void start(){
         fclose(logfile);
         logfile=NULL;
     }
+    SDL_Quit();
 }
 void init(){
     pxprpc::defaultFuncMap.add((new pxprpc::NamedFunctionPPImpl1())->init("xplat_sdlloader.start",

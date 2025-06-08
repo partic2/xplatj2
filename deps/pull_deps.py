@@ -72,6 +72,8 @@ def main():
 
     pull('SDL','https://gitee.com/partic/SDL-mirror','release-2.32.x')
     pull('webview','https://gitee.com/partic/webview-mirror.git','master')
+    
+    pull('txiki.js','https://gitee.com/partic/txiki.js-partic.git','master')
 
 if __name__=='__main__':
     main()

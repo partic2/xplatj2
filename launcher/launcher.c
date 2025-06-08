@@ -1,3 +1,5 @@
+#include <libloaderapi.h>
+#include <minwindef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,6 +29,18 @@ static char *strconcat2(char *str1,char *str2){
   r[len1+len2]=0;
   return r;
 }
+
+#ifdef __WIN32
+static void *dlopen(const char *name,int flag){
+  return LoadLibrary(name);
+}
+static void *dlsym(void *dll,const char *name){
+  return GetProcAddress((HMODULE)dll, name);
+}
+static int dlclose(void *dll){
+  FreeLibrary((HMODULE)dll);
+}
+#endif
 
 /*
   This is also a DLLHOST, Use as ./launcher dllpath function_name ...other_command
@@ -129,20 +143,8 @@ int main(int argc, char *argv[]) {
   }else{
     //As a DLL Host.
     void (*entryFunc)(int argc,char *argv[]);
-  #ifdef __WIN32
-    HANDLE dll1=LoadLibrary(argv[1]);
-    if(dll1==NULL){
-      fprintf(stderr,"Load dll failed.\n");
-      return 1;
-    }
-    entryFunc=(void (*)(int argc,char *argv[]))GetProcAddress(dll1,argv[2]);
-    if(entryFunc==NULL){
-      fprintf(stderr,"Entry function not found.\n");
-      return 1;
-    }
-    entryFunc(argc,argv);
-  #elif defined __linux__
-    void *dll1=dlopen(argv[1],RTLD_LOCAL);
+
+    void *dll1=dlopen(argv[1],0);
     if(dll1==NULL){
       fprintf(stderr,"Load dll failed.\n");
       return 1;
@@ -153,7 +155,5 @@ int main(int argc, char *argv[]) {
       return 1;
     }
     entryFunc(argc,argv);
-  #endif
-
   }
 }

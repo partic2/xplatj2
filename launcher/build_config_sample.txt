@@ -4,17 +4,17 @@
 # If specified, Each toolchain in this dict will be used to compile respective release. The key of the dict is the output directory name.
 DESKTOP_TOOLCHAIN_LIST={
     'CC_MINGW-W64_X86_64':{
-        'CC':'c:/mingw64/bin/gcc',
-        'CXX':'c:/mingw64/bin/g++',
-        'JLINK':'c:/Programe Files/java/bin/jlink'    # jlink is only used when PACK_JAVA_RUNTIME=True
+        'CC':'c:/mingw64/bin/gcc.exe',
+        'CXX':'c:/mingw64/bin/g++.exe',
+        'JLINK':'c:/Programe Files/java/bin/jlink.exe'    # jlink is only used when PACK_JAVA_RUNTIME=True
     },
     'CC_MINGW-W64_X86':{
-        'CC':'c:/mingw32/bin/gcc',
-        'CXX':'c:/mingw32/bin/g++',
+        'CC':'c:/mingw32/bin/gcc.exe',
+        'CXX':'c:/mingw32/bin/g++.exe',
     },
     'CC_LINUX-GCC_ARM':{
-        'CC':'c:/cross-compiler/1/bin/arm-linux-gnueabihf-gcc',
-        'CC':'c:/cross-compiler/1/bin/arm-linux-gnueabihf-g++'
+        'CC':'c:/cross-compiler/1/bin/arm-linux-gnueabihf-gcc.exe',
+        'CC':'c:/cross-compiler/1/bin/arm-linux-gnueabihf-g++.exe'
     }
 }
 

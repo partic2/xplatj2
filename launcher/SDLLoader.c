@@ -27,7 +27,7 @@ int main(int argc,char *argv[]){
     if(rtbridgeDll==NULL){
         SDL_Log("pxprpc runtime bridge load failed.maybe dependencies(libc++) missing? %s",SDL_GetError());
     }else{
-        char *(*pxprpc_rtbridge_host_ensureInited)();
+        const char *(*pxprpc_rtbridge_host_ensureInited)();
         pxprpc_rtbridge_host_ensureInited=SDL_LoadFunction(rtbridgeDll,"pxprpc_rtbridge_host_ensureInited");
         if(pxprpc_rtbridge_host_ensureInited==NULL){
             SDL_Log("pxprpc runtime bridge load failed. No entry found.");
