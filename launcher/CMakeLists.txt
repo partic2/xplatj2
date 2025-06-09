@@ -44,13 +44,6 @@ endif()
 
 set(PXPRPC_RTBRIDGE_BUILD_EXE OFF)
 
-if(ANDROID)
-add_library(SDLLoader SHARED SDLLoader.c)
-SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
-else()
-add_executable(SDLLoader SDLLoader.c)
-endif()
-
 add_executable(launcher launcher.c)
 
 add_subdirectory(${DEPS_SOURCE_DIRS}/SDL ./build-sdl EXCLUDE_FROM_ALL)
@@ -59,7 +52,6 @@ add_subdirectory(${DEPS_SOURCE_DIRS}/txiki.js ./build-txiki.js EXCLUDE_FROM_ALL)
 
 list(APPEND PXPRPC_RTBIRDGE_MODULES_DIRS ${CMAKE_CURRENT_LIST_DIR}/../pxprpc-modules)
 add_subdirectory(${DEPS_SOURCE_DIRS}/PxpRpc/runtime_bridge ./build-pxprpc_rtbridge)
-target_link_libraries(SDLLoader SDL2main SDL2)
 
 
 

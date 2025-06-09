@@ -30,7 +30,6 @@ namespace pxprpc_txikijs{
         static JSValue ioSend(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
         static JSValue ioReceive(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
         static JSValue ioClose(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
-        static JSValue ioBufFree(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
         static JSValue accessMemory(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
         static const JSCFunctionListEntry props[] = {
             {
@@ -132,6 +131,9 @@ namespace pxprpc_txikijs{
             uv_mutex_unlock(&jobsMutex);
             uv_async_send(&asyncReq);
         }
+        void join(){
+
+        }
         //FIXME:Thread racing
         virtual void deinitAndDelete(){
             if(this->rt!=nullptr){
@@ -171,8 +173,6 @@ namespace pxprpc_txikijs{
             if(JS_IsUndefined(this_val)){
                 return JS_EXCEPTION;
             }
-            auto thisWrap=static_cast<TjsRuntimeWrap *>(JS_GetOpaque(this_val,0));
-            if(thisWrap==nullptr)return JS_EXCEPTION;
             auto name=JS_ToCString(ctx, argv[0]);
             auto r=pxprpc_rtbridge_pipe_connect(name);
             JS_FreeCString(ctx, name);

@@ -26,6 +26,8 @@ public class MainActivity extends Activity {
 	public static String gdxFlag="gdx";
 	public static String sdlFlag="sdl";
 	public static String webappFlag="webapp";
+
+	public static String tjsFlag="tjs";
 	public static String shutdownFlag="shutdown";
 	public static String rebootFlag="reboot";
 
@@ -163,6 +165,11 @@ public class MainActivity extends Activity {
 				intent.setClass(this,Class.forName("project.xplat.sdl.MainActivity"));
 				this.startActivityForResult(intent,1);
 			}else if(webappFlag.equals(selectedBackend)){
+				intent=new Intent();
+				intent.setClass(this,Class.forName("project.xplat.webapp.MainActivity"));
+				this.startActivityForResult(intent,1);
+			}else if(tjsFlag.equals(selectedBackend)){
+				//Still, webapp, But run tjs loader.
 				intent=new Intent();
 				intent.setClass(this,Class.forName("project.xplat.webapp.MainActivity"));
 				this.startActivityForResult(intent,1);

@@ -42,7 +42,7 @@ public class MainActivity extends SDLActivity
 	@Override
 	protected String getMainSharedObject()
 	{
-		return "libSDLLoader.so";
+		return "libpxprpc_rtbridge.so";
 	}
 	
 
