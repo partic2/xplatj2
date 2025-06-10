@@ -12,6 +12,7 @@ import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.BuiltInFuncList;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
+import pxprpc.runtimebridge.NativeHelper;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 
 import java.io.ByteArrayOutputStream;
@@ -171,6 +172,15 @@ public class SurfaceManager implements Closeable{
     public ByteBuffer getPlaneBufferData(ImageOrBitmap img,int planeIndex){
         ByteBuffer buf1 = img.image.getPlanes()[planeIndex].getBuffer();
         return buf1;
+    }
+    @MethodTypeDecl("oi->lii")
+    public Object[] getPlaneBufferDataProps(ImageOrBitmap img,int planeIndex){
+        ByteBuffer buf1 = img.image.getPlanes()[planeIndex].getBuffer();
+        if(buf1.isDirect()){
+            return new Object[]{NativeHelper.directBufferProperty(buf1,1),buf1.position(),buf1.remaining()};
+        }else{
+            return new Object[]{(long)0,0,0};
+        }
     }
     public ByteBuffer getPlaneBufferDataRange(ImageOrBitmap img,int planeIndex,int offset,int len){
         ByteBuffer buf1 = img.image.getPlanes()[planeIndex].getBuffer();
