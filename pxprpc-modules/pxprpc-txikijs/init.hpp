@@ -86,7 +86,7 @@ namespace pxprpc_txikijs{
         std::vector<std::function<void()> *> jobs;
         uv_async_t asyncReq;
         JSValue jsonevent=JS_UNDEFINED;
-        int32_t refCount=0;
+        int32_t refCount=1;
         std::set<struct pxprpc_abstract_io *> openedConn;
         
         TjsRuntimeWrap(){
@@ -114,8 +114,8 @@ namespace pxprpc_txikijs{
                 TJS_Run(this->rt);
                 uv_close(reinterpret_cast<uv_handle_t *>(&asyncReq),[](uv_handle_t *req)-> void {});
                 uv_run(TJS_GetLoop(this->rt),UV_RUN_ONCE);
+                TJS_FreeRuntime(this->rt);
                 this->rt=nullptr;
-                TJS_FreeRuntime(rt);
                 this->freeRef();
             });
         }
@@ -141,9 +141,6 @@ namespace pxprpc_txikijs{
             jobs.push_back(new decltype(cb)(cb));
             uv_mutex_unlock(&jobsMutex);
             uv_async_send(&asyncReq);
-        }
-        void join(){
-
         }
         //FIXME:Thread racing
         virtual void deinitAndDelete(){
