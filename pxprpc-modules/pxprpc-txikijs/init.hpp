@@ -213,7 +213,7 @@ namespace pxprpc_txikijs{
             buf.bytes.base=reinterpret_cast<void *>(JS_GetArrayBuffer(ctx, &size,argv[1]));
             buf.bytes.length=size;
             buf.next_part=nullptr;
-            char *err=pxprpc_rtbridge_bsend(io1,&buf);
+            const char *err=pxprpc_rtbridge_bsend(io1,&buf);
             if(err==nullptr){
                 return JS_UNDEFINED;
             }else{
@@ -234,7 +234,7 @@ namespace pxprpc_txikijs{
             thisWrap->addRef();
             auto jsCb=JS_DupValue(ctx,argv[1]);
             pxprpc_rtbridge_host::postRunnable([thisWrap,io1,jsCb,ctx]()->void {
-                pxprpc::iopp::receive(io1,{},
+                pxprpc::iopp::receive(io1,
                 [thisWrap,jsCb,ctx](const char *err,std::tuple<int32_t,void *> buf,std::function<void()> freebuf)-> void {
                     thisWrap->postRunnable([thisWrap,buf,freebuf,ctx,jsCb,err]()-> void {
                         if(err!=nullptr){

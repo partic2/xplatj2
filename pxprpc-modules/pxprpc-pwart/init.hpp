@@ -175,22 +175,21 @@ namespace pxprpc_pwart{
         sbuf.bytes.base=buf;
         sbuf.bytes.length=length;
         sbuf.next_part=nullptr;
-        char *err=pxprpc_rtbridge_bsend(io,&sbuf);
+        const char *err=pxprpc_rtbridge_bsend(io,&sbuf);
         sp=fp;
-        pwart_rstack_put_ref(&sp, err);
+        pwart_rstack_put_ref(&sp, const_cast<char *>(err));
     }
     void __wasm_io_brecv(void *fp){
         void *sp=fp;
         struct pxprpc_abstract_io *io=(struct pxprpc_abstract_io *)pwart_rstack_get_ref(&sp);
-        struct pxprpc_buffer_part sbuf;
-        sbuf.bytes.base=nullptr;
-        sbuf.bytes.length=0;
-        sbuf.next_part=nullptr;
-        char *err=pxprpc_rtbridge_brecv(io,&sbuf);
+        struct pxprpc_bytes rbuf;
+        rbuf.base=nullptr;
+        rbuf.length=0;
+        const char *err=pxprpc_rtbridge_brecv(io,&rbuf);
         sp=fp;
-        pwart_rstack_put_ref(&sp,err);
-        pwart_rstack_put_ref(&sp,sbuf.bytes.base);
-        pwart_rstack_put_i32(&sp,sbuf.bytes.length);
+        pwart_rstack_put_ref(&sp,const_cast<char *>(err));
+        pwart_rstack_put_ref(&sp,rbuf.base);
+        pwart_rstack_put_i32(&sp,rbuf.length);
     }
     void __wasm_io_buf_free(void *fp){
         void *sp=fp;
