@@ -29,14 +29,10 @@ public class JseIo implements Closeable{
         return new File(path).getCanonicalPath();
     }
     public void unlink(String path) throws IOException {
-        if(!new File(path).delete()){
-            throw new IOException("deleted failed");
-        }
+        new File(path).delete();
     }
     public void rename(String path,String newPath) throws IOException {
-        if(!new File(path).renameTo(new File(newPath))){
-            throw new IOException("rename failed");
-        };
+        new File(path).renameTo(new File(newPath));
     }
 
     @Override
@@ -68,11 +64,12 @@ public class JseIo implements Closeable{
         fh.raf=new RandomAccessFile(fh.f.getCanonicalPath(),"rw");
         return new Object[]{fh,fh.f.getCanonicalPath()};
     }
-
     public ByteBuffer fhRead(FH f,long offset,int length) throws IOException {
         f.raf.seek(offset);
         ByteBuffer buf = ByteBuffer.allocate(length);
-        f.raf.read(buf.array());
+        int byteRead=f.raf.read(buf.array());
+        if(byteRead<0)byteRead=0;
+        Utils.setLimit(buf,byteRead);
         return buf;
     }
     public int fhWrite(FH f,long offset,ByteBuffer buf) throws IOException {
@@ -122,14 +119,10 @@ public class JseIo implements Closeable{
         return fh;
     }
     public void rmdir(String path) throws IOException {
-        if(!new File(path).delete()){
-            throw new IOException("rmdir failed");
-        }
+        new File(path).delete();
     }
     public void mkdir(String path) throws IOException {
-        if(!new File(path).mkdirs()){
-            throw new IOException("mkdir failed");
-        }
+        new File(path).mkdirs();
     }
     protected void copyFileRecursively(String path,String newPath) throws IOException {
         File f1 = new File(path);

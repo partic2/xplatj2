@@ -61,6 +61,12 @@ public class CorsBusterServer {
         CloseableGroup closables=new CloseableGroup();
         try{
             String path=session.getUri();
+            String search=session.getQueryParameterString();
+            if(search==null){
+                search="";
+            }else{
+                search="?"+search;
+            }
             int delim1=path.indexOf("/",1);
             //First part is corsBuster prefix
             path=path.substring(delim1+1);
@@ -75,7 +81,7 @@ public class CorsBusterServer {
             }
             path=path.substring(delim1);
             URL realUrl = null;
-            realUrl = new URL(host + path);
+            realUrl = new URL(host + path + search);
             HttpURLConnection conn = (HttpURLConnection)realUrl.openConnection();
             conn.setDoInput(true);
             conn.setRequestMethod(session.getMethod().name());
