@@ -108,10 +108,6 @@ def BuildAndroidRelease():
                 dstsodir+'/libpxprpc_rtbridge.so')
         shutil.copy(sodir+'/launcher',\
                 dstsodir+'/launcher')
-    if os.path.exists(sourceroot+'/android-project/src/main/java/org/libsdl'):
-        shutil.rmtree(sourceroot+'/android-project/src/main/java/org/libsdl')
-    shutil.copytree(sourceroot+'/deps/SDL/android-project/app/src/main/java/org/libsdl',\
-        sourceroot+'/android-project/src/main/java/org/libsdl')
     os.chdir(sourceroot+'/android-project')
     gradle=os.curdir+os.sep+'gradlew'
     if os.name=='posix':
@@ -165,6 +161,10 @@ def BuildDesktopRelease(name,toolchain):
         shutil.unpack_archive(sourceroot+'/javase-project/build/distributions/xplatj.zip',\
             sourceroot+'/launcher/build/_temp/jse')
         shutil.copytree(sourceroot+'/launcher/build/_temp/jse/xplatj',outdir,dirs_exist_ok=True)
+        if os.path.exists(sourceroot+'/javase-project/src/main/assets'):
+            shutil.copytree(sourceroot+'/javase-project/src/main/assets',outdir,dirs_exist_ok=True)
+        if os.path.exists(sourceroot+'/commonj/src/main/assets'):
+            shutil.copytree(sourceroot+'/commonj/src/main/assets',outdir,dirs_exist_ok=True)
         if buildConfig['PACK_JAVA_RUNTIME']:
             if not os.path.exists(outdir+'/rt-java/release'):
                 PrintAndRun(toolchain['JLINK']+' --add-modules java.base,java.logging --output '+outdir+'/rt-java')

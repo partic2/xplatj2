@@ -101,6 +101,14 @@ public class XplatHTTPDServer extends NanoHTTPD {
                 }
             }
         }else if(uri.startsWith(pxprpcWsTunnelPrefix)) {
+            Map<String, String> headers = session.getHeaders();
+            if(headers.containsKey("origin") && !headers.get("origin").equals("")){
+                if(!headers.get("origin").startsWith("http://127.0.0.1")){
+                    return Response.newFixedLengthResponse(Status.FORBIDDEN,"text/plain",
+                            "Access from "+headers.get("origin")+" are not allowed."+
+                                "only accept request from 127.0.0.1");
+                }
+            }
         	return pxprpcServ.handle(new ProxyIHTTPSession(){
                 @Override
                 public String getUri() {

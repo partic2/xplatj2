@@ -48,9 +48,16 @@ android {
 				srcDirs '../commonj/src/main/java'
 				srcDirs '../deps/PxpRpc/java/src'
 				srcDirs '../deps/PxpRpc/runtime_bridge/java'
+				srcDirs '../deps/SDL/android-project/app/src/main/java'
+				if(!"minimal".equals(System.getenv("XPLATJ_BUILD_VARIANTS"))){
+					srcDirs+="src/extend/java"
+				}
 			}
 			resources{
 				srcDirs '../commonj/src/main/resources'
+			}
+			assets{
+				srcDirs '../commonj/src/main/assets'
 			}
 		}
 	}
@@ -67,8 +74,6 @@ android {
 		}
 	}
 }
-
-
 
 dependencies {
 	api fileTree(dir:'src/main/jar',include:['*.jar']);
