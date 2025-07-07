@@ -25,7 +25,6 @@ import java.util.Scanner;
 
 public class JMain {
 	static int orientation = 1;
-	public static boolean debugMode;
 	public static boolean[] startOptsParsed=new boolean[]{false};
 	public static String selectedBackend;
 	public static void ensureStartOpts(){
@@ -40,7 +39,7 @@ public class JMain {
 				String[] opts=new String(content,0,len,"utf8").split("\\s+");
 				for(String opt:opts){
 					if("debug".equals(opt)){
-						debugMode=true;
+						PlatCoreConfig.debugMode=true;
 					}
 				}
 				selectedBackend=opts[0];
@@ -74,13 +73,13 @@ public class JMain {
 	public static void startWebAppBackend() {
 		File cd = new File("");
 		String absPath = cd.getAbsolutePath();
-		if(debugMode) {
+		if(PlatCoreConfig.debugMode) {
 			httpd=new XplatHTTPDServer("0.0.0.0",httpdPort);
 		}else {
 			httpd=new XplatHTTPDServer("127.0.0.1",httpdPort);
 		}
 		try {
-			httpd.start(60*1000);
+			httpd.start(60*60*1000);
 			String entryUrl=XplatHTTPDServer.urlPathForFile(new File(cd.getAbsoluteFile()+"/data/index.html"));
 			entryUrl="http://127.0.0.1:"+httpdPort+(entryUrl.startsWith("/")?"":"/")+entryUrl;
 			System.out.println("Open url "+entryUrl+" in browser.");

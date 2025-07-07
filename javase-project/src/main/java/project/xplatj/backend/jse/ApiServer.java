@@ -11,6 +11,7 @@ import xplatj.platform.PlatApi;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 
@@ -25,9 +26,16 @@ public class ApiServer {
         if(JseIo.i==null)new JseIo();
         putModule(JseIo.PxprpcNamespace,JseIo.i);
 
+        try {
+            Class<?> extendMain = Class.forName("pxprpcapi.javaseex.Main");
+            Method register = extendMain.getMethod("registerPxprpcApi");
+            register.invoke(null);
+        } catch (Exception e) {
+        }
+
         for(port=portRange[0];port<portRange[1];port+=2){
             try{
-                if(JMain.debugMode){
+                if(PlatCoreConfig.debugMode){
                     tcpServ.bindAddr= new InetSocketAddress(
                             Inet4Address.getByAddress(new byte[]{(byte)0,(byte)0,(byte)0,(byte)0}),port);
                 }else{

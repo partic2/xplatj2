@@ -1,5 +1,6 @@
 package lib.pursuer.simplewebserver;
 
+import org.nanohttpd.protocols.http.ClientHandler;
 import org.nanohttpd.protocols.http.IHTTPSession;
 import org.nanohttpd.protocols.http.NanoHTTPD;
 import org.nanohttpd.protocols.http.response.IStatus;
@@ -11,6 +12,9 @@ import xplatj.gdxconfig.core.PlatCoreConfig;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -102,7 +106,7 @@ public class XplatHTTPDServer extends NanoHTTPD {
             }
         }else if(uri.startsWith(pxprpcWsTunnelPrefix)) {
             Map<String, String> headers = session.getHeaders();
-            if(headers.containsKey("origin") && !headers.get("origin").equals("")){
+            if(!PlatCoreConfig.debugMode && headers.containsKey("origin") && !headers.get("origin").equals("")){
                 if(!headers.get("origin").startsWith("http://127.0.0.1")){
                     return Response.newFixedLengthResponse(Status.FORBIDDEN,"text/plain",
                             "Access from "+headers.get("origin")+" are not allowed."+
@@ -117,6 +121,14 @@ public class XplatHTTPDServer extends NanoHTTPD {
                 }
             }.wrap(session));
         }else if(uri.startsWith(websocketTunnelPrefix)){
+            Map<String, String> headers = session.getHeaders();
+            if(!PlatCoreConfig.debugMode && headers.containsKey("origin") && !headers.get("origin").equals("")){
+                if(!headers.get("origin").startsWith("http://127.0.0.1")){
+                    return Response.newFixedLengthResponse(Status.FORBIDDEN,"text/plain",
+                            "Access from "+headers.get("origin")+" are not allowed."+
+                                    "only accept request from 127.0.0.1");
+                }
+            }
             return wsServ.handle(new ProxyIHTTPSession(){
                 @Override
                 public String getUri() {
@@ -125,10 +137,28 @@ public class XplatHTTPDServer extends NanoHTTPD {
                 }
             }.wrap(session));
         }else if(uri.startsWith(corsBusterPrefix)){
+            //Can we loose this restriction for other origin?
+            Map<String, String> headers = session.getHeaders();
+            if(!PlatCoreConfig.debugMode && headers.containsKey("origin") && !headers.get("origin").equals("")){
+                if(!headers.get("origin").startsWith("http://127.0.0.1")){
+                    return Response.newFixedLengthResponse(Status.FORBIDDEN,"text/plain",
+                            "Access from "+headers.get("origin")+" are not allowed."+
+                                    "only accept request from 127.0.0.1");
+                }
+            }
             return corsBuster.handle(session);
         }else{
             return super.handle(session);
         }
     }
 
+    @Override
+    protected ClientHandler createClientHandler(Socket finalAccept, InputStream inputStream) {
+        try {
+            //To optimize rpc on android.
+            finalAccept.setTcpNoDelay(true);
+        } catch (SocketException e) {
+        }
+        return new ClientHandler(this, inputStream, finalAccept);
+    }
 }

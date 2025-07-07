@@ -29,9 +29,8 @@ import xplatj.javaplat.partic2.util.VariableTable;
 import xplatj.platform.PlatApi;
 
 public class PlatCoreConfig implements Closeable {
-
+	public static boolean debugMode=false;
 	public static Container<PlatCoreConfig> singleton = new Container<PlatCoreConfig>();
-
 	public static PlatCoreConfig get() {
 		return singleton.get();
 	}

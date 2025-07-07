@@ -33,7 +33,6 @@ public class MainActivity extends Activity {
 
 	public static String selectedBackend="";
 	public static String selectedResultAction="shutdown";
-	public static boolean debugMode=false;
 	public static boolean[] startOptsParsed=new boolean[]{false};
 	public static Integer currentTaskId=null;
 
@@ -50,7 +49,7 @@ public class MainActivity extends Activity {
 				String[] opts=new String(content,0,len, StandardCharsets.UTF_8).split("\\s+");
 				for(String opt:opts){
 					if("debug".equals(opt)){
-						debugMode=true;
+						PlatCoreConfig.debugMode=true;
 					}else if("launcher_end".equals(opt)) {
 						break;
 					}

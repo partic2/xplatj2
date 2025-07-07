@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
                 project.xplat.launcher.MainActivity.ensureStartOpts();
 
                 String hostname="127.0.0.1";
-                if(project.xplat.launcher.MainActivity.debugMode){
+                if(PlatCoreConfig.debugMode){
                     hostname="0.0.0.0";
                 }
                 //check port available
@@ -69,7 +69,7 @@ public class MainActivity extends Activity {
                     }catch(Exception ex){
                     }
                 }
-                httpd.start(60 * 1000);
+                httpd.start(60 * 60 * 1000);
             }
         } catch (IOException e) {
             e.printStackTrace();

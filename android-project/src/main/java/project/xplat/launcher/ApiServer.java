@@ -20,6 +20,8 @@ import xplatj.javaplat.partic2.util.OneArgFunc;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -114,6 +116,12 @@ public class ApiServer {
                 putModule(AndroidUIBase.PxprpcNamespace,AndroidUIBase.i);
                 putModule(JseIo.PxprpcNamespace,JseIo.i);
                 putModule(IntentReceiver.PxprpcNamespace,IntentReceiver.i);
+                try {
+                    Class<?> extendMain = Class.forName("pxprpcapi.androidhelperex.Main");
+                    Method register = extendMain.getMethod("registerPxprpcApi");
+                    register.invoke(null);
+                } catch (Exception e) {
+                }
             }
         });
         if(!(ApiServer.defaultAndroidContext instanceof PxprpcService)){
@@ -124,7 +132,7 @@ public class ApiServer {
         Log.d("PxpRpc", "start: listen");
         for(port=portRange[0];port<portRange[1];port+=2){
             try{
-                if(MainActivity.debugMode){
+                if(PlatCoreConfig.debugMode){
                     tcpServ.bindAddr= new InetSocketAddress(
                             Inet4Address.getByAddress(new byte[]{(byte)0,(byte)0,(byte)0,(byte)0}),port);
                 }else{
