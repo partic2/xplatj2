@@ -167,7 +167,7 @@ def BuildDesktopRelease(name,toolchain):
             shutil.copytree(sourceroot+'/commonj/src/main/assets',outdir,dirs_exist_ok=True)
         if buildConfig['PACK_JAVA_RUNTIME']:
             if not os.path.exists(outdir+'/rt-java/release'):
-                PrintAndRun(toolchain['JLINK']+' --add-modules java.base,java.logging --output '+outdir+'/rt-java')
+                PrintAndRun(toolchain['JLINK']+' --add-modules java.base,java.logging,jdk.crypto.ec,jdk.crypto.cryptoki --output '+outdir+'/rt-java')
             scriptFile=''
             with io.open(outdir+'/bin/xplatj','r',encoding='utf-8') as f1:
                 scriptFile=f1.read()
