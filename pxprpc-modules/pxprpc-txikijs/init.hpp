@@ -70,7 +70,9 @@ namespace pxprpc_txikijs{
             JS_NewClass(JS_GetRuntime(ctx),classId,&classDef);
             auto inst = JS_NewObjectClass(ctx,classId);
             JS_SetPropertyFunctionList(ctx,inst,props,5);
-            JS_DefinePropertyValueStr(ctx, JS_GetGlobalObject(ctx), "__pxprpc4tjs__", inst, JS_PROP_C_W_E);
+            JSValue gobj=JS_GetGlobalObject(ctx);
+            JS_DefinePropertyValueStr(ctx, gobj, "__pxprpc4tjs__", inst, JS_PROP_C_W_E);
+            JS_FreeValue(ctx,gobj);
             JS_SetOpaque(inst, opaque);
         }
     }
@@ -80,8 +82,6 @@ namespace pxprpc_txikijs{
         public:
 
         TJSRuntime *rt=nullptr;
-        std::vector<std::string> args;
-        std::vector<char *> argsC; 
         uv_mutex_t jobsMutex;
         std::vector<std::function<void()> *> jobs;
         uv_async_t asyncReq;
@@ -92,17 +92,10 @@ namespace pxprpc_txikijs{
         TjsRuntimeWrap(){
             uv_mutex_init(&jobsMutex);
         }
-        void init(std::vector<std::string> &args,std::function<void()> done){
-            this->args=args;
+        void init(std::function<void()> done){
             asyncReq.data=this;            
             pxprpc_rtbridge_host::runInNewThread([this,done]()->void {
                 this->addRef();
-                this->argsC.clear();
-                for(auto& it:this->args){
-                    this->argsC.push_back(const_cast<char *>(it.c_str()));
-                }
-                this->argsC.push_back(nullptr);
-                TJS_Initialize(this->argsC.size()-1,this->argsC.data());
                 this->rt=TJS_NewRuntime();
                 auto ctx=TJS_GetJSContext(this->rt);
                 __pxprpc4tjs::bindRpcBridge(ctx,this);
@@ -113,18 +106,17 @@ namespace pxprpc_txikijs{
                 done();
                 TJS_Run(this->rt);
                 uv_close(reinterpret_cast<uv_handle_t *>(&asyncReq),[](uv_handle_t *req)-> void {});
-                uv_run(TJS_GetLoop(this->rt),UV_RUN_ONCE);
+                for(int i1=0;i1<5;i1++){
+                    uv_run(TJS_GetLoop(this->rt),UV_RUN_ONCE);
+                }
                 TJS_FreeRuntime(this->rt);
                 this->rt=nullptr;
                 this->freeRef();
             });
         }
         void runJs(const std::string &jsCode){
-            std::string validJs=jsCode;
-            if(jsCode.at(-1)!=0){
-                validJs=jsCode+"\0";
-            }
-            JS_Eval(TJS_GetJSContext(rt),jsCode.c_str(),jsCode.length(),"<annomous>",JS_EVAL_TYPE_GLOBAL);
+            JSValue jv=JS_Eval(TJS_GetJSContext(rt),jsCode.c_str(),jsCode.length(),"<annomous>",JS_EVAL_TYPE_GLOBAL);
+            JS_FreeValue(TJS_GetJSContext(rt),jv);
         }
         void runPendingJobs(){
             auto queueCopy=this->jobs;
@@ -142,7 +134,7 @@ namespace pxprpc_txikijs{
             uv_mutex_unlock(&jobsMutex);
             uv_async_send(&asyncReq);
         }
-        //FIXME:Thread racing
+        //XXX:Thread racing
         virtual void deinitAndDelete(){
             if(this->rt!=nullptr){
                 this->freeRef();
@@ -240,10 +232,12 @@ namespace pxprpc_txikijs{
                         if(err!=nullptr){
                             auto errStr=JS_NewString(ctx, err);
                             JS_Call(ctx,jsCb,JS_UNDEFINED,1,&errStr);
+                            JS_FreeValue(ctx,errStr);
                         }else{
                             auto reJs=JS_NewArrayBufferCopy(ctx,reinterpret_cast<uint8_t *>(std::get<1>(buf)),std::get<0>(buf));
                             freebuf();
                             JS_Call(ctx,jsCb,JS_UNDEFINED,1,&reJs);
+                            JS_FreeValue(ctx,reJs);
                         }
                         JS_FreeValue(ctx,jsCb);
                         thisWrap->freeRef();
@@ -274,6 +268,10 @@ namespace pxprpc_txikijs{
                  [](JSRuntime *rt, void *opaque, void *ptr)-> void {}, nullptr, true);
         }
     }
+
+    void SetTjsStartupDir(const std::string &startupDir){
+        TJS_SetTjsStartupDir(startupDir.c_str());
+    }
     
     void init(){
         if(inited)return;
@@ -286,7 +284,7 @@ namespace pxprpc_txikijs{
                     args.push_back(para->nextString());
                 }
                 auto r=new TjsRuntimeWrapAsyncFree();
-                r->p->init(args,[ret,r]()->void {
+                r->p->init([ret,r]()->void {
                     pxprpc_rtbridge_host::resolveTS(ret,r);
                 });
             })
@@ -299,6 +297,13 @@ namespace pxprpc_txikijs{
                     tjs->p->runJs(jsCode);
                     pxprpc_rtbridge_host::resolveTS(ret);
                 });
+            })
+        ).add(
+            (new pxprpc::NamedFunctionPPImpl1())
+                ->init("pxprpc_txikijs.SetStartupDir", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
+                auto startupDir=para->nextString();
+                SetTjsStartupDir(startupDir);
+                ret->resolve();
             })
         );
         inited=1;

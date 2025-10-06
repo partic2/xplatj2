@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "uv.h"
 extern "C"{
 #ifdef __ANDROID__
 #define SDL_DISABLE_IMMINTRIN_H 1
@@ -198,10 +199,12 @@ int inited=0;
 
 //NOTE:Will leak TJS Runtime, So only call once for one process.
 void tjsstart(int block){
-    std::string bootjs=get_data_path("/boot0.js");
-    std::vector<std::string> tjsargs={"tjs","run",bootjs.c_str()};
+    auto dataPath=get_data_path("");
+    pxprpc_txikijs::SetTjsStartupDir(dataPath);
     auto tjsWrap=new pxprpc_txikijs::TjsRuntimeWrap();
-    tjsWrap->init(tjsargs,[]()->void {});
+    tjsWrap->init([tjsWrap,dataPath]()->void {
+        tjsWrap->runJs("import('"+dataPath+"/boot0.js');undefined;");
+    });
     if(block){
         uv_sem_wait(&xplatexit);
     }
