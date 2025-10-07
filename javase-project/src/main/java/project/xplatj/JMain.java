@@ -60,10 +60,7 @@ public class JMain {
 			PrefixFS.defaultPrefix=new File("data").getCanonicalPath()+"/";
 		}catch(IOException e){};
 		ensureStartOpts();
-		PlatCoreConfig.platApi=new PlatApiImpl();
-		if(PlatCoreConfig.get()==null){
-			PlatCoreConfig.singleton.set(new PlatCoreConfig());
-		}
+
 		if("webapp".equals(selectedBackend)) {
 			startWebAppBackend();
 		}
@@ -106,7 +103,7 @@ public class JMain {
 			try{
 				while(true){
 					ByteBuffer[] b=new ByteBuffer[1];
-					conn.receive(b);
+					b[0]=conn.receive();
 					conn.send(b);
 				}
 			}catch(Exception e){
@@ -127,22 +124,22 @@ public class JMain {
 			Io io1 = Pipe.connect("test pipe server 1");
 			io1.send(new ByteBuffer[]{ByteBuffer.wrap("Hello server".getBytes("utf-8"))});
 			ByteBuffer[] bb = new ByteBuffer[1];
-			io1.receive(bb);
+			bb[0]=io1.receive();
 			System.out.println(new String(Utils.toBytes(bb[0]),"utf-8"));
 			io1.send(new ByteBuffer[]{ByteBuffer.wrap("Hello client".getBytes("utf-8"))});
 			bb = new ByteBuffer[1];
-			io1.receive(bb);
+			bb[0]=io1.receive();
 			System.out.println(new String(Utils.toBytes(bb[0]),"utf-8"));
 			io1.close();
 
 			io1 = Pipe.connect("test pipe server 1");
 			io1.send(new ByteBuffer[]{ByteBuffer.wrap("Hello server".getBytes("utf-8"))});
 			bb = new ByteBuffer[1];
-			io1.receive(bb);
+			bb[0]=io1.receive();
 			System.out.println(new String(Utils.toBytes(bb[0]),"utf-8"));
 			io1.send(new ByteBuffer[]{ByteBuffer.wrap("Hello client".getBytes("utf-8"))});
 			bb = new ByteBuffer[1];
-			io1.receive(bb);
+			bb[0]=io1.receive();
 			System.out.println(new String(Utils.toBytes(bb[0]),"utf-8"));
 			io1.close();
 		}catch(Exception e){
@@ -150,6 +147,10 @@ public class JMain {
 		};
 	}
 	public static void main(String args[]) {
+		PlatCoreConfig.platApi=new PlatApiImpl();
+		if(PlatCoreConfig.get()==null){
+			PlatCoreConfig.singleton.set(new PlatCoreConfig());
+		}
 		NativeHelper.loadNativeLibrary();
 		ByteBuffer errorMessage = ByteBuffer.allocateDirect(255);
 		NativeHelper.ensureRtbInited(errorMessage);

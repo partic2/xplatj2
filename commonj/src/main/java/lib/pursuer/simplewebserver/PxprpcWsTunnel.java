@@ -102,7 +102,7 @@ public class PxprpcWsTunnel extends WebSocket implements AbstractIo {
     }
 
     @Override
-    public void receive(ByteBuffer[] buffs) throws IOException {
+    public ByteBuffer receive() throws IOException {
         try {
             ArrayList<byte[]> packets=new ArrayList<byte[]>();
             WebSocketFrame wsFrm=null;
@@ -119,16 +119,10 @@ public class PxprpcWsTunnel extends WebSocket implements AbstractIo {
                 msg.put(p);
             }
             Utils.setPos(msg,0);
-            Utils.setLimit(msg,0);
-            for(int i=0;i<buffs.length-1;i++){
-                Utils.setLimit(msg,msg.position()+buffs[i].remaining());
-                int bufStart=buffs[i].position();
-                buffs[i].put(msg);
-                Utils.setPos(buffs[i],bufStart);
-            }
-            Utils.setLimit(msg,msg.capacity());
-            buffs[buffs.length-1]=msg;
+            Utils.setLimit(msg,size);
+            return msg;
         } catch (InterruptedException e) {
+            throw new IOException("interrupted.");
         }
     }
 
