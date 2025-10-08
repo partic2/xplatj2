@@ -108,6 +108,8 @@ public class JMain {
 				}
 			}catch(Exception e){
 				e.printStackTrace();
+			}finally {
+				conn.close();
 			};
 		}
 	}
@@ -154,11 +156,11 @@ public class JMain {
 		NativeHelper.loadNativeLibrary();
 		ByteBuffer errorMessage = ByteBuffer.allocateDirect(255);
 		NativeHelper.ensureRtbInited(errorMessage);
-		if(errorMessage.get(0)!=0){
-			byte[] err=new byte[255];
+		if(errorMessage.get(0)!=0) {
+			byte[] err = new byte[255];
 			errorMessage.get(err);
 			try {
-				System.err.println(new String(err,"utf-8"));
+				System.err.println(new String(err, "utf-8"));
 			} catch (UnsupportedEncodingException e) {
 			}
 		}
