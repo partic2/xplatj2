@@ -1,15 +1,9 @@
 package pxprpcapi.androidhelper;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Bundle;
-import project.xplat.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.EventDispatcher;
 import pxprpc.extend.TableSerializer;
-import pxprpc.extend.TypeDeclParser;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.partic2.filesystem.IFile;
 import xplatj.javaplat.partic2.filesystem.IFileSystem;
@@ -107,7 +101,7 @@ public class IntentReceiver extends PxprpcBroadcastReceiverAdapter implements Cl
         }else{
             synchronized (this.waitingQueue){
                 while(this.waitingQueue.size()>20){
-                    this.waitingQueue.poll().resolve(new TableSerializer().setColumnInfo("",new String[0]).build());
+                    this.waitingQueue.poll().resolve(new TableSerializer().setColumnsInfo("",new String[0]).build());
                 }
                 waitingQueue.offer(aret);
             }

@@ -66,7 +66,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         return new BuiltInFuncList().listStaticConstField(BluetoothDevice.class);
     }
     public ByteBuffer describeAdapterState(){
-        TableSerializer ser = new TableSerializer().setColumnInfo("ssic",new String[]{"address","name","state","enabled"});
+        TableSerializer ser = new TableSerializer().setColumnsInfo("ssic",new String[]{"address","name","state","enabled"});
         ser.addRow(new Object[]{this.adapter.getAddress(),this.adapter.getName(),this.adapter.getState(),this.adapter.isEnabled()});
         return ser.build();
     }
@@ -175,7 +175,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
 
     @SuppressLint("MissingPermission")
     public ByteBuffer describeDiscoveredDevices(){
-        TableSerializer ser = new TableSerializer().setColumnInfo(null, new String[]{
+        TableSerializer ser = new TableSerializer().setColumnsInfo(null, new String[]{
                 "address", "class", "name", "rssi", "type", "bondState","scanRecord"});
         for(Map.Entry<String,DiscoveryResult> e:this.discovered.entrySet()){
             DiscoveryResult v = e.getValue();
@@ -187,7 +187,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     }
     @SuppressLint("MissingPermission")
     public ByteBuffer describeDiscoveredDevice(String address){
-        TableSerializer ser = new TableSerializer().setColumnInfo("sisiii", new String[]{"address", "class", "name", "rssi", "type", "bondState"});
+        TableSerializer ser = new TableSerializer().setColumnsInfo("sisiii", new String[]{"address", "class", "name", "rssi", "type", "bondState"});
         DiscoveryResult dr = this.discovered.get(address);
         if(dr!=null){
             ser.addRow(new Object[]{

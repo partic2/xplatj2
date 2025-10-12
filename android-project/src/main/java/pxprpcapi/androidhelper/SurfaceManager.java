@@ -98,7 +98,7 @@ public class SurfaceManager implements Closeable{
         return new Object[]{format,width,height,androidClass};
     }
     public ByteBuffer getImageInfo(ImageOrBitmap img){
-        return new TableSerializer().setColumnInfo(
+        return new TableSerializer().setColumnsInfo(
                 null,new String[]{"format","width","height","androidClass"})
                 .addRow(this.getImageInfo2(img)).build();
     }
@@ -147,7 +147,7 @@ public class SurfaceManager implements Closeable{
     }
 
     public ByteBuffer describePlanesInfo(ImageOrBitmap img){
-        TableSerializer ser = new TableSerializer().setColumnInfo("iii",
+        TableSerializer ser = new TableSerializer().setColumnsInfo("iii",
                 new String[]{"pixelStride","rowStride","planeDataSize"});
         if(img.image!=null){
             for(Image.Plane e:img.image.getPlanes()){
@@ -191,7 +191,7 @@ public class SurfaceManager implements Closeable{
         return buf1;
     }
     public ByteBuffer packPlaneData(List<Image.Plane> planes){
-        TableSerializer ser = new TableSerializer().setColumnInfo("iib",new String[]{"pixelStride","rowStride","buffer"});
+        TableSerializer ser = new TableSerializer().setColumnsInfo("iib",new String[]{"pixelStride","rowStride","buffer"});
         for(Image.Plane e:planes){
             ser.addRow(new Object[]{
                     e.getPixelStride()

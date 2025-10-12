@@ -60,7 +60,7 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         return wm.getScanResults();
     }
     public ByteBuffer packScanResult(List<ScanResult> l){
-        TableSerializer ser = new TableSerializer().setColumnInfo(null, new String[]{
+        TableSerializer ser = new TableSerializer().setColumnsInfo(null, new String[]{
                 "SSID", "level", "frequency", "capabilities"});
         for(ScanResult r:l){
         	ser.addRow(new Object[]{r.SSID,r.level,r.frequency,r.capabilities});
@@ -68,14 +68,14 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         return ser.build();
     }
     public ByteBuffer getWifiInfo1(){
-        return new TableSerializer().setColumnInfo(null,new String[]{
+        return new TableSerializer().setColumnsInfo(null,new String[]{
                 "5GHzBandSupported","P2pSupported"
                 }).addRow(new Object[]{
                 wm.is5GHzBandSupported(),wm.isP2pSupported()
         }).build();
     }
     public ByteBuffer getState(){
-        return new TableSerializer().setColumnInfo(null,new String[]{
+        return new TableSerializer().setColumnsInfo(null,new String[]{
                 "WifiEnabled","WifiState"
         }).addRow(new Object[]{
                 wm.isWifiEnabled(),wm.getWifiState()
@@ -178,7 +178,7 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
     }
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public ByteBuffer describeP2pPeersInfo(ArrayList<WifiP2pDevice> peers){
-        TableSerializer ser = new TableSerializer().setColumnInfo(null, new String[]{"deviceAddress", "deviceName", "status"});
+        TableSerializer ser = new TableSerializer().setColumnsInfo(null, new String[]{"deviceAddress", "deviceName", "status"});
         for(WifiP2pDevice p:peers){
             ser.addRow(new Object[]{p.deviceAddress,p.deviceName,p.status});
         }

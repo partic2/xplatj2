@@ -48,7 +48,7 @@ public class AndroidCamera2 implements Closeable{
 
 
     public ByteBuffer getBaseCamerasInfo() throws CameraAccessException {
-        TableSerializer ser=new TableSerializer().setColumnInfo("ssss",
+        TableSerializer ser=new TableSerializer().setColumnsInfo("ssss",
                 new String[]{"id","features","outputSizes","sensorActiveSize"});
         for(String id:camSrv.getCameraIdList()){
             CameraCharacteristics info = camSrv.getCameraCharacteristics(id);
@@ -345,7 +345,7 @@ public class AndroidCamera2 implements Closeable{
     }
 
     public ByteBuffer packPlaneData(Image img){
-        TableSerializer ser = new TableSerializer().setColumnInfo("ii",new String[]{"pixelStride","rowStride","buffer"});
+        TableSerializer ser = new TableSerializer().setColumnsInfo("ii",new String[]{"pixelStride","rowStride","buffer"});
         for(Image.Plane e:img.getPlanes()){
             ser.addRow(new Object[]{
                     e.getPixelStride()

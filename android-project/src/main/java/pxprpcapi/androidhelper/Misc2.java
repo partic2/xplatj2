@@ -140,7 +140,7 @@ public class Misc2 implements Closeable{
 	}
 	public ByteBuffer packLocation(Location location,boolean tableSer){
 		if (tableSer) {
-			return new TableSerializer().setColumnInfo("ldddddd", new String[]{
+			return new TableSerializer().setColumnsInfo("ldddddd", new String[]{
 							"time","latitude", "longitude", "speed", "bearing", "altitude", "accuracy"})
 					.addRow(new Object[]{location.getTime(),
 							(double)location.getLatitude(),(double)location.getLongitude(),(double)location.getSpeed(),
@@ -195,7 +195,7 @@ public class Misc2 implements Closeable{
 	}
 
 	public ByteBuffer getLightsInfo() {
-		TableSerializer ser = new TableSerializer().setColumnInfo("is", new String[]{"id", "desc"});
+		TableSerializer ser = new TableSerializer().setColumnsInfo("is", new String[]{"id", "desc"});
 		for (Light2 tl : this.lights) {
 			ser.addRow(new Object[]{tl.id,tl.desc});
 		}

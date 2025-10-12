@@ -32,7 +32,6 @@ public class ApiServer {
     public static Context defaultAndroidContext;
     public static HandlerThread handlerThread;
     public static Handler handler;
-    public static int[] portRange=new int[]{2050,2079};
     public static int port=2050;
     public static IBinder serviceBinder;
     public static ServiceConnection serviceConnection=new ServiceConnection() {
@@ -130,7 +129,7 @@ public class ApiServer {
                     serviceConnection,Context.BIND_AUTO_CREATE);
         }
         Log.d("PxpRpc", "start: listen");
-        for(port=portRange[0];port<portRange[1];port+=2){
+        for(;port<20000;port+=2048){
             try{
                 if(PlatCoreConfig.debugMode){
                     tcpServ.bindAddr= new InetSocketAddress(
@@ -144,7 +143,7 @@ public class ApiServer {
             }catch (IOException ex){
             }
         }
-        if(port>=portRange[1]){
+        if(port>=20000){
             throw new RuntimeException("No available tcp port.");
         }
     }

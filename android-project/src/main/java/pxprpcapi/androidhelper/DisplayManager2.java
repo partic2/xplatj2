@@ -33,7 +33,7 @@ public class DisplayManager2 implements Closeable {
     }
     public ByteBuffer getDevicesInfo(){
         Display[] displays = dm.getDisplays();
-        TableSerializer ser = new TableSerializer().setColumnInfo(null,new String[]{
+        TableSerializer ser = new TableSerializer().setColumnsInfo(null,new String[]{
                 "id", "name", "width", "height","state","refreshRate","realWidth","realHeight","dpiX","dpiY"
         });
         for(Display d:displays){

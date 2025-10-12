@@ -12,11 +12,9 @@ import android.os.Bundle;
 import project.xplat.launcher.ApiServer;
 import project.xplat.launcher.AssetsCopy;
 import pxprpc.base.Utils;
-import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
 import pxprpc.extend.TypeDeclParser;
-import xplatj.gdxconfig.core.PlatCoreConfig;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -68,7 +66,7 @@ public class SysBase implements Closeable{
 		}
 	}
 	public ByteBuffer deviceInfo(){
-		return new TableSerializer().setColumnInfo(null,new String[]{
+		return new TableSerializer().setColumnsInfo(null,new String[]{
 				"version","hardware","abi","product","device","board","manufacturer","brand"}).addRow(new Object[]{
 				Build.VERSION.SDK_INT,Build.HARDWARE, Utils.stringJoin(",", Arrays.asList(Build.SUPPORTED_ABIS)),
 				Build.PRODUCT,Build.DEVICE,Build.BOARD,Build.MANUFACTURER,Build.BRAND}).build();

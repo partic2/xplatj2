@@ -1,4 +1,4 @@
-package project.xplat.launcher;
+package project.xplat.webapp;
 
 import android.app.Service;
 import android.content.Intent;
@@ -6,11 +6,13 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
+import project.xplat.launcher.ApiServer;
+import project.xplat.launcher.AssetsCopy;
 import pxprpcapi.androidhelper.MediaProjection2;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 
-public class PxprpcService extends Service {
-    public PxprpcService() {
+public class AndroidNodeProcess extends Service {
+    public AndroidNodeProcess() {
     }
 
     @Override
@@ -35,7 +37,7 @@ public class PxprpcService extends Service {
                     new Runnable() {
                         @Override
                         public void run() {
-                            PxprpcService.this.bgThread();
+                            project.xplat.launcher.PxprpcService.this.bgThread();
                         }
                     }
             );
@@ -58,10 +60,10 @@ public class PxprpcService extends Service {
         ApiServer.stop();
         super.onDestroy();
     }
-    public ServiceBinder mBinder;
+    public project.xplat.launcher.PxprpcService.ServiceBinder mBinder;
     @Override
     public IBinder onBind(Intent intent) {
-        this.mBinder=new ServiceBinder();
+        this.mBinder=new project.xplat.launcher.PxprpcService.ServiceBinder();
         return this.mBinder;
     }
 }
