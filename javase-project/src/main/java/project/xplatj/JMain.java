@@ -7,10 +7,7 @@ import project.xplatj.backend.jse.PlatApiImpl;
 import pxprpc.base.AbstractIo;
 import pxprpc.base.ServerContext;
 import pxprpc.base.Utils;
-import pxprpc.runtimebridge.Io;
-import pxprpc.runtimebridge.NativeHelper;
-import pxprpc.runtimebridge.Pipe;
-import pxprpc.runtimebridge.PipeServer;
+import pxprpc.runtimebridge.*;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.gdxplat.partic2.utils.Env;
 import xplatj.javaplat.partic2.filesystem.FSUtils;
@@ -162,6 +159,13 @@ public class JMain {
 			try {
 				System.err.println(new String(err, "utf-8"));
 			} catch (UnsupportedEncodingException e) {
+			}
+		}else{
+			RuntimeBridgeUtils.ensureInit();
+			try {
+				RuntimeBridgeUtils.registerJavaPipeServer();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 		ApiServer.start();

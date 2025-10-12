@@ -4,12 +4,18 @@ package project.xplat.launcher;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
+import pxprpc.extend.RpcExtendClientCallable;
+import pxprpc.extend.TableSerializer;
 import pxprpc.runtimebridge.NativeHelper;
+import pxprpc.runtimebridge.PipeServer;
+import pxprpc.runtimebridge.RuntimeBridgeUtils;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.partic2.filesystem.impl.PrefixFS;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class AssetsCopy {
 	private static Context mContext;
@@ -24,6 +30,7 @@ public class AssetsCopy {
 			return true;
 		}
 	}
+	public static PipeServer rtbPipeServ;
 	public static void init(Context context){
 		try {
 			ByteBuffer errorMessage= ByteBuffer.allocateDirect(255);
@@ -31,6 +38,19 @@ public class AssetsCopy {
 			NativeHelper.ensureRtbInited(errorMessage);
 			if(errorMessage.duplicate().get()!=0){
 				Log.e("pxprpc_rtbridge","pxprpc_rtbridge init failed.");
+			}else{
+				RuntimeBridgeUtils.ensureInit();
+				RuntimeBridgeUtils.registerJavaPipeServer();
+				try {
+					RpcExtendClientCallable setAndroidPackageInfo = RuntimeBridgeUtils.client.getFunc("AndroidHelper.set_android_package_info");
+					if(setAndroidPackageInfo!=null){
+						setAndroidPackageInfo.typedecl("b->");
+					}
+					TableSerializer tab = new TableSerializer().setColumnsInfo("ss", new String[]{"packageName", "packageDataFilesPath"});
+					tab.addRow(new Object[]{context.getPackageName(),context.getFilesDir().getAbsolutePath()})；
+					setAndroidPackageInfo.callBlock(new Object[]{tab.build()});
+				} catch (Exception e) {
+				}
 			}
 			mContext=context;
 			AssetsCopy.assetsDir=mContext.getFilesDir().getCanonicalPath();
