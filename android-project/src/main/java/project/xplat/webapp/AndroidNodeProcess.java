@@ -37,7 +37,6 @@ public class AndroidNodeProcess extends Service {
                     new Runnable() {
                         @Override
                         public void run() {
-                            project.xplat.launcher.PxprpcService.this.bgThread();
                         }
                     }
             );

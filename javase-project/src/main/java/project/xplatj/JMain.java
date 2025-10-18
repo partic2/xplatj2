@@ -7,6 +7,7 @@ import project.xplatj.backend.jse.PlatApiImpl;
 import pxprpc.base.AbstractIo;
 import pxprpc.base.ServerContext;
 import pxprpc.base.Utils;
+import pxprpc.extend.RpcExtendClientCallable;
 import pxprpc.runtimebridge.*;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.gdxplat.partic2.utils.Env;
@@ -110,7 +111,7 @@ public class JMain {
 			};
 		}
 	}
-	public static void testPxprpcClient() throws IOException{
+	public static void testPxprpcClient(){
 		try{
 			PlatCoreConfig.get().executor.execute(()-> {
 				try {

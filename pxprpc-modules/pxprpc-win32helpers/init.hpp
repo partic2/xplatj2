@@ -288,7 +288,7 @@ namespace pxprpc_win32helpers{
                         rejectTS(ret,"overlapped call is not allowed.");
                     }else{
                         windowEnumResult=new pxprpc::TableSerializer();
-                        windowEnumResult->setColumnInfo("lsiiii",{"handle","title","left","top","right","bottom"});
+                        windowEnumResult->setColumnsInfo("lsiiii",{"handle","title","left","top","right","bottom"});
                         EnumWindows(EnumWindowsProc, 0);
                         resolveTS(ret,windowEnumResult->buildSer());
                         delete windowEnumResult;

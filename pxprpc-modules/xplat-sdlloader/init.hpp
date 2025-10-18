@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "pxprpc_ext.hpp"
 #include "uv.h"
 extern "C"{
 #ifdef __ANDROID__
@@ -24,6 +25,8 @@ extern "C"{
 
 #include <pxprpc_rtbridge_host.hpp>
 #include <pxprpc-txikijs/init.hpp>
+
+#include <iostream>
 
 namespace xplat_sdlloader{
 
@@ -210,22 +213,55 @@ void tjsstart(int block){
     }
 }
 
+using Parameter=pxprpc::NamedFunctionPPImpl1::Parameter;
+using AsyncReturn=pxprpc::NamedFunctionPPImpl1::AsyncReturn;
+
+
+uv_lib_t *libnodeso=nullptr;
+
 void init(){
     if(inited)return;
     inited=1;
     uv_sem_init(&xplatexit,0);
     pxprpc::defaultFuncMap.add((new pxprpc::NamedFunctionPPImpl1())->init("xplat_sdlloader.start",
-        [](auto para,auto ret)->void{
+        [](Parameter* para,AsyncReturn* ret)->void{
             pxprpc_rtbridge_host::runInNewThread([ret]()-> void {
                 start();
                 ret->resolve();
             });
         })
     ).add((new pxprpc::NamedFunctionPPImpl1())->init("xplat_sdlloader.tjsstart",
-        [](auto para,auto ret)->void {
+        [](Parameter* para,AsyncReturn* ret)->void {
             tjsstart(0);
         })
     );
+    pxprpc::defaultFuncMap.add((new pxprpc::NamedFunctionPPImpl1())->init("xplat_sdlloader.loadNodeJSAndroid",
+        [](Parameter* para,AsyncReturn* ret)->void {
+            int err=-1;
+            if(libnodeso==nullptr){
+                libnodeso=new uv_lib_t();
+                err=uv_dlopen("libnode.so", libnodeso);
+            }
+            if(err!=0){
+                ret->reject(uv_dlerror(libnodeso));
+                return;
+            }
+            void (*nodejs__main)(int argc,const char *argv[]);
+			SDL_Log("===========dlopen done, prepare dlsym===============");
+            err=uv_dlsym(libnodeso, "nodejs__main", reinterpret_cast<void **>(nodejs__main));
+            if(err!=0){
+                ret->reject("nodejs__main not found in libnode.so");
+                return;
+            }
+			SDL_Log("===========dlsym done, prepare call===============");
+            std::string jsmain=get_data_path("pxseed/www/noderun.js");
+            std::cout<<jsmain<<std::endl;
+            const char *nodejs__main__argv[]={"node",jsmain.c_str(),"pxseedServer2023/entry.js",nullptr};
+            nodejs__main(3,nodejs__main__argv);
+            ret->resolve();
+        })
+    );
+
 }
 
 }

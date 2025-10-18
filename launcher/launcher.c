@@ -37,7 +37,7 @@ static void *dlsym(void *dll,const char *name){
   return GetProcAddress((HMODULE)dll, name);
 }
 static int dlclose(void *dll){
-  FreeLibrary((HMODULE)dll);
+  return FreeLibrary((HMODULE)dll);
 }
 #endif
 

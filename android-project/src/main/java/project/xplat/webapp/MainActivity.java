@@ -23,6 +23,7 @@ import project.xplat.launcher.AssetsCopy;
 import pxprpc.base.ServerContext;
 import pxprpc.extend.RpcExtendClientCallable;
 import pxprpc.runtimebridge.PipeServer;
+import pxprpc.runtimebridge.RuntimeBridgeUtils;
 import pxprpcapi.androidhelper.AndroidUIBase;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.partic2.util.IFactory;
@@ -61,9 +62,8 @@ public class MainActivity extends Activity {
                 }
                 httpd = new XplatHTTPDServer(hostname, httpdPort);
                 if(project.xplat.launcher.MainActivity.tjsFlag==project.xplat.launcher.MainActivity.selectedBackend) {
-                    PipeServer.ensureInit();
                     try {
-                        RpcExtendClientCallable tjsstart = PipeServer.client.getFunc("xplat_sdlloader.tjsstart");
+                        RpcExtendClientCallable tjsstart = RuntimeBridgeUtils.client.getFunc("xplat_sdlloader.tjsstart");
                         tjsstart.typedecl("->");
                         tjsstart.callBlock();
                     }catch(Exception ex){

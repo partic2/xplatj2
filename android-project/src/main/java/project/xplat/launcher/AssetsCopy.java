@@ -41,16 +41,6 @@ public class AssetsCopy {
 			}else{
 				RuntimeBridgeUtils.ensureInit();
 				RuntimeBridgeUtils.registerJavaPipeServer();
-				try {
-					RpcExtendClientCallable setAndroidPackageInfo = RuntimeBridgeUtils.client.getFunc("AndroidHelper.set_android_package_info");
-					if(setAndroidPackageInfo!=null){
-						setAndroidPackageInfo.typedecl("b->");
-					}
-					TableSerializer tab = new TableSerializer().setColumnsInfo("ss", new String[]{"packageName", "packageDataFilesPath"});
-					tab.addRow(new Object[]{context.getPackageName(),context.getFilesDir().getAbsolutePath()})；
-					setAndroidPackageInfo.callBlock(new Object[]{tab.build()});
-				} catch (Exception e) {
-				}
 			}
 			mContext=context;
 			AssetsCopy.assetsDir=mContext.getFilesDir().getCanonicalPath();
