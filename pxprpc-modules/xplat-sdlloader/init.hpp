@@ -24,9 +24,9 @@ extern "C"{
 
 
 #include <pxprpc_rtbridge_host.hpp>
-#include <pxprpc-txikijs/init.hpp>
 
-#include <iostream>
+#include <pxprpc-pxseedloader/init.hpp>
+
 
 namespace xplat_sdlloader{
 
@@ -75,12 +75,6 @@ void start(){
     {
         //to init wasi module on windows, maybe changed in future.
         FILE *fh=NULL;
-        fh=freopen(get_data_path("/xplat-flag.txt").c_str(),"r",stdin);
-        if(fh==NULL){
-            SDL_Log("xplat:freopen stdin error %s",strerror(errno));
-        }else{
-            setvbuf(fh, NULL, _IONBF, 0);
-        }
         fh=freopen(get_data_path("/stdout.txt").c_str(),"w",stdout);
         if(fh==NULL){
             SDL_Log("xplat:freopen stdout error %s",strerror(errno));
@@ -180,49 +174,33 @@ void sdlloop(){
     if(sdlEventHandle==nullptr){
         return;
     }
-    while (!quit) {
-        while (SDL_WaitEvent(&event) != 0) {
-            if(sdlEventHandle==nullptr){
-                if (event.type == SDL_QUIT) {
-                    quit = 1;
-                }
-            }else{
-                void *sp=fp;
-                pwart_rstack_put_ref(&sp,&event);
-                pwart_call_wasm_function(sdlEventHandle,fp);
+    while (SDL_WaitEvent(&event) != 0) {
+        if(sdlEventHandle==nullptr){
+            if (event.type == SDL_QUIT) {
+                break;
             }
+        }else{
+            void *sp=fp;
+            pwart_rstack_put_ref(&sp,&event);
+            pwart_call_wasm_function(sdlEventHandle,fp);
         }
     }
+    pwart_free_stack(fp);
 }
 
-//TODO: How to signal to exit?
-uv_sem_t xplatexit;
 int inited=0;
 
 
-//NOTE:Will leak TJS Runtime, So only call once for one process.
-void tjsstart(int block){
-    auto dataPath=get_data_path("");
-    pxprpc_txikijs::SetTjsStartupDir(dataPath);
-    auto tjsWrap=new pxprpc_txikijs::TjsRuntimeWrap();
-    tjsWrap->init([tjsWrap,dataPath]()->void {
-        tjsWrap->runJs("import('"+dataPath+"/boot0.js');undefined;");
-    });
-    if(block){
-        uv_sem_wait(&xplatexit);
-    }
-}
+
 
 using Parameter=pxprpc::NamedFunctionPPImpl1::Parameter;
 using AsyncReturn=pxprpc::NamedFunctionPPImpl1::AsyncReturn;
 
 
-uv_lib_t *libnodeso=nullptr;
 
 void init(){
     if(inited)return;
     inited=1;
-    uv_sem_init(&xplatexit,0);
     pxprpc::defaultFuncMap.add((new pxprpc::NamedFunctionPPImpl1())->init("xplat_sdlloader.start",
         [](Parameter* para,AsyncReturn* ret)->void{
             pxprpc_rtbridge_host::runInNewThread([ret]()-> void {
@@ -232,35 +210,10 @@ void init(){
         })
     ).add((new pxprpc::NamedFunctionPPImpl1())->init("xplat_sdlloader.tjsstart",
         [](Parameter* para,AsyncReturn* ret)->void {
-            tjsstart(0);
+            pxprpc_PxseedLoader::tjsstart();
         })
     );
-    pxprpc::defaultFuncMap.add((new pxprpc::NamedFunctionPPImpl1())->init("xplat_sdlloader.loadNodeJSAndroid",
-        [](Parameter* para,AsyncReturn* ret)->void {
-            int err=-1;
-            if(libnodeso==nullptr){
-                libnodeso=new uv_lib_t();
-                err=uv_dlopen("libnode.so", libnodeso);
-            }
-            if(err!=0){
-                ret->reject(uv_dlerror(libnodeso));
-                return;
-            }
-            void (*nodejs__main)(int argc,const char *argv[]);
-			SDL_Log("===========dlopen done, prepare dlsym===============");
-            err=uv_dlsym(libnodeso, "nodejs__main", reinterpret_cast<void **>(nodejs__main));
-            if(err!=0){
-                ret->reject("nodejs__main not found in libnode.so");
-                return;
-            }
-			SDL_Log("===========dlsym done, prepare call===============");
-            std::string jsmain=get_data_path("pxseed/www/noderun.js");
-            std::cout<<jsmain<<std::endl;
-            const char *nodejs__main__argv[]={"node",jsmain.c_str(),"pxseedServer2023/entry.js",nullptr};
-            nodejs__main(3,nodejs__main__argv);
-            ret->resolve();
-        })
-    );
+    
 
 }
 
@@ -269,8 +222,8 @@ void init(){
 extern "C"{
     //For dll user. NOTE:Will leak TJS Runtime, So only call once for one process. 
     extern void xplat_tjsloader_start_once(){
-        xplat_sdlloader::init();
-        xplat_sdlloader::tjsstart(1);
+        pxprpc_PxseedLoader::init();
+        pxprpc_PxseedLoader::tjsstart();
     }
     //Use SDL_main instead of replaced main.
     extern int SDL_main(int argc, char *argv[]){

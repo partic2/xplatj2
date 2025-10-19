@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -37,7 +38,7 @@ public class MainActivity extends Activity {
     protected void bgThread() {
         initWebServer();
     }
-    public static NanoHTTPD httpd;
+    public static volatile NanoHTTPD httpd;
     public static int httpdPort = 2080;
     public static int[] httpdPortRange=new int[]{2080,2095};
     public void initWebServer() {
@@ -60,15 +61,17 @@ public class MainActivity extends Activity {
                 if(httpdPort>=httpdPortRange[1]){
                     throw new RuntimeException("No available tcp port.");
                 }
-                httpd = new XplatHTTPDServer(hostname, httpdPort);
                 if(project.xplat.launcher.MainActivity.tjsFlag==project.xplat.launcher.MainActivity.selectedBackend) {
                     try {
                         RpcExtendClientCallable tjsstart = RuntimeBridgeUtils.client.getFunc("xplat_sdlloader.tjsstart");
                         tjsstart.typedecl("->");
                         tjsstart.callBlock();
+                        tjsstart.free();
                     }catch(Exception ex){
+                        ex.printStackTrace();
                     }
                 }
+                httpd = new XplatHTTPDServer(hostname, httpdPort);
                 httpd.start(60 * 60 * 1000);
             }
         } catch (IOException e) {
@@ -84,7 +87,7 @@ public class MainActivity extends Activity {
         startActivity(intent);
     }
 
-    public View mainWebView;
+    public WebView mainWebView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,8 +136,15 @@ public class MainActivity extends Activity {
         wv.getSettings().setAllowFileAccess(true);
         wv.getSettings().setAllowContentAccess(true);
         wv.getSettings().setAllowUniversalAccessFromFileURLs(true);
+        while(httpd==null){
+            //race condition
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+            }
+        }
         try {
-            wv.loadUrl("http://127.0.0.1:" + httpdPort +XplatHTTPDServer.urlPathForFile(new File(AssetsCopy.assetsDir + "/index.html")));
+            mainWebView.loadUrl("http://127.0.0.1:" + httpdPort +XplatHTTPDServer.urlPathForFile(new File(AssetsCopy.assetsDir + "/index.html")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

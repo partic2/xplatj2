@@ -3,6 +3,7 @@ package project.xplat.launcher;
 
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.os.Build;
 import android.util.Log;
 import pxprpc.extend.RpcExtendClientCallable;
 import pxprpc.extend.TableSerializer;
@@ -50,7 +51,10 @@ public class AssetsCopy {
 			if(PlatCoreConfig.get()==null){
 				PlatCoreConfig.singleton.set(new PlatCoreConfig());
 			}
-		} catch (IOException e) {
+			RpcExtendClientCallable setAndroidInitInfo = RuntimeBridgeUtils.client.getFunc("pxprpc_PxseedLoader.setAndroidInitInfo");
+			setAndroidInitInfo.typedecl("si->").callBlock(AssetsCopy.assetsDir, Build.VERSION.SDK_INT);
+			setAndroidInitInfo.free();
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
