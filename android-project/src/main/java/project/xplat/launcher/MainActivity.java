@@ -10,6 +10,8 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
 import android.os.Build;
 import android.os.Bundle;
+import pxprpc.extend.RpcExtendClientCallable;
+import pxprpc.runtimebridge.RuntimeBridgeUtils;
 import pxprpcapi.androidhelper.AndroidUIBase;
 import xplatj.gdxconfig.core.PlatCoreConfig;
 import xplatj.javaplat.partic2.util.AsyncFuncChain;
@@ -19,21 +21,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 
 
 public class MainActivity extends Activity {
 	private Intent intent;
-	public static String gdxFlag="gdx";
-	public static String sdlFlag="sdl";
-	public static String webappFlag="webapp";
-
-	public static String tjsFlag="tjs";
-	public static String shutdownFlag="shutdown";
-	public static String rebootFlag="reboot";
-
-	public static String selectedBackend="";
-	public static String selectedResultAction="shutdown";
+	public static final String sdlFlag="sdl";
+	public static final String webappFlag="webapp";
 	public static boolean[] startOptsParsed=new boolean[]{false};
+	public static HashSet<String> startupOpts=new HashSet<String>();
 	public static Integer currentTaskId=null;
 
 	public static void ensureStartOpts(){
@@ -41,21 +38,14 @@ public class MainActivity extends Activity {
 		synchronized (startOptsParsed){
 			if(startOptsParsed[0])return;
 			startOptsParsed[0]=true;
+			startupOpts.clear();
 			FileInputStream in1 = null;
 			try {
 				in1 = new FileInputStream(AssetsCopy.assetsDir + "/xplat-flag.txt");
 				byte[] content=new byte[1024];
 				int len=in1.read(content);
-				String[] opts=new String(content,0,len, StandardCharsets.UTF_8).split("\\s+");
-				for(String opt:opts){
-					if("debug".equals(opt)){
-						PlatCoreConfig.debugMode=true;
-					}else if("launcher_end".equals(opt)) {
-						break;
-					}
-				}
-				selectedBackend=opts[0];
-				selectedResultAction=opts[1];
+				startupOpts.addAll(Arrays.asList(new String(content,0,len, StandardCharsets.UTF_8).split("\\s+")));
+				PlatCoreConfig.debugMode=startupOpts.contains("debug");
 			} catch (FileNotFoundException e) {
 			} catch (IOException e) {
 			}finally{
@@ -85,7 +75,7 @@ public class MainActivity extends Activity {
 				try{
 					Runtime.getRuntime().exec("chmod 0777 " + MainActivity.this .getFilesDir().getAbsolutePath());
 				}
-				catch (IOException e) {}
+				catch (Exception e) {}
 
 				if(Build.VERSION.SDK_INT>=19){
 					MainActivity.this.getExternalFilesDirs(null);
@@ -97,6 +87,14 @@ public class MainActivity extends Activity {
 					multicastLock.acquire();
 				}
 				MainActivity.this.startService(new Intent(MainActivity.this,PxprpcService.class));
+                try {
+                    RpcExtendClientCallable tjsstart = RuntimeBridgeUtils.client.getFunc("xplat_sdlloader.tjsstart");
+                    tjsstart.typedecl("->");
+                    tjsstart.callBlock();
+                    tjsstart.free();
+                }catch(Exception ex){
+                    ex.printStackTrace();
+                }
 				launch();
 			}
 		}).start();
@@ -144,7 +142,7 @@ public class MainActivity extends Activity {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			String[] reqPerms=getPermissionNotGranted();
 			if(reqPerms.length>0) this.requestPermissions(reqPerms,1);
-		}else {
+		} else {
 			initEnviron();
 		}
 	}
@@ -158,17 +156,11 @@ public class MainActivity extends Activity {
 	public void launch(){
 		try {
 			ensureStartOpts();
-
-			if(sdlFlag.equals(selectedBackend)){
+			if(startupOpts.contains("sdl")){
 				intent=new Intent();
 				intent.setClass(this,Class.forName("project.xplat.sdl.MainActivity"));
 				this.startActivityForResult(intent,1);
-			}else if(webappFlag.equals(selectedBackend)){
-				intent=new Intent();
-				intent.setClass(this,Class.forName("project.xplat.webapp.MainActivity"));
-				this.startActivityForResult(intent,1);
-			}else if(tjsFlag.equals(selectedBackend)){
-				//Still, webapp, But run tjs loader.
+			}else if(startupOpts.contains("webapp")){
 				intent=new Intent();
 				intent.setClass(this,Class.forName("project.xplat.webapp.MainActivity"));
 				this.startActivityForResult(intent,1);
@@ -195,23 +187,7 @@ public class MainActivity extends Activity {
 	}
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		boolean shutdown=true;
-		ApiServer.defaultAndroidContext=this;
-		try{
-			startOptsParsed[0]=false;
-			ensureStartOpts();
-			if(shutdownFlag.equals(selectedResultAction)){
-				shutdown=true;
-			}else if(rebootFlag.equals(selectedResultAction)){
-				shutdown=false;
-			}
-		}catch(Exception e){
-		}
-		if(!shutdown){
-			launch();
-		}else{
-			finish();
-		}
+		finish();
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 }

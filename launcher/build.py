@@ -108,6 +108,10 @@ def BuildAndroidRelease():
                 dstsodir+'/libpxprpc_rtbridge.so')
         shutil.copy(sodir+'/launcher',\
                 dstsodir+'/launcher')
+    
+    if os.path.exists(builddir+'/build-txiki.js/tjs-initialize'):
+        shutil.move(builddir+'/build-txiki.js/tjs-initialize',sourceroot+'/android-project/src/main/assets/res/tjs-initialize')
+    
     os.chdir(sourceroot+'/android-project')
     gradle=os.curdir+os.sep+'gradlew'
     if os.name=='posix':
@@ -165,6 +169,10 @@ def BuildDesktopRelease(name,toolchain):
             shutil.copytree(sourceroot+'/javase-project/src/main/assets',outdir,dirs_exist_ok=True)
         if os.path.exists(sourceroot+'/commonj/src/main/assets'):
             shutil.copytree(sourceroot+'/commonj/src/main/assets',outdir,dirs_exist_ok=True)
+
+        if os.path.exists(builddir+'/build-txiki.js/tjs-initialize'):
+            shutil.move(builddir+'/build-txiki.js/tjs-initialize',outdir+'/res/tjs-initialize')
+
         if buildConfig['PACK_JAVA_RUNTIME']:
             if not os.path.exists(outdir+'/rt-java/release'):
                 PrintAndRun(toolchain['JLINK']+' --add-modules java.base,java.logging,jdk.crypto.ec,jdk.crypto.cryptoki --output '+outdir+'/rt-java')

@@ -1,6 +1,7 @@
 package project.xplat.launcher;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Build;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 public class AssetsCopy {
 	private static Context mContext;
 	public static AssetsCopy ac;
+	//Will be override to app internal files.
 	public static String assetsDir="/sdcard/Download/xplat";
 	public static boolean loadAssets(Context ctx) throws IOException {
 		File f=new File(assetsDir+"/xplat-flag.txt");
@@ -52,7 +54,13 @@ public class AssetsCopy {
 				PlatCoreConfig.singleton.set(new PlatCoreConfig());
 			}
 			RpcExtendClientCallable setAndroidInitInfo = RuntimeBridgeUtils.client.getFunc("pxprpc_PxseedLoader.setAndroidInitInfo");
-			setAndroidInitInfo.typedecl("si->").callBlock(AssetsCopy.assetsDir, Build.VERSION.SDK_INT);
+			String processTag="";
+			if(context instanceof PxprpcService){
+				processTag="pxprpcsrv";
+			}else if(context instanceof Activity){
+				processTag="activity";
+			}
+			setAndroidInitInfo.typedecl("sis->").callBlock(AssetsCopy.assetsDir, Build.VERSION.SDK_INT,processTag);
 			setAndroidInitInfo.free();
 		} catch (Exception e) {
 			throw new RuntimeException(e);

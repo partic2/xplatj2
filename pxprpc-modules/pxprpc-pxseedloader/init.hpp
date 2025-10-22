@@ -16,7 +16,6 @@ extern "C"{
 #include <iostream>
 
 
-//#define __ANDROID__
 
 namespace pxprpc_PxseedLoader{
     using string=std::string;
@@ -31,11 +30,27 @@ namespace pxprpc_PxseedLoader{
     uv_lib_t *libnodeso=nullptr;
     #endif
 
+    //There may be multiple process use same pxseed-loader in same time, use tag to distinct these,Use pid if not set.
+    //For example, On android ,there is a service process and an activity process. Use a valid filename character as process tag.
+    string processTag("");
+
     string pxseedLoaderDataDir("");
     string pathPartSep="/";
 
+    uv_sem_t exitRequested;
+
+    void pxseedLoaderRequestExit(){
+        uv_sem_post(&exitRequested);
+    }
+    void waitForPxseedLoaderExit(){
+        uv_sem_wait(&exitRequested);
+        uv_sem_post(&exitRequested);
+    }
+
     void init(){
         if(inited)return;
+        processTag=std::to_string(uv_os_getpid());
+        uv_sem_init(&exitRequested, 0);
         {
             char *exepathC=new char[1024];
             size_t exepathSize=1024;
@@ -45,7 +60,12 @@ namespace pxprpc_PxseedLoader{
             if(exepathCpp.find('\\')!=std::string::npos){
                 pathPartSep="\\";
             }
-            pxseedLoaderDataDir=exepathCpp+pathPartSep+"data";
+            auto dirPartEndAt=exepathCpp.find_last_of(pathPartSep[0]);
+            if(dirPartEndAt==std::string::npos){
+                pxseedLoaderDataDir="";
+            }else{
+                pxseedLoaderDataDir=exepathCpp.substr(0,dirPartEndAt)+pathPartSep+"data";
+            }
         }
 
         #ifdef __ANDROID__
@@ -55,11 +75,14 @@ namespace pxprpc_PxseedLoader{
                 //Must called by Java side to initialize android environment before other call.
                 androidDataDir=para->nextString();
                 androidApiVersion=para->nextInt();
+                auto ptag=para->nextString();
+                if(ptag.size()>0){
+                    processTag=ptag;
+                }
                 pxseedLoaderDataDir=androidDataDir;
-
                 //init stdout/stderr
-                string stdoutFile(pxseedLoaderDataDir+pathPartSep+"stdout.txt");
-                string stderrFile(pxseedLoaderDataDir+pathPartSep+"stderr.txt");
+                string stdoutFile(pxseedLoaderDataDir+pathPartSep+"stdout_"+processTag+".txt");
+                string stderrFile(pxseedLoaderDataDir+pathPartSep+"stderr_"+processTag+".txt");
                 FILE *fh=freopen(stdoutFile.c_str(),"w",stdout);
                 if(fh==NULL){
                     //Error
@@ -78,7 +101,7 @@ namespace pxprpc_PxseedLoader{
             (new pxprpc::NamedFunctionPPImpl1())
                 ->init("pxprpc_PxseedLoader.getAndroidInitInfo", [](Parameter *para, AsyncReturn *ret) -> void {
                 auto ser=new pxprpc::Serializer();
-                ser->prepareSerializing(64)->putString(androidDataDir)->putInt(androidApiVersion);
+                ser->prepareSerializing(64)->putString(androidDataDir)->putInt(androidApiVersion)->putString(processTag);
                 ret->resolve(ser);
             })
         ).add((new pxprpc::NamedFunctionPPImpl1())->init("pxprpc_PxseedLoader.loadNodeJSAndroid",
@@ -112,11 +135,14 @@ namespace pxprpc_PxseedLoader{
 
     //NOTE:Will leak TJS Runtime, So only call once for one process.
     void tjsstart(){
+        std::cout<<"[txikijs]:initializing."<<std::endl;
         pxprpc_txikijs::init();
         pxprpc_txikijs::SetTjsStartupDir(pxseedLoaderDataDir);
+        
         auto tjsWrap=new pxprpc_txikijs::TjsRuntimeWrap();
         tjsWrap->init([tjsWrap]()->void {
-            tjsWrap->runJs(string{"import('"}+pxseedLoaderDataDir+"/boot0.js');undefined;");
+            std::cout<<"[txikijs]:initialize done.importing '"<<pxseedLoaderDataDir+pathPartSep+"boot0.js'"<<std::endl;
+            tjsWrap->runJs(string{"import(String.raw`"}+(pxseedLoaderDataDir+pathPartSep+"boot0.js")+"`);undefined;");
         });
     }
 

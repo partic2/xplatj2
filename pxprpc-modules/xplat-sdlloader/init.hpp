@@ -221,9 +221,12 @@ void init(){
 
 extern "C"{
     //For dll user. NOTE:Will leak TJS Runtime, So only call once for one process. 
-    extern void xplat_tjsloader_start_once(){
+    extern void xplat_tjsloader_start_once(int waitExitRequested){
         pxprpc_PxseedLoader::init();
         pxprpc_PxseedLoader::tjsstart();
+        if(waitExitRequested){
+            pxprpc_PxseedLoader::waitForPxseedLoaderExit();
+        }
     }
     //Use SDL_main instead of replaced main.
     extern int SDL_main(int argc, char *argv[]){

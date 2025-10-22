@@ -61,16 +61,6 @@ public class MainActivity extends Activity {
                 if(httpdPort>=httpdPortRange[1]){
                     throw new RuntimeException("No available tcp port.");
                 }
-                if(project.xplat.launcher.MainActivity.tjsFlag==project.xplat.launcher.MainActivity.selectedBackend) {
-                    try {
-                        RpcExtendClientCallable tjsstart = RuntimeBridgeUtils.client.getFunc("xplat_sdlloader.tjsstart");
-                        tjsstart.typedecl("->");
-                        tjsstart.callBlock();
-                        tjsstart.free();
-                    }catch(Exception ex){
-                        ex.printStackTrace();
-                    }
-                }
                 httpd = new XplatHTTPDServer(hostname, httpdPort);
                 httpd.start(60 * 60 * 1000);
             }
