@@ -3,7 +3,7 @@ package pxprpcapi.androidhelper;
 import android.app.Service;
 import android.os.BatteryManager;
 import android.os.PowerManager;
-import project.xplat.launcher.ApiServer;
+import partic2.pxseedloader.android.launcher.ApiServer;
 import pxprpc.extend.TableSerializer;
 
 import java.io.Closeable;
@@ -27,13 +27,13 @@ public class Power2 extends PxprpcBroadcastReceiverAdapter implements Closeable 
     public PowerManager.WakeLock screenWake;
     public void accuireCpuWakeLock(){
         if(cpuWake==null){
-            cpuWake=pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"xplatj:ApiServer");
+            cpuWake=pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"pxseed-loader:ApiServer");
             cpuWake.acquire();
         }
     }
     public void accuireScreenWakeLock(boolean keepBright){
         if(screenWake==null){
-            screenWake=pm.newWakeLock(keepBright?PowerManager.SCREEN_BRIGHT_WAKE_LOCK:PowerManager.SCREEN_DIM_WAKE_LOCK,"xplatj:ApiServer");
+            screenWake=pm.newWakeLock(keepBright?PowerManager.SCREEN_BRIGHT_WAKE_LOCK:PowerManager.SCREEN_DIM_WAKE_LOCK,"pxseedloader:ApiServer");
             screenWake.acquire();
         }
     }

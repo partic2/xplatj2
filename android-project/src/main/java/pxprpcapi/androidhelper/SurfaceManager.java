@@ -6,14 +6,14 @@ import android.media.ImageReader;
 import android.opengl.GLES20;
 import android.os.Handler;
 import android.view.Surface;
-import project.xplat.launcher.ApiServer;
+import partic2.pxseedloader.android.launcher.ApiServer;
 import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.BuiltInFuncList;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
 import pxprpc.runtimebridge.NativeHelper;
-import xplatj.gdxconfig.core.PlatCoreConfig;
+import xplatj.javaplat.partic2.util.PlatCoreConfig;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;

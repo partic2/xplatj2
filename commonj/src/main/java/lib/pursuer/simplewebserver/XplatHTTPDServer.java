@@ -3,12 +3,11 @@ package lib.pursuer.simplewebserver;
 import org.nanohttpd.protocols.http.ClientHandler;
 import org.nanohttpd.protocols.http.IHTTPSession;
 import org.nanohttpd.protocols.http.NanoHTTPD;
-import org.nanohttpd.protocols.http.response.IStatus;
 import org.nanohttpd.protocols.http.response.Response;
 import org.nanohttpd.protocols.http.response.Status;
 import org.nanohttpd.protocols.websockets.NanoWSD;
 import org.nanohttpd.webserver.SimpleWebServer;
-import xplatj.gdxconfig.core.PlatCoreConfig;
+import xplatj.javaplat.partic2.util.PlatCoreConfig;
 
 import java.io.File;
 import java.io.IOException;

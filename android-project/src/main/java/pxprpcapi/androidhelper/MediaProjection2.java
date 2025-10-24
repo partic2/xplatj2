@@ -11,17 +11,14 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.DisplayMetrics;
-import project.xplat.launcher.ApiServer;
+import partic2.pxseedloader.android.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
-import xplatj.gdxplat.partic2.utils.Env;
 import xplatj.javaplat.partic2.pxprpc.AsyncFuncChainPxprpcAdapter;
 import xplatj.javaplat.partic2.util.AsyncFuncChain;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.util.Random;
 
 public class MediaProjection2 implements Closeable {
     public static final int ServiceBinderCode=1000;
@@ -108,7 +105,7 @@ public class MediaProjection2 implements Closeable {
         return null;
     }
     public boolean requestScreenCapture(final AsyncReturn<Boolean> ret){
-        int reqCode= Env.i(Random.class).nextInt(0xffffff);
+        int reqCode= (int)System.currentTimeMillis();
         ApiServer.onActivityResultCallback.put(reqCode,(param)->{
             requestResultCode=(Integer)param[1];
             if(requestResultCode==Activity.RESULT_OK){

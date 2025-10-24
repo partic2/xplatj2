@@ -15,7 +15,7 @@
 
 
 static char *current_dir;
-static char *flagfilepath="./data/xplat-flag.txt";
+static char *flagfilepath="./data/pxseedloader-flags.txt";
 
 /* free by caller*/
 static char *strconcat2(const char *str1,const char *str2){
@@ -43,7 +43,7 @@ static int dlclose(void *dll){
 
 
 
-static void loadXplatDll(){
+static void loadMainDll(){
    void *rtbridgeDll=dlopen("libpxprpc_rtbridge",0);
     if(rtbridgeDll==NULL){
         printf("pxprpc runtime bridge first try failed.\n");
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
     free(tbuf);
     fclose(flagfile);
     
-    loadXplatDll();
+    loadMainDll();
 
     return 0;
     

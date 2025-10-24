@@ -10,7 +10,7 @@ import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
-import project.xplat.launcher.ApiServer;
+import partic2.pxseedloader.android.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.BuiltInFuncList;
 import pxprpc.extend.MethodTypeDecl;

@@ -13,7 +13,7 @@ import android.media.ImageReader;
 import android.os.Build;
 import android.util.Size;
 import android.view.Surface;
-import project.xplat.launcher.ApiServer;
+import partic2.pxseedloader.android.launcher.ApiServer;
 import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.BuiltInFuncList;

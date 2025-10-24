@@ -17,7 +17,7 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.*;
 import android.hardware.Camera;
-import project.xplat.launcher.ApiServer;
+import partic2.pxseedloader.android.launcher.ApiServer;
 import pxprpc.base.Serializer2;
 import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;

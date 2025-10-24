@@ -4,9 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import project.xplat.launcher.ApiServer;
 import pxprpc.extend.EventDispatcher;
-import xplatj.gdxconfig.core.PlatCoreConfig;
+import xplatj.javaplat.partic2.util.PlatCoreConfig;
 
 public class PxprpcBroadcastReceiverAdapter extends BroadcastReceiver {
 

@@ -38,7 +38,7 @@ android {
 		release{
 			storeFile file('../tools/android.keystore')
 			storePassword '123456'
-			keyAlias 'PursuerTestKey'
+			keyAlias 'public'
 			keyPassword '123456'
 		}
 	}

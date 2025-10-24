@@ -4,9 +4,8 @@ import pxprpc.base.Utils;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
-import xplatj.gdxconfig.core.PlatCoreConfig;
-import xplatj.javaplat.partic2.filesystem.impl.PrefixFS;
-import xplatj.javaplat.partic2.io.stream.StreamTransmit;
+import xplatj.javaplat.partic2.util.PlatCoreConfig;
+import xplatj.javaplat.partic2.util.StreamTransmit;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -19,10 +18,7 @@ import java.util.Stack;
 public class JseIo implements Closeable{
     public static JseIo i;
     public static final String PxprpcNamespace="JseHelper.JseIo";
-    public PrefixFS fs;
     public JseIo(){
-        fs=new PrefixFS();
-        fs.prefix="";
         i=this;
     }
     public String realpath(String path) throws IOException {
@@ -245,9 +241,8 @@ public class JseIo implements Closeable{
         out.write(buf.array(),buf.position(),buf.remaining());
         out.flush();
     }
-    public String getDataDir(){
-        return PrefixFS.defaultPrefix;
-    }
+    public String dataDir="";
+    public String getDataDir(){return this.dataDir;}
 
     public String getProp(String prop){
         String result = System.getProperty(prop);

@@ -2,27 +2,22 @@ package pxprpcapi.androidhelper;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import project.xplat.launcher.ApiServer;
-import pxprpc.base.Serializer2;
+import partic2.pxseedloader.android.launcher.ApiServer;
+import partic2.pxseedloader.android.webapp.MainActivity;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.EventDispatcher;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
-import xplatj.gdxconfig.core.PlatCoreConfig;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 
 public class AndroidUIBase implements Closeable {
     public static final String PxprpcNamespace="AndroidHelper.AndroidUIBase";
@@ -87,12 +82,12 @@ public class AndroidUIBase implements Closeable {
     }
 
     public void webViewSetStartScript(String script){
-        project.xplat.webapp.MainActivity activity=(project.xplat.webapp.MainActivity)ApiServer.defaultAndroidContext;
+        MainActivity activity=(MainActivity)ApiServer.defaultAndroidContext;
         activity.setWebviewStartScript(script);
     }
     public void webViewRunJs(String script){
         mainTaskQueue.post(()-> {
-            project.xplat.webapp.MainActivity activity=(project.xplat.webapp.MainActivity)ApiServer.defaultAndroidContext;
+            MainActivity activity=(MainActivity)ApiServer.defaultAndroidContext;
             activity.webviewRunJs(script);
         });
     }

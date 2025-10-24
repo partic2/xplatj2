@@ -12,15 +12,12 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.webkit.MimeTypeMap;
 import de.cketti.fileprovider.PublicFileProvider;
-import project.xplat.launcher.ApiServer;
+import partic2.pxseedloader.android.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
-import xplatj.gdxplat.partic2.utils.Env;
 
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Random;
 
 public class Intent2 implements Closeable {
     public static final String PxprpcNamespace="AndroidHelper.Intent";
@@ -102,7 +99,7 @@ public class Intent2 implements Closeable {
         Uri uri= Uri.parse(getUriForFile(imagePath));
         Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT,uri);
-        int reqCode= Env.i(Random.class).nextInt(0xffffff);
+        int reqCode= (int)System.currentTimeMillis();
         if(ApiServer.defaultAndroidContext instanceof Activity){
             ApiServer.onActivityResultCallback.put(reqCode,(param)->{
                 ApiServer.onActivityResultCallback.remove(reqCode);
@@ -139,7 +136,7 @@ public class Intent2 implements Closeable {
             }
             Intent intent=new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
             intent.setData(Uri.parse("package:"+ApiServer.defaultAndroidContext.getPackageName()));
-            int reqCode= Env.i(Random.class).nextInt(0xffffff);
+            int reqCode= (int)System.currentTimeMillis();
             ApiServer.onActivityResultCallback.put(reqCode,(args)->{
                 ApiServer.resolveAsync(ret,args[1].equals(Activity.RESULT_OK));
                 return true;

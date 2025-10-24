@@ -1,16 +1,15 @@
 package pxprpcapi.androidhelper;
 
 import android.content.IntentFilter;
+import partic2.pxseedloader.android.launcher.AssetsCopy;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.EventDispatcher;
 import pxprpc.extend.TableSerializer;
-import xplatj.gdxconfig.core.PlatCoreConfig;
-import xplatj.javaplat.partic2.filesystem.IFile;
-import xplatj.javaplat.partic2.filesystem.IFileSystem;
-import xplatj.javaplat.partic2.io.IDataBlock;
 import xplatj.javaplat.partic2.util.CloseableGroup;
 
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -18,6 +17,12 @@ import java.util.*;
 public class IntentReceiver extends PxprpcBroadcastReceiverAdapter implements Closeable {
     public static final String PxprpcNamespace="AndroidHelper.IntentReceiver";
     public static IntentReceiver i;
+
+    @Override
+    public void close() throws IOException {
+        this.eventDispatcher().close();
+    }
+
     public static class Evt{
         public String event;
         public long time;
@@ -31,49 +36,8 @@ public class IntentReceiver extends PxprpcBroadcastReceiverAdapter implements Cl
     HashMap<String,ECfg> ecfgs=new HashMap<String,ECfg>();
     public IntentReceiver(){
         i=this;
-        init();
     }
-    protected void init(){
-        this.dispatcher=new EventDispatcher();
-        dispatcher.setEventType(ByteBuffer.class);
-        IFileSystem fs = PlatCoreConfig.get().fs;
-        IFile cfgFile=fs.resolve("pxprpc/"+ IntentReceiver.PxprpcNamespace+"/ecfgs");
-        if(cfgFile.exists()){
-            CloseableGroup toClose=new CloseableGroup();
-            try {
-                IDataBlock data = cfgFile.open();
-                toClose.add(()->data.free());
-                ByteBuffer buf = ByteBuffer.allocate((int) data.size());
-                for(ECfg it:new TableSerializer().load(buf).toTypedObjectArray(ECfg.class)){
-                    ecfgs.put(it.event,it);
-                }
-            } catch (IOException e) {
-            }finally {
-                toClose.closeQuietly();
-            }
-        }
-    }
-    public void close() throws IOException {
-        if(i==this)i=null;
-        IFileSystem fs = PlatCoreConfig.get().fs;
-        IFile cfgFile=fs.resolve("pxprpc/"+ IntentReceiver.PxprpcNamespace+"/ecfgs");
-        if(!cfgFile.exists()) {
-            cfgFile.create();
-        }
-        CloseableGroup toClose=new CloseableGroup();
-        try {
-            IDataBlock data = cfgFile.open();
-            toClose.add(()->data.free());
-            ArrayList<ECfg> lists = new ArrayList<ECfg>();
-            lists.addAll(ecfgs.values());
-            TableSerializer tab = new TableSerializer().fromTypedObjectArray(lists);
-            ByteBuffer buf = tab.build();
-            data.write(buf.array(),buf.position(),buf.remaining());
-        } catch (IOException e) {
-        }finally {
-            toClose.closeQuietly();
-        }
-    }
+
     public void queueIntent(String event,ByteBuffer data){
         Evt t1=new Evt();
         t1.data=data;

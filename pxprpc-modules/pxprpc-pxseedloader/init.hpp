@@ -47,6 +47,19 @@ namespace pxprpc_PxseedLoader{
         uv_sem_post(&exitRequested);
     }
 
+    //NOTE:Will leak TJS Runtime, So only call once for one process.
+    void tjsstart(){
+        std::cout<<"[txikijs]:initializing."<<std::endl;
+        pxprpc_txikijs::init();
+        pxprpc_txikijs::SetTjsStartupDir(pxseedLoaderDataDir);
+        
+        auto tjsWrap=new pxprpc_txikijs::TjsRuntimeWrap();
+        tjsWrap->init([tjsWrap]()->void {
+            std::cout<<"[txikijs]:initialize done.importing '"<<pxseedLoaderDataDir+pathPartSep+"boot0.js'"<<std::endl;
+            tjsWrap->runJs(string{"import(String.raw`"}+(pxseedLoaderDataDir+pathPartSep+"boot0.js")+"`);undefined;");
+        });
+    }
+
     void init(){
         if(inited)return;
         processTag=std::to_string(uv_os_getpid());
@@ -67,6 +80,13 @@ namespace pxprpc_PxseedLoader{
                 pxseedLoaderDataDir=exepathCpp.substr(0,dirPartEndAt)+pathPartSep+"data";
             }
         }
+        
+        pxprpc::defaultFuncMap.add((new pxprpc::NamedFunctionPPImpl1())->init("pxprpc_PxseedLoader.tjsstart",
+            [](Parameter* para,AsyncReturn* ret)->void {
+                pxprpc_PxseedLoader::tjsstart();
+				ret->resolve();
+            })
+        );
 
         #ifdef __ANDROID__
         pxprpc::defaultFuncMap.add(
@@ -133,17 +153,16 @@ namespace pxprpc_PxseedLoader{
         inited=1;
     }
 
-    //NOTE:Will leak TJS Runtime, So only call once for one process.
-    void tjsstart(){
-        std::cout<<"[txikijs]:initializing."<<std::endl;
-        pxprpc_txikijs::init();
-        pxprpc_txikijs::SetTjsStartupDir(pxseedLoaderDataDir);
-        
-        auto tjsWrap=new pxprpc_txikijs::TjsRuntimeWrap();
-        tjsWrap->init([tjsWrap]()->void {
-            std::cout<<"[txikijs]:initialize done.importing '"<<pxseedLoaderDataDir+pathPartSep+"boot0.js'"<<std::endl;
-            tjsWrap->runJs(string{"import(String.raw`"}+(pxseedLoaderDataDir+pathPartSep+"boot0.js")+"`);undefined;");
-        });
-    }
+}
 
+extern "C"{
+    //For dll user. NOTE:Will leak TJS Runtime, So only call once for one process. 
+    extern void xplat_tjsloader_start_once(int waitExitRequested){
+        pxprpc_PxseedLoader::init();
+        pxprpc_PxseedLoader::tjsstart();
+        if(waitExitRequested){
+            pxprpc_PxseedLoader::waitForPxseedLoaderExit();
+        }
+    }
+    
 }

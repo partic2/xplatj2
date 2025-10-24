@@ -40,7 +40,7 @@ java{
 sourceCompatibility = 8
 targetCompatibility = 8
 
-mainClassName='project.xplatj.JMain'
+mainClassName='partic2.pxseedloader.javase.backend.jse.JMain'
 
 
 dependencies {
