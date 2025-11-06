@@ -10,8 +10,10 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import pxprpc.extend.RpcExtendClientCallable;
 import pxprpc.runtimebridge.RuntimeBridgeUtils;
+import pxprpcapi.androidhelper.Intent2;
 import pxprpcapi.jsehelper.JseIo;
 import xplatj.javaplat.partic2.util.PlatCoreConfig;
 
@@ -26,8 +28,7 @@ import java.util.HashSet;
 
 public class MainActivity extends Activity {
 	private Intent intent;
-	public static final String sdlFlag="sdl";
-	public static final String webappFlag="webapp";
+
 	public static HashSet<String> startupOpts=new HashSet<String>();
 	public static Integer currentTaskId=null;
 
@@ -157,26 +158,7 @@ public class MainActivity extends Activity {
 	}
 
 	public void launch(){
-
-			ensureStartOpts();
-			ApiServer.handler.post(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						if(startupOpts.contains("sdl")){
-							intent=new Intent();
-							intent.setClass(MainActivity.this,Class.forName("partic2.pxseedloader.android.sdl.MainActivity"));
-							MainActivity.this.startActivityForResult(intent,1);
-						}else if(startupOpts.contains("webapp")){
-							intent=new Intent();
-							intent.setClass(MainActivity.this,Class.forName("partic2.pxseedloader.android.webapp.MainActivity"));
-							MainActivity.this.startActivityForResult(intent,1);
-						}
-					} catch (ClassNotFoundException e) {
-						finish();
-					}
-			}
-			});
+		ensureStartOpts();
 	}
 
 	@Override
@@ -195,7 +177,7 @@ public class MainActivity extends Activity {
 	}
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		finish();
+		ApiServer.onActivityResult(requestCode,resultCode,data);
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 }

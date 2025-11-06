@@ -67,11 +67,21 @@ public class MainActivity extends Activity {
     }
 
     public WebView mainWebView;
+    public String startupUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
+        Intent intent=this.getIntent();
+        this.startupUrl=intent.getStringExtra("url");
+        if(this.startupUrl==null){
+            try {
+                this.startupUrl="http://127.0.0.1:" + httpdPort +XplatHTTPDServer.urlPathForFile(new File(AssetsCopy.assetsDir + "/index.html"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         PlatCoreConfig.get().executor.execute(
                 new Runnable() {
                     @Override
@@ -87,6 +97,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        ApiServer.defaultAndroidContext=this;
     }
 
     protected void initWebView() {
@@ -122,11 +133,7 @@ public class MainActivity extends Activity {
             } catch (InterruptedException e) {
             }
         }
-        try {
-            mainWebView.loadUrl("http://127.0.0.1:" + httpdPort +XplatHTTPDServer.urlPathForFile(new File(AssetsCopy.assetsDir + "/index.html")));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        mainWebView.loadUrl(this.startupUrl);
     }
     protected void deinitWebView(){
         WebView wv = ((WebView) mainWebView);
@@ -160,5 +167,6 @@ public class MainActivity extends Activity {
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         ApiServer.onActivityResult(requestCode,resultCode,data);
+        super.onActivityResult(requestCode,resultCode,data);
     }
 }

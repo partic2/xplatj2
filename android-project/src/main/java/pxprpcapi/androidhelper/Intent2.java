@@ -13,6 +13,7 @@ import android.provider.Settings;
 import android.webkit.MimeTypeMap;
 import de.cketti.fileprovider.PublicFileProvider;
 import partic2.pxseedloader.android.launcher.ApiServer;
+import partic2.pxseedloader.android.launcher.MainActivity;
 import pxprpc.extend.AsyncReturn;
 
 import java.io.Closeable;
@@ -163,6 +164,24 @@ public class Intent2 implements Closeable {
             type = "application/octet-stream";
         }
         return type;
+    }
+
+    public void startActivity(String activityName,String packageName) throws ClassNotFoundException {
+        Intent intent = new Intent();
+        if(packageName.equals("")) {
+            intent.setClass(ApiServer.defaultAndroidContext,Class.forName(activityName));
+            ApiServer.defaultAndroidContext.startActivity(intent);
+        }else{
+            intent.setClassName(packageName,activityName);
+            ApiServer.defaultAndroidContext.startActivity(intent);
+        }
+    }
+
+    public void openHttpUrl(String url,String flags) throws ClassNotFoundException {
+        Intent intent = new Intent();
+        intent.setClass(ApiServer.defaultAndroidContext,Class.forName("partic2.pxseedloader.android.webapp.MainActivity"));
+        intent.putExtra("url",url);
+        ApiServer.defaultAndroidContext.startActivity(intent);
     }
 
     @Override

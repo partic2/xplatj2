@@ -24,6 +24,8 @@ import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 
 
 public class ApiServer {
@@ -32,6 +34,7 @@ public class ApiServer {
     public static HandlerThread handlerThread;
     public static Handler handler;
     public static int port=2050;
+    public static Semaphore baseModulesInited;
     public static IBinder serviceBinder;
     public static ServiceConnection serviceConnection=new ServiceConnection() {
         @Override
@@ -120,6 +123,7 @@ public class ApiServer {
                     register.invoke(null);
                 } catch (Exception e) {
                 }
+                baseModulesInited.release();
             }
         });
         if(!(ApiServer.defaultAndroidContext instanceof PxprpcService)){
@@ -137,9 +141,11 @@ public class ApiServer {
                     tcpServ.bindAddr= new InetSocketAddress(
                             Inet4Address.getByAddress(new byte[]{(byte)127,(byte)0,(byte)0,(byte)1}),port);
                 }
+                baseModulesInited.acquire();
+                baseModulesInited.release();
                 tcpServ.listenAndServe();
                 break;
-            }catch (IOException ex){
+            }catch (Exception ex){
             }
         }
         if(port>=20000){
@@ -155,6 +161,7 @@ public class ApiServer {
 
     public static void start(Context context) {
         defaultAndroidContext=context;
+        baseModulesInited=new Semaphore(0);
         new Thread(new Runnable() {
             @Override
             public void run() {
