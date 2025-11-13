@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
 
 
 public class MainActivity extends Activity {
@@ -95,7 +96,14 @@ public class MainActivity extends Activity {
                 }catch(Exception ex){
                     ex.printStackTrace();
                 }
-				launch();
+				ensureStartOpts();
+				if(Intent.ACTION_MAIN.equals(intent.getAction()) && Intent.CATEGORY_LAUNCHER.equals(intent.getCategories())){
+					try {
+						RuntimeBridgeUtils.varSet("pxseedloader.event.request_ui",Long.toString(System.currentTimeMillis()));
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
 			}
 		}).start();
 	}
@@ -134,6 +142,16 @@ public class MainActivity extends Activity {
 		return permNotGranted.toArray(new String[0]);
 	}
 
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		this.setIntent(intent);
+		try {
+			RuntimeBridgeUtils.varSet("pxseedloader.event.request_ui",Long.toString(System.currentTimeMillis()));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -155,10 +173,6 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 		ApiServer.defaultAndroidContext = this;
-	}
-
-	public void launch(){
-		ensureStartOpts();
 	}
 
 	@Override

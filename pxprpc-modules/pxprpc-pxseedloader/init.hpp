@@ -3,7 +3,7 @@
 
 
 
-#include "pxprpc_rtbridge.h"
+
 #include <pxprpc_pp.hpp>
 #include <pxprpc_ext.hpp>
 extern "C"{
@@ -49,38 +49,34 @@ namespace pxprpc_PxseedLoader{
 
     //NOTE:Will leak TJS Runtime, So only call once for one process.
     void tjsstart(){
-        std::cout<<"[txikijs]:initializing."<<std::endl;
+        std::cerr<<"[txikijs]:initializing."<<std::endl;
         pxprpc_txikijs::init();
         pxprpc_txikijs::SetTjsStartupDir(pxseedLoaderDataDir);
         
         auto tjsWrap=new pxprpc_txikijs::TjsRuntimeWrap();
         tjsWrap->init([tjsWrap]()->void {
-            std::cout<<"[txikijs]:initialize done.importing '"<<pxseedLoaderDataDir+pathPartSep+"boot0.js'"<<std::endl;
+            std::cerr<<"[txikijs]:initialize done.importing '"<<pxseedLoaderDataDir+pathPartSep+"boot0.js'"<<std::endl;
             tjsWrap->runJs(string{"import(String.raw`"}+(pxseedLoaderDataDir+pathPartSep+"boot0.js")+"`);undefined;");
         });
+    }
+
+    pxprpc_rtbridge_host::TcpPxpRpcServer *pxprpcServer=nullptr;
+    void initPxseedEnviron(){
+        if(pxprpcServer==nullptr){
+            auto port=2048;
+            pxprpcServer=new pxprpc_rtbridge_host::TcpPxpRpcServer("127.0.0.1",2048);
+            for(;port<20000;port+=2048){
+                pxprpcServer->port=port;
+                const char *err=pxprpcServer->start();
+                if(err==nullptr)break;
+            }
+        }
     }
 
     void init(){
         if(inited)return;
         processTag=std::to_string(uv_os_getpid());
-        uv_sem_init(&exitRequested, 0);
-        {
-            char *exepathC=new char[1024];
-            size_t exepathSize=1024;
-            uv_exepath(exepathC,&exepathSize);
-            string exepathCpp(exepathC);
-            delete[] exepathC;
-            if(exepathCpp.find('\\')!=std::string::npos){
-                pathPartSep="\\";
-            }
-            auto dirPartEndAt=exepathCpp.find_last_of(pathPartSep[0]);
-            if(dirPartEndAt==std::string::npos){
-                pxseedLoaderDataDir="";
-            }else{
-                pxseedLoaderDataDir=exepathCpp.substr(0,dirPartEndAt)+pathPartSep+"data";
-            }
-        }
-        
+        uv_sem_init(&exitRequested, 0);       
         pxprpc::defaultFuncMap.add((new pxprpc::NamedFunctionPPImpl1())->init("pxprpc_PxseedLoader.tjsstart",
             [](Parameter* para,AsyncReturn* ret)->void {
                 pxprpc_PxseedLoader::tjsstart();
@@ -116,6 +112,7 @@ namespace pxprpc_PxseedLoader{
                     setvbuf(fh, NULL, _IONBF, 0);
                 }
                 ret->resolve();
+                initPxseedEnviron();
             })
         ).add(
             (new pxprpc::NamedFunctionPPImpl1())
@@ -148,6 +145,26 @@ namespace pxprpc_PxseedLoader{
             ret->resolve();
         })
         );
+        #endif
+
+        #ifndef __ANDROID__
+        {
+            char *exepathC=new char[1024];
+            size_t exepathSize=1024;
+            uv_exepath(exepathC,&exepathSize);
+            string exepathCpp(exepathC);
+            delete[] exepathC;
+            if(exepathCpp.find('\\')!=std::string::npos){
+                pathPartSep="\\";
+            }
+            auto dirPartEndAt=exepathCpp.find_last_of(pathPartSep[0]);
+            if(dirPartEndAt==std::string::npos){
+                pxseedLoaderDataDir="";
+            }else{
+                pxseedLoaderDataDir=exepathCpp.substr(0,dirPartEndAt)+pathPartSep+"data";
+            }
+            initPxseedEnviron();
+        }
         #endif
         
         inited=1;

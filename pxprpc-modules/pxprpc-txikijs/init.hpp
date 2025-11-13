@@ -38,6 +38,7 @@ namespace pxprpc_txikijs{
         static JSValue ioReceive(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
         static JSValue ioClose(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
         static JSValue accessMemory(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
+        static JSValue ioReceiveBlock(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
         static const JSCFunctionListEntry props[] = {
             {
                 "pipeConnect", JS_PROP_C_W_E, JS_DEF_CFUNC, 0, {                                            
@@ -62,6 +63,11 @@ namespace pxprpc_txikijs{
             {
                 "accessMemory", JS_PROP_C_W_E, JS_DEF_CFUNC, 0, {                                            
                     .func = { 2, JS_CFUNC_generic, { .generic = accessMemory } }        
+                }
+            },
+            {
+                "ioReceiveBlock", JS_PROP_C_W_E, JS_DEF_CFUNC, 0, {                                            
+                    .func = { 1, JS_CFUNC_generic, { .generic = ioReceiveBlock } }        
                 }
             }
         };
@@ -257,7 +263,7 @@ namespace pxprpc_txikijs{
             auto io1=reinterpret_cast<struct pxprpc_abstract_io *>(i64);
             thisWrap->openedConn.erase(io1);
             io1->close(io1);
-            return JS_EXCEPTION;
+            return JS_UNDEFINED;
         }
         static JSValue accessMemory(JSContext *ctx, JSValue this_val, int argc, JSValue *argv){
             int64_t base;
@@ -266,6 +272,28 @@ namespace pxprpc_txikijs{
             JS_ToInt32(ctx, &len, argv[1]);
             return JS_NewArrayBuffer(ctx, reinterpret_cast<uint8_t*>(base), len,
                  [](JSRuntime *rt, void *opaque, void *ptr)-> void {}, nullptr, true);
+        }
+        static JSValue ioReceiveBlock(JSContext *ctx, JSValue this_val, int argc, JSValue *argv){
+            if(JS_IsUndefined(this_val)){
+                return JS_EXCEPTION;
+            }
+            auto thisWrap=static_cast<TjsRuntimeWrap *>(JS_GetOpaque(this_val,classId));
+            if(thisWrap==nullptr){
+                return JS_EXCEPTION;
+            }
+            int64_t i64;
+            JS_ToBigInt64(ctx, &i64, argv[0]);
+            auto io1=reinterpret_cast<struct pxprpc_abstract_io *>(i64);
+            thisWrap->addRef();
+            struct pxprpc_bytes buffer;
+            const char *err=pxprpc_rtbridge_brecv(io1,&buffer);
+            if(err!=nullptr){
+                return JS_NewString(ctx,err);
+            }else{
+                auto jsBuffer=JS_NewArrayBufferCopy(ctx,(const uint8_t *)(buffer.base),buffer.length);
+                io1->buf_free(buffer.base);
+                return jsBuffer;
+            }
         }
     }
 
