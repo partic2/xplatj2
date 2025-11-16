@@ -36,6 +36,7 @@ namespace pxprpc_PxseedLoader{
 
     string pxseedLoaderDataDir("");
     string pathPartSep="/";
+    string hostFlags(" ");
 
     uv_sem_t exitRequested;
 
@@ -82,9 +83,29 @@ namespace pxprpc_PxseedLoader{
                 pxprpc_PxseedLoader::tjsstart();
 				ret->resolve();
             })
+        ).add((new pxprpc::NamedFunctionPPImpl1())->init("pxprpc_PxseedLoader.getLoaderInfo",
+            [](Parameter* para,AsyncReturn* ret)->void {
+                pxprpc::TableSerializer tab;
+                tab.setColumnsInfo("sss",{"pxseedLoaderDataDir","processTag","hostFlags"});
+                tab.addValue(pxseedLoaderDataDir)->addValue(processTag)->addValue(hostFlags);
+				ret->resolve(tab.buildSer());
+            })
         );
 
+        #ifdef __WIN32
+        hostFlags+="__WIN32 ";
+        #endif
+
+        #ifdef __WIN64
+        hostFlags+="__WIN64 ";
+        #endif
+
+        #ifdef __linux__
+        hostFlags+="__linux__ ";
+        #endif
+
         #ifdef __ANDROID__
+        hostFlags+="__ANDROID__ ";
         pxprpc::defaultFuncMap.add(
             (new pxprpc::NamedFunctionPPImpl1())
                 ->init("pxprpc_PxseedLoader.setAndroidInitInfo", [](Parameter *para, AsyncReturn *ret) -> void {

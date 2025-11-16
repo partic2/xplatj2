@@ -10,7 +10,7 @@ extern "C"{
 #include <quickjs.h>
 #include <tjs.h>
 }
-#include <pxprpc_pp.hpp >
+#include <pxprpc_pp.hpp>
 #include <pxprpc_ext.hpp>
 #include <pxprpc_rtbridge_host.hpp>
 #include <pxprpc_rtbridge_base/init.hpp>

@@ -170,7 +170,7 @@ def BuildDesktopRelease(name,toolchain):
         if os.path.exists(sourceroot+'/commonj/src/main/assets'):
             shutil.copytree(sourceroot+'/commonj/src/main/assets',outdir,dirs_exist_ok=True)
 
-        if os.path.exists(builddir+'/build-txiki.js/tjs-initialize'):
+        if not os.path.exists(outdir+'/res/tjs-initialize') and os.path.exists(builddir+'/build-txiki.js/tjs-initialize'):
             shutil.move(builddir+'/build-txiki.js/tjs-initialize',outdir+'/res/tjs-initialize')
 
         if buildConfig['PACK_JAVA_RUNTIME']:
