@@ -14,6 +14,7 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Build;
 import partic2.pxseedloader.android.launcher.ApiServer;
+import partic2.pxseedloader.android.launcher.PxprpcService;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.TableSerializer;
 
@@ -44,7 +45,7 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         if2.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         if2.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         if2.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        ApiServer.defaultAndroidContext.registerReceiver(this, if2);
+        PxprpcService.current.registerReceiver(this, if2);
         i=this;
     }
     public void close(){

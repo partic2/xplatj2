@@ -98,7 +98,7 @@
                 android:name="partic2.pxseedloader.android.launcher.PxprpcService"
                 android:enabled="true"
                 android:exported="true"
-                android:process=":pxprpcsrv"
+                android:process=":ui"
         android:foregroundServiceType="">
         </service>
 
@@ -116,11 +116,11 @@
         </activity>
         <activity
                 android:name="partic2.pxseedloader.android.webapp.MainActivity"
-                android:process=":ui" android:exported="true" android:launchMode="standard">
+                android:process=":webview" android:exported="true" android:launchMode="standard">
         </activity>
         <activity
                 android:name="partic2.pxseedloader.android.launcher.MainSysShareReceiver"
-                android:label="@string/app_name" android:exported="true">
+                android:process=":ui" android:label="@string/app_name" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
                 <category android:name="android.intent.category.DEFAULT"/>

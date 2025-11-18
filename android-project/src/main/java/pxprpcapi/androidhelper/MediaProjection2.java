@@ -32,12 +32,6 @@ public class MediaProjection2 implements Closeable {
     }
     public Intent mediaProjectionToken;
     public int requestResultCode;
-    public boolean mediaProjectionRequest(Parcel param,Parcel result){
-        requestResultCode = param.readInt();
-        this.mediaProjectionToken=param.readParcelable(ApiServer.defaultAndroidContext.getClassLoader());
-        result.writeString(null);
-        return true;
-    }
     public void startScreenCapture(SurfaceManager.SurfaceWrap sur){
         this.mp=mpm.getMediaProjection(requestResultCode,mediaProjectionToken);
         DisplayMetrics dm = ApiServer.defaultAndroidContext.getResources().getDisplayMetrics();
@@ -107,25 +101,10 @@ public class MediaProjection2 implements Closeable {
     public boolean requestScreenCapture(final AsyncReturn<Boolean> ret){
         int reqCode= (int)System.currentTimeMillis();
         ApiServer.onActivityResultCallback.put(reqCode,(param)->{
-            requestResultCode=(Integer)param[1];
+            this.requestResultCode=(Integer)param[1];
             if(requestResultCode==Activity.RESULT_OK){
-                mediaProjectionToken=(Intent)param[2];
-                Parcel param2=Parcel.obtain();
-                Parcel result=Parcel.obtain();
-                param2.writeInt(MediaProjection2.ServiceBinderCode);
-                param2.writeInt(requestResultCode);
-                param2.writeParcelable(mediaProjectionToken, 0);
-                try {
-                    ApiServer.serviceBinder.transact(reqCode,param2,result,0);
-                    String errInfo=result.readString();
-                    if(errInfo==null){
-                        ApiServer.resolveAsync(ret,true);
-                    }else{
-                        ApiServer.rejectAsync(ret,new Exception(errInfo));
-                    }
-                } catch (RemoteException e) {
-                    ApiServer.rejectAsync(ret,e);
-                }
+                this.mediaProjectionToken=(Intent)param[2];
+                ApiServer.resolveAsync(ret,true);
             }else{
                 ApiServer.resolveAsync(ret,false);
             }

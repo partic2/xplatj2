@@ -72,6 +72,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        if(PlatCoreConfig.get()==null){
+            PlatCoreConfig.singleton.set(new PlatCoreConfig());
+        }
         super.onCreate(savedInstanceState);
         Intent intent=this.getIntent();
         this.startupUrl=intent.getStringExtra("url");

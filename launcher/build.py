@@ -109,7 +109,7 @@ def BuildAndroidRelease():
         shutil.copy(sodir+'/launcher',\
                 dstsodir+'/launcher')
     
-    if os.path.exists(builddir+'/build-txiki.js/tjs-initialize'):
+    if os.path.exists(builddir+'/build-txiki.js/tjs-initialize') and not os.path.exists(sourceroot+'/android-project/src/main/assets/res/tjs-initialize'):
         shutil.move(builddir+'/build-txiki.js/tjs-initialize',sourceroot+'/android-project/src/main/assets/res/tjs-initialize')
     
     os.chdir(sourceroot+'/android-project')

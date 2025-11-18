@@ -16,28 +16,14 @@ public class PxprpcService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        AssetsCopy.init(this);
-        ApiServer.port=ApiServer.port+1;
-        ApiServer.defaultAndroidContext=this;
     }
 
-    void bgThread() {
-        ApiServer.start(this);
-    }
-    public boolean rpcsrvListening=false;
 
+    public static volatile PxprpcService current;
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(!rpcsrvListening){
-            rpcsrvListening=true;
-            PlatCoreConfig.get().executor.execute(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            PxprpcService.this.bgThread();
-                        }
-                    }
-            );
+        if(current==null){
+            current=this;
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -45,16 +31,11 @@ public class PxprpcService extends Service {
     public static class ServiceBinder extends Binder{
         @Override
         protected boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
-            switch(data.readInt()){
-                case MediaProjection2.ServiceBinderCode:
-                    return MediaProjection2.i.mediaProjectionRequest(data,reply);
-            }
             return true;
         }
     }
     @Override
     public void onDestroy() {
-        ApiServer.stop();
         super.onDestroy();
     }
     public ServiceBinder mBinder;

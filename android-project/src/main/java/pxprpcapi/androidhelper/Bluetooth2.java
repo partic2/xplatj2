@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.ParcelUuid;
 import partic2.pxseedloader.android.launcher.ApiServer;
+import partic2.pxseedloader.android.launcher.PxprpcService;
 import pxprpc.base.Serializer2;
 import pxprpc.base.Utils;
 import pxprpc.extend.BuiltInFuncList;
@@ -45,7 +46,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
                 if2.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
                 if2.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
 
-                ApiServer.defaultAndroidContext.registerReceiver(this, if2);
+                PxprpcService.current.registerReceiver(this, if2);
             }else{
                 throw new UnsupportedOperationException("Not support yet");
             }

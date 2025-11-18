@@ -24,17 +24,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 
 public class MainActivity extends Activity {
-	private Intent intent;
 
 	public static HashSet<String> startupOpts=new HashSet<String>();
 	public static Integer currentTaskId=null;
 
 	public static void ensureStartOpts(){
-		
+
 		synchronized (startupOpts){
 			startupOpts.clear();
 			FileInputStream in1 = null;
@@ -64,48 +64,56 @@ public class MainActivity extends Activity {
 		initEnviron();
 	}
 
+	public static Semaphore uiProcessInited=new Semaphore(0);
 	public void initEnviron(){
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				AssetsCopy.init(MainActivity.this);
-				ApiServer.start(MainActivity.this);
-				if(JseIo.i!=null){
-					JseIo.i.dataDir=AssetsCopy.assetsDir;
-				}
-				try{
-					Runtime.getRuntime().exec("chmod 0777 " + MainActivity.this .getFilesDir().getAbsolutePath());
-				}
-				catch (Exception e) {}
-
-				if(Build.VERSION.SDK_INT>=19){
-					MainActivity.this.getExternalFilesDirs(null);
-				}
-				WifiManager wifiMgr = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
-					multicastLock = wifiMgr.createMulticastLock("pxseed-loader");
-					multicastLock.setReferenceCounted(false);
-					multicastLock.acquire();
-				}
-				MainActivity.this.startService(new Intent(MainActivity.this,PxprpcService.class));
-                try {
-                    RpcExtendClientCallable tjsstart = RuntimeBridgeUtils.client.getFunc("pxprpc_PxseedLoader.tjsstart");
-                    tjsstart.typedecl("->");
-                    tjsstart.callBlock();
-                    tjsstart.free();
-                }catch(Exception ex){
-                    ex.printStackTrace();
-                }
-				ensureStartOpts();
-				if(Intent.ACTION_MAIN.equals(intent.getAction()) && Intent.CATEGORY_LAUNCHER.equals(intent.getCategories())){
-					try {
-						RuntimeBridgeUtils.varSet("pxseedloader.event.request_ui",Long.toString(System.currentTimeMillis()));
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				}
+		synchronized (uiProcessInited){
+			if(uiProcessInited.tryAcquire()){
+				uiProcessInited.release();
+				return;
 			}
-		}).start();
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					AssetsCopy.init(MainActivity.this);
+					MainActivity.this.startService(new Intent(MainActivity.this,PxprpcService.class));
+					while(PxprpcService.current==null){
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+						}
+					}
+					ApiServer.start(MainActivity.this);
+					if(JseIo.i!=null){
+						JseIo.i.dataDir=AssetsCopy.assetsDir;
+					}
+					try{
+						Runtime.getRuntime().exec("chmod 0777 " + MainActivity.this .getFilesDir().getAbsolutePath());
+					}
+					catch (Exception e) {}
+
+					if(Build.VERSION.SDK_INT>=19){
+						MainActivity.this.getExternalFilesDirs(null);
+					}
+					WifiManager wifiMgr = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
+						multicastLock = wifiMgr.createMulticastLock("pxseed-loader");
+						multicastLock.setReferenceCounted(false);
+						multicastLock.acquire();
+					}
+					try {
+						RpcExtendClientCallable tjsstart = RuntimeBridgeUtils.client.getFunc("pxprpc_PxseedLoader.tjsstart");
+						tjsstart.typedecl("->");
+						tjsstart.callBlock();
+						tjsstart.free();
+					}catch(Exception ex){
+						ex.printStackTrace();
+					}
+					ensureStartOpts();
+					uiProcessInited.release();
+				}
+			}).start();
+		}
+
 	}
 	String[] dangerousPerm=new String[]{"android.permission.ACCESS_LOCATION_EXTRA_COMMANDS","android.permission.ACCESS_NETWORK_STATE",
 			"android.permission.ACCESS_NOTIFICATION_POLICY","android.permission.ACCESS_WIFI_STATE","android.permission.BLUETOOTH",
@@ -142,21 +150,24 @@ public class MainActivity extends Activity {
 		return permNotGranted.toArray(new String[0]);
 	}
 
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		this.setIntent(intent);
-		try {
-			RuntimeBridgeUtils.varSet("pxseedloader.event.request_ui",Long.toString(System.currentTimeMillis()));
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		currentTaskId=getTaskId();
+		if(uiProcessInited.tryAcquire()){
+			uiProcessInited.release();
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						RuntimeBridgeUtils.varSet("pxseedloader.event.request_ui",Long.toString(System.currentTimeMillis()));
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}).start();
+		}
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			String[] reqPerms=getPermissionNotGranted();
 			if(reqPerms.length>0){
@@ -167,6 +178,12 @@ public class MainActivity extends Activity {
 		} else {
 			initEnviron();
 		}
+
+	}
+
+	@Override
+	public void onBackPressed() {
+		this.finish();
 	}
 
 	@Override
@@ -182,11 +199,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		ApiServer.stop();
 		currentTaskId=null;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
-			multicastLock.release();
-		}
 		super.onDestroy();
 	}
 	@Override

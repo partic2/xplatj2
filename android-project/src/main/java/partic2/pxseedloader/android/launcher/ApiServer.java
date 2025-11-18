@@ -35,17 +35,6 @@ public class ApiServer {
     public static Handler handler;
     public static int port=2050;
     public static Semaphore baseModulesInited;
-    public static IBinder serviceBinder;
-    public static ServiceConnection serviceConnection=new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            ApiServer.serviceBinder=service;
-        }
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            ApiServer.serviceBinder=null;
-        }
-    };
 
     public static Handler getHandler(){
         return handler;
@@ -126,11 +115,6 @@ public class ApiServer {
                 baseModulesInited.release();
             }
         });
-        if(!(ApiServer.defaultAndroidContext instanceof PxprpcService)){
-            ApiServer.defaultAndroidContext.bindService(
-                    new Intent(ApiServer.defaultAndroidContext,PxprpcService.class),
-                    serviceConnection,Context.BIND_AUTO_CREATE);
-        }
         Log.d("PxpRpc", "start: listen");
         for(;port<20000;port+=2048){
             try{
@@ -190,9 +174,6 @@ public class ApiServer {
                         }
                     }
                     tcpServ=null;
-                    if(ApiServer.serviceBinder!=null){
-                        ApiServer.defaultAndroidContext.unbindService(ApiServer.serviceConnection);
-                    }
                 }catch(Exception ex){
                     //mute deinit error for runtime.
                     ex.printStackTrace();
