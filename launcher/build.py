@@ -155,7 +155,7 @@ def BuildDesktopRelease(name,toolchain):
         outdir=sourceroot+'/launcher/build/'+name+'_release'
         os.makedirs(outdir,exist_ok=True)
         # TODO: what should I copy on linux?
-        copyFiles=['launcher','launcher.exe','build-sdl/SDL2.dll','build-sdl/libSDL2.so',
+        copyFiles=['launcher','launcher.exe','build-sdl/SDL3.dll','build-sdl/libSDL3.so',
                    'build-pxprpc_rtbridge/libpxprpc_rtbridge.dll','build-pxprpc_rtbridge/libpxprpc_rtbridge.so']
         for t1 in copyFiles:
             filename=t1.split('/')[-1].split('\\')[-1];

@@ -70,7 +70,7 @@ def main():
     targetdir=pull('PxpRpc','https://gitee.com/partic/PxpRpc','main')
     runpy.run_path(os.path.join(targetdir,'runtime_bridge','deps','pull_deps.py'),run_name='__main__')
 
-    pull('SDL','https://gitee.com/partic/SDL-mirror','release-2.32.x')
+    pull('SDL','https://gitee.com/partic/SDL-mirror','release-3.2.x')
     pull('webview','https://gitee.com/partic/webview-mirror.git','master')
     
     pull('txiki.js','https://gitee.com/partic/txiki.js-partic.git','master')

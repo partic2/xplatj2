@@ -11,6 +11,8 @@ import android.net.wifi.WifiManager.MulticastLock;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import pxprpc.base.ClientContext;
+import pxprpc.base.RemoteError;
 import pxprpc.extend.RpcExtendClientCallable;
 import pxprpc.runtimebridge.RuntimeBridgeUtils;
 import pxprpcapi.androidhelper.Intent2;
@@ -32,6 +34,8 @@ public class MainActivity extends Activity {
 
 	public static HashSet<String> startupOpts=new HashSet<String>();
 	public static Integer currentTaskId=null;
+
+	public static RpcExtendClientCallable rtbVarOnChange;
 
 	public static void ensureStartOpts(){
 
@@ -110,6 +114,27 @@ public class MainActivity extends Activity {
 					}
 					ensureStartOpts();
 					uiProcessInited.release();
+					try{
+						if(rtbVarOnChange==null){
+							rtbVarOnChange=RuntimeBridgeUtils.varOnChange();
+							rtbVarOnChange.poll(new RpcExtendClientCallable.Ret() {
+								@Override
+								public void cb(Object[] r, RemoteError err) {
+									if("pxseed_sdlloader.event.SDL_RunMain".equals(r[0])){
+										try {
+											Intent intent = new Intent();
+											intent.setClass(ApiServer.defaultAndroidContext,Class.forName("partic2.pxseedloader.android.sdl.MainActivity"));
+											ApiServer.defaultAndroidContext.startActivity(intent);
+										} catch (ClassNotFoundException e) {
+											e.printStackTrace();
+										}
+									}
+								}
+							});
+						}
+					}catch(Exception e){
+						e.printStackTrace();
+					}
 				}
 			}).start();
 		}
