@@ -147,40 +147,9 @@ namespace pxprpc_win32helpers{
     }
 
     HHOOK g_hKeyboardHook = NULL;
-    class KeyboardHookEventListener;
-    std::set<KeyboardHookEventListener *> allKbHookEventSource;
+    std::set<pxprpc::EventDispatcher *> allHookEventSource;
     LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
 
-    class KeyboardHookEventListener:public pxprpc::PxpObject{
-        public:
-        std::vector<pxprpc::NamedFunctionPPImpl1::AsyncReturn *> pullRequests;
-        KeyboardHookEventListener(){
-            allKbHookEventSource.insert(this);
-        }
-        void pull(pxprpc::NamedFunctionPPImpl1::AsyncReturn *ret){
-            pullRequests.push_back(ret);
-        }
-        void notify(int32_t keyEv){
-            for(auto t1:pullRequests){
-                t1->resolve(t1, keyEv);
-            }
-            pullRequests.clear();
-        }
-        ~KeyboardHookEventListener(){
-            allKbHookEventSource.erase(this);
-            if(allKbHookEventSource.size()==0){
-                PostFunctionToDefaultMessageLoop([]()-> void {
-                    if(g_hKeyboardHook){
-                        UnhookWindowsHookEx(g_hKeyboardHook);
-                        g_hKeyboardHook=NULL;
-                    }
-                });
-            }
-            for(auto it:pullRequests){
-                it->reject("closed");
-            }
-        }
-    };
 
     LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
         LRESULT res=CallNextHookEx(g_hKeyboardHook, nCode, wParam, lParam);;
@@ -189,20 +158,24 @@ namespace pxprpc_win32helpers{
             if (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN || wParam == WM_KEYUP || wParam == WM_SYSKEYUP) {
                 int32_t keyEv=pKeyInfo->vkCode;
                 if(GetAsyncKeyState(VK_CONTROL)){
-                    keyEv|=0x10000000;
+                    keyEv|=0x100000;
                 }
                 if(GetAsyncKeyState(VK_SHIFT)){
-                    keyEv|=0x20000000;
+                    keyEv|=0x200000;
                 }
                 if(GetAsyncKeyState(VK_MENU)){
-                    keyEv|=0x40000000;
+                    keyEv|=0x400000;
                 }
                 if(wParam == WM_KEYUP || wParam == WM_SYSKEYUP){
-                    keyEv|=0x80000000;
+                    keyEv|=0x800000;
                 }
                 pxprpc_rtbridge_host::postRunnable([keyEv]()->void {
-                    for(auto t1:allKbHookEventSource){
-                        t1->notify(keyEv);
+                    for(auto t1:allHookEventSource){
+                        auto ser=new pxprpc::Serializer();
+                        ser->prepareSerializing(32);
+                        ser->putInt(INPUT_KEYBOARD);
+                        ser->putInt(keyEv);
+                        t1->pendingReturn->resolve(ser);
                     }
                 });
             }
@@ -231,7 +204,6 @@ namespace pxprpc_win32helpers{
         windowEnumResult->addValue((int32_t)windowRect.bottom);
         return TRUE;
     }
-
     int inited=0;
     void init(){
         if(inited)return;
@@ -270,16 +242,14 @@ namespace pxprpc_win32helpers{
                         g_hKeyboardHook=SetWindowsHookEx(WH_KEYBOARD_LL,LowLevelKeyboardProc,GetModuleHandle(NULL),0);
                     }
                     if(g_hKeyboardHook!=NULL){
-                        resolveTS(ret,new KeyboardHookEventListener());
+                        auto ed=new pxprpc::EventDispatcher();
+                        ed->ondelete=[](pxprpc::NamedFunctionPPImpl1 *self)->void {allHookEventSource.erase(static_cast<pxprpc::EventDispatcher *>(self));};
+                        allHookEventSource.insert(ed);
+                        resolveTS(ret,ed);
                     }else{
                         rejectTS(ret,"SetWindowsHookEx failed");
                     }
                 });
-            })
-        ).add((new pxprpc::NamedFunctionPPImpl1())
-            ->init("pxprpc_win32helpers.PullKeyboardEvent", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, pxprpc::NamedFunctionPPImpl1::AsyncReturn *ret) -> void {
-                auto kbListener=static_cast<KeyboardHookEventListener *>(para->nextObject());
-                kbListener->pull(ret);
             })
         ).add((new pxprpc::NamedFunctionPPImpl1())
             ->init("pxprpc_win32helpers.EnumWindows", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, pxprpc::NamedFunctionPPImpl1::AsyncReturn *ret) -> void {
@@ -314,9 +284,45 @@ namespace pxprpc_win32helpers{
                     resolveTS(ret);
                 });
             })
-        );
-
-        
+        ).add((new pxprpc::NamedFunctionPPImpl1())
+            ->init("pxprpc_win32helpers.SendInput", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, pxprpc::NamedFunctionPPImpl1::AsyncReturn *ret) -> void {
+                PostFunctionToDefaultMessageLoop([para,ret]()-> void {
+                    auto inputCount=para->nextInt();
+                    INPUT *inputs=new INPUT[inputCount]();
+                    for(int i1=0;i1<inputCount;i1++){
+                        auto inputType=para->nextInt();
+                        switch(inputType){
+                            case INPUT_KEYBOARD: //keyboard
+                            {
+                                inputs[i1].type=INPUT_KEYBOARD;
+                                inputs[i1].ki.dwFlags=para->nextInt();
+                                inputs[i1].ki.wVk=para->nextInt();
+                            }
+                            break;
+                            case INPUT_MOUSE: //mouse
+                            {
+                                inputs[i1].type=INPUT_MOUSE;
+                                inputs[i1].mi.dwFlags=para->nextInt();
+                                inputs[i1].mi.dx=para->nextInt();
+                                inputs[i1].mi.dy=para->nextInt();
+                                inputs[i1].mi.mouseData=para->nextInt();
+                            }
+                            break;
+                        }
+                    }
+                    SendInput(inputCount, inputs, sizeof(INPUT));
+                    delete[] inputs;
+                    resolveTS(ret);
+                });
+            })
+        ).add((new pxprpc::NamedFunctionPPImpl1())
+            ->init("pxprpc_win32helpers.SetCursorPos", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, pxprpc::NamedFunctionPPImpl1::AsyncReturn *ret) -> void {
+                PostFunctionToDefaultMessageLoop([para,ret]()-> void {
+                    SetCursorPos(para->nextInt(),para->nextInt());
+                    resolveTS(ret);
+                });
+            })
+        );       
         inited=1;
     }
 }

@@ -161,7 +161,7 @@ namespace pxprpc_PxseedLoader{
             }
             std::string jsmain=pxseedLoaderDataDir+pathPartSep+"pxseed"+pathPartSep+"www"+pathPartSep+"noderun.js";
             std::cout<<"jsmain:"<<jsmain<<std::endl;
-            const char *nodejs__main__argv[]={"node",jsmain.c_str(),"pxseedServer2023/entry.js",nullptr};
+            const char *nodejs__main__argv[]={"node",jsmain.c_str(),"pxseedServer2023/entry",nullptr};
             nodejs__main(3,nodejs__main__argv);
             ret->resolve();
         })
