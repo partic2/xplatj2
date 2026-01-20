@@ -47,6 +47,10 @@ set(PXPRPC_RTBRIDGE_BUILD_EXE OFF)
 
 add_executable(launcher launcher.c)
 
+if(LINUX AND NOT ANDROID)
+target_link_libraries(launcher dl)
+endif()
+
 add_subdirectory(${DEPS_SOURCE_DIRS}/SDL ./build-sdl EXCLUDE_FROM_ALL)
 add_subdirectory(${DEPS_SOURCE_DIRS}/pwart ./build-pwart EXCLUDE_FROM_ALL)
 add_subdirectory(${DEPS_SOURCE_DIRS}/txiki.js ./build-txiki.js EXCLUDE_FROM_ALL)

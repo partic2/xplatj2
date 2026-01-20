@@ -38,23 +38,26 @@ static void *dlsym(void *dll,const char *name){
 static int dlclose(void *dll){
   return FreeLibrary((HMODULE)dll);
 }
+static char *dlerror(){
+  return (char *)"dlerror is not supported on windows";
+}
 #endif
 
 
 
 
 static void loadMainDll(){
-   void *rtbridgeDll=dlopen("libpxprpc_rtbridge",0);
+   void *rtbridgeDll=dlopen("libpxprpc_rtbridge",1);
     if(rtbridgeDll==NULL){
-        printf("pxprpc runtime bridge first try failed.\n");
-        rtbridgeDll=dlopen("libpxprpc_rtbridge.so",0);
+        printf("pxprpc runtime bridge first try failed. %s\n",dlerror());
+        rtbridgeDll=dlopen("libpxprpc_rtbridge.so",1);
     }
     if(rtbridgeDll==NULL){
-        printf("pxprpc runtime bridge second try failed.\n");
-        rtbridgeDll=dlopen("libpxprpc_rtbridge.dll",0);
+        printf("pxprpc runtime bridge second try failed.%s\n",dlerror());
+        rtbridgeDll=dlopen("libpxprpc_rtbridge.dll",1);
     }
     if(rtbridgeDll==NULL){
-        printf("pxprpc runtime bridge load failed.maybe dependencies(libc++) missing?\n");
+        printf("pxprpc runtime bridge load failed.%s maybe dependencies(libc++) missing?\n",dlerror());
     }else{
         const char *(*pxprpc_rtbridge_host_ensureInited)();
         pxprpc_rtbridge_host_ensureInited=(const char *(*)())(dlsym(rtbridgeDll,"pxprpc_rtbridge_host_ensureInited"));
