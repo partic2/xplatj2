@@ -57,7 +57,7 @@ static void loadMainDll(){
         rtbridgeDll=dlopen("libpxprpc_rtbridge.dll",1);
     }
     if(rtbridgeDll==NULL){
-        printf("pxprpc runtime bridge load failed.%s maybe dependencies(libc++) missing?\n",dlerror());
+        printf("pxprpc runtime bridge load failed.%s may be dependencies(libc++) is missing Or missing \".\" in LD_LIBRARY_PATH environment on Linux\n",dlerror());
     }else{
         const char *(*pxprpc_rtbridge_host_ensureInited)();
         pxprpc_rtbridge_host_ensureInited=(const char *(*)())(dlsym(rtbridgeDll,"pxprpc_rtbridge_host_ensureInited"));
@@ -105,16 +105,18 @@ int main(int argc, char *argv[]) {
     }
     #if defined __linux__
     {
-      const char *ldpath=getenv("LD_LIBRARY_PATH");
-      char *temppath=NULL;
-      if(ldpath==NULL){
-        temppath=strconcat2("", ".");
-      }else{
-        temppath=strconcat2(ldpath, ":.");
-      }
-      ldpatheq=strconcat2("LD_LIBRARY_PATH=", temppath);
-      free(temppath);
-      putenv(ldpatheq);
+      /* NOTE:execve required
+        const char *ldpath=getenv("LD_LIBRARY_PATH");
+        char *temppath=NULL;
+        if(ldpath==NULL){
+          temppath=strconcat2("", ".");
+        }else{
+          temppath=strconcat2(ldpath, ":.");
+        }
+        ldpatheq=strconcat2("LD_LIBRARY_PATH=", temppath);
+        free(temppath);
+        putenv(ldpatheq);
+      */
       mkdir("./data",0777);
     }
     #endif
