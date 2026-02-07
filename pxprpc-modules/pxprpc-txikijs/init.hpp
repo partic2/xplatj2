@@ -1,7 +1,6 @@
 
 #pragma once
 
-
 extern "C"{
 #include "pxprpc.h"
 #include "pxprpc_rtbridge.h"
@@ -10,6 +9,9 @@ extern "C"{
 #include <quickjs.h>
 #include <tjs.h>
 }
+
+#include "mbedtls.hpp"
+
 #include <pxprpc_pp.hpp>
 #include <pxprpc_ext.hpp>
 #include <pxprpc_rtbridge_host.hpp>
@@ -262,7 +264,7 @@ namespace pxprpc_txikijs{
             JS_ToBigInt64(ctx, &i64, argv[0]);
             auto io1=reinterpret_cast<struct pxprpc_abstract_io *>(i64);
             thisWrap->openedConn.erase(io1);
-            io1->close(io1);
+            pxprpc_rtbridge_io_close(io1);
             return JS_UNDEFINED;
         }
         static JSValue accessMemory(JSContext *ctx, JSValue this_val, int argc, JSValue *argv){
@@ -334,6 +336,7 @@ namespace pxprpc_txikijs{
                 ret->resolve();
             })
         );
+        mbedtlsInit();
         inited=1;
     }
 }

@@ -97,7 +97,7 @@ namespace pxprpc_pwart{
     void __wasm_io_buf_free(void *fp);
     void __wasm_io_close(void *fp);
 
-    pwart_host_function_c pxprpc4pwartfuncc[]={
+    pwart_host_function_c pxprpc4pwartfunc[]={
         &__wasm_pipe_connect,&__wasm_io_bsend,&__wasm_io_brecv,&__wasm_io_buf_free,&__wasm_io_close
     };
 
@@ -110,7 +110,7 @@ namespace pxprpc_pwart{
 
         PwartNamespaceWrap(){
             cObj=pwart_namespace_new();
-            hostmod=pwart_namespace_new_host_module(pxprpc4pwartfuncnames, pxprpc4pwartfuncc, 5);
+            hostmod=pwart_namespace_new_host_module(pxprpc4pwartfuncnames, pxprpc4pwartfunc, 5);
             pwart_namespace_define_host_module(cObj,"pxprpc", hostmod);
         }
         char *defineWasmModule(std::string &name,uint8_t *wasmBytes,int32_t length){
@@ -200,14 +200,14 @@ namespace pxprpc_pwart{
     void __wasm_pipe_connect(void *fp){
         void *sp=fp;
         char *name=(char *)pwart_rstack_get_ref(&sp);
-        pxprpc_abstract_io *io=pxprpc_pipe_connect(name);
+        pxprpc_abstract_io *io=pxprpc_rtbridge_pipe_connect(name);
         sp=fp;
         pwart_rstack_put_ref(&sp,io);
     }
     void __wasm_io_close(void *fp){
         void *sp=fp;
         struct pxprpc_abstract_io *io=(struct pxprpc_abstract_io *)pwart_rstack_get_ref(&sp);
-        io->close(io);
+        pxprpc_rtbridge_io_close(io);
     }
     
     void init(){

@@ -146,15 +146,10 @@ def BuildDesktopRelease(name,toolchain):
         PrintAndRun(cmake+' '+' '.join(flags2))
         os.chdir(builddir)
         PrintAndRun(buildConfig['MAKE'])
-        os.chdir(sourceroot+'/javase-project')
-        gradle=os.curdir+os.sep+'gradlew'
-        if os.name=='posix':
-            os.chmod(gradle,0o777)
-        PrintAndRun(gradle+' distZip')
-        os.chdir(sourceroot+'/launcher')
         outdir=sourceroot+'/launcher/build/'+name+'_release'
+        os.chdir(sourceroot+'/launcher')
         os.makedirs(outdir,exist_ok=True)
-        # TODO: what should I copy on linux?
+        # TODO: add linux startup shell script, setup LD_LIBRARY_PATH
         copyFiles=['launcher','launcher.exe','build-sdl/SDL3.dll','build-sdl/libSDL3.so',
                    'build-pxprpc_rtbridge/libpxprpc_rtbridge.dll','build-pxprpc_rtbridge/libpxprpc_rtbridge.so']
         for t1 in copyFiles:
@@ -162,17 +157,26 @@ def BuildDesktopRelease(name,toolchain):
             if os.path.exists(os.path.join(builddir,t1)):
                 shutil.copy(os.path.join(builddir,t1),\
             os.path.join(outdir,filename))
-        shutil.unpack_archive(sourceroot+'/javase-project/build/distributions/xplatj.zip',\
-            sourceroot+'/launcher/build/_temp/jse')
-        shutil.copytree(sourceroot+'/launcher/build/_temp/jse/xplatj',outdir,dirs_exist_ok=True)
+        
+        if not os.path.exists(outdir+'/res/tjs-initialize') and os.path.exists(builddir+'/build-txiki.js/tjs-initialize'):
+            shutil.move(builddir+'/build-txiki.js/tjs-initialize',outdir+'/res/tjs-initialize')
+
         if os.path.exists(sourceroot+'/javase-project/src/main/assets'):
             shutil.copytree(sourceroot+'/javase-project/src/main/assets',outdir,dirs_exist_ok=True)
         if os.path.exists(sourceroot+'/commonj/src/main/assets'):
             shutil.copytree(sourceroot+'/commonj/src/main/assets',outdir,dirs_exist_ok=True)
 
-        if not os.path.exists(outdir+'/res/tjs-initialize') and os.path.exists(builddir+'/build-txiki.js/tjs-initialize'):
-            shutil.move(builddir+'/build-txiki.js/tjs-initialize',outdir+'/res/tjs-initialize')
+        '''
+        os.chdir(sourceroot+'/javase-project')
+        gradle=os.curdir+os.sep+'gradlew'
+        if os.name=='posix':
+            os.chmod(gradle,0o777)
+        PrintAndRun(gradle+' distZip')
 
+        shutil.unpack_archive(sourceroot+'/javase-project/build/distributions/xplatj.zip',\
+            sourceroot+'/launcher/build/_temp/jse')
+        shutil.copytree(sourceroot+'/launcher/build/_temp/jse/xplatj',outdir,dirs_exist_ok=True)
+        
         if buildConfig['PACK_JAVA_RUNTIME']:
             if not os.path.exists(outdir+'/rt-java/release'):
                 PrintAndRun(toolchain['JLINK']+' --add-modules java.base,java.logging,jdk.crypto.ec,jdk.crypto.cryptoki --output '+outdir+'/rt-java')
@@ -187,6 +191,7 @@ def BuildDesktopRelease(name,toolchain):
                 scriptFile=f1.read()
             with io.open(outdir+'/bin/xplatj.bat','w',encoding='utf-8') as f1:
                 f1.write('set JAVA_HOME=./rt-java\n'+scriptFile)
+        '''
         os.chdir(sourceroot+'/launcher')
     finally:
         os.environ[ldpathenv]=savedldpath
