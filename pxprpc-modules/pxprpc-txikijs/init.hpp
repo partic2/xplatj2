@@ -243,7 +243,7 @@ namespace pxprpc_txikijs{
                             JS_FreeValue(ctx,errStr);
                         }else{
                             auto reJs=JS_NewArrayBufferCopy(ctx,reinterpret_cast<uint8_t *>(std::get<1>(buf)),std::get<0>(buf));
-                            freebuf();
+                            pxprpc_rtbridge_host::postRunnable(freebuf);
                             JS_Call(ctx,jsCb,JS_UNDEFINED,1,&reJs);
                             JS_FreeValue(ctx,reJs);
                         }
