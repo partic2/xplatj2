@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
+
+project(xplat-launcher)
+
 enable_language(ASM)
 
 set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_CMAKE_SHARED_LINKER_FLAGS_RELEASE} -s")
@@ -10,7 +13,7 @@ endif()
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
-project(xplat-launcher)
+
 
 set(BUILD_TESTING OFF)
 

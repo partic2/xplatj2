@@ -2,6 +2,7 @@
 
 // WIP For multi-thread issue
 
+#include "mbedtls/md5.h"
 #include <string>
 extern "C"{
 #include "pxprpc.h"
@@ -248,9 +249,17 @@ namespace pxprpc_txikijs{
                         }
                     }else if(alg=="SHA512"){
                         uint8_t buf[32];
-                        int r=mbedtls_sha256(std::get<1>(input),std::get<0>(input),buf,0);
+                        int r=mbedtls_sha512(std::get<1>(input),std::get<0>(input),buf,0);
                         if(r==0){
                             pxprpc_rtbridge_host::resolveTS(ret,buf,48);
+                        }else{
+                            pxprpc_rtbridge_host::rejectTS(ret,"mbedtls error code:"+std::to_string(r));
+                        }
+                    }else if(alg=="MD5"){
+                        uint8_t buf[16];
+                        int r=mbedtls_md5(std::get<1>(input),std::get<0>(input),buf);
+                        if(r==0){
+                            pxprpc_rtbridge_host::resolveTS(ret,buf,16);
                         }else{
                             pxprpc_rtbridge_host::rejectTS(ret,"mbedtls error code:"+std::to_string(r));
                         }

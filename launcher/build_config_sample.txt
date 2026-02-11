@@ -1,32 +1,16 @@
-# '#' mean comment.
+//The config is just a js file.
 
-
-# If specified, Each toolchain in this dict will be used to compile respective release. The key of the dict is the output directory name.
-DESKTOP_TOOLCHAIN_LIST={
-    'CC_MINGW-W64_X86_64':{
-        'CC':'c:/mingw64/bin/gcc.exe',
-        'CXX':'c:/mingw64/bin/g++.exe',
-        'JLINK':'c:/Programe Files/java/bin/jlink.exe'    # jlink is only used when PACK_JAVA_RUNTIME=True
+c.desktopBuildToolchains={
+    "MINGW-x86_32":{
+        "CC":"C:\\mingw32\\bin\\gcc",
+        "CXX":"C:\\mingw32\\bin\\g++",
+        "APPENDENV":{
+            "PATH":["C:\\mingw32\\bin"]
+        }
     },
-    'CC_MINGW-W64_X86':{
-        'CC':'c:/mingw32/bin/gcc.exe',
-        'CXX':'c:/mingw32/bin/g++.exe',
-    },
-    'CC_LINUX-GCC_ARM':{
-        'CC':'c:/cross-compiler/1/bin/arm-linux-gnueabihf-gcc.exe',
-        'CC':'c:/cross-compiler/1/bin/arm-linux-gnueabihf-g++.exe'
+    "LINUX_HOST":{
+        "CC":"/usr/bin/gcc",
+        "CXX":"/usr/bin/g++"
     }
 }
 
-SKIP_ANDROID_BUILD=False
-
-ANDROID_ABI=['armeabi-v7a','arm64-v8a']
-
-ANDROID_NATIVE_API_LEVEL='21'
-
-#Embed Java runtime with jlink.
-PACK_JAVA_RUNTIME=False
-
-#Where to pull the dependencies.
-DEPS_REPOSITORY_PULL_URL='https://gitee.com/partic/{name}.git'
-#DEPS_REPOSITORY_PULL_URL='https://github.com/partic2/{name}.git'

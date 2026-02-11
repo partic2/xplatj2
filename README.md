@@ -17,7 +17,7 @@ Android SDK
 
 Android NDK
 
-Python3(to run build script)
+NodeJS (to run build script)
 
 Git
 
