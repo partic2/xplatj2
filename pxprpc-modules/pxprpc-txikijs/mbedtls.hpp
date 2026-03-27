@@ -3,6 +3,8 @@
 // WIP For multi-thread issue
 
 #include "mbedtls/md5.h"
+
+#include "quickjs.h"
 #include <string>
 extern "C"{
 #include "pxprpc.h"
@@ -18,9 +20,11 @@ extern "C"{
 #include <pxprpc_rtbridge_base/init.hpp>
 #include <list>
 
+#include <pxprpc-txikijs/init.hpp>
 
 namespace pxprpc_txikijs{
 
+    namespace __embedtlsBinding{
     using string=std::string;
     using AsyncReturn=pxprpc::NamedFunctionPPImpl1::AsyncReturn;
     using Parameter=pxprpc::NamedFunctionPPImpl1::Parameter;
@@ -29,6 +33,50 @@ namespace pxprpc_txikijs{
     int __mbedtls_ssl_recv_client(void *ctx,unsigned char *buf,size_t len);
 
     
+    //By deepseek
+    class FIFOBuffer {
+        private:
+            std::deque<uint8_t> buffer;
+            
+        public:
+            void write(const uint8_t* data, size_t len) {
+                buffer.insert(buffer.end(), data, data + len);
+            }
+            
+            size_t read(uint8_t* output, size_t max_len) {
+                size_t len = std::min(max_len, buffer.size());
+                for (size_t i = 0; i < len; ++i) {
+                    output[i] = buffer[i];
+                }
+                buffer.erase(buffer.begin(), buffer.begin() + len);
+                return len;
+            }
+            
+            size_t peek(uint8_t* output, size_t max_len) const {
+                size_t len = std::min(max_len, buffer.size());
+                for (size_t i = 0; i < len; ++i) {
+                    output[i] = buffer[i];
+                }
+                return len;
+            }
+            
+            size_t available() const { return buffer.size(); }
+            bool empty() const { return buffer.empty(); }
+            void clear() { buffer.clear(); }
+    };
+
+    std::vector<std::function<JSValue(TjsRuntimeWrap *thisWrap,JSContext *ctx,int argc,JSValue *argv)>> embedtlsSslFunc2026List;
+        
+    static JSValue embedtlsSslFunc2026(JSContext *ctx,JSValue this_val, int argc, JSValue *argv){
+        int32_t i32;
+        int index=JS_ToInt32(ctx,&i32,argv[0]);
+        if(index<embedtlsSslFunc2026List.size()){
+            auto thisWrap=static_cast<TjsRuntimeWrap *>(JS_GetOpaque(this_val,__pxprpc4tjs::classId));
+            return embedtlsSslFunc2026List[i32](thisWrap,ctx,argc,argv);
+        }else{
+            return JS_UNDEFINED;
+        }
+    }
 
     class SslClientAsync{
         mbedtls_ssl_context ssl;
@@ -37,8 +85,8 @@ namespace pxprpc_txikijs{
         mbedtls_ctr_drbg_context ctr_drbg;
         public:
         string hostname;
-        std::list<std::pair<int,unsigned char *>> C2SCipher;
-        std::list<std::pair<int,unsigned char *>> S2CCipher;
+        FIFOBuffer C2SCipher;
+        FIFOBuffer S2CCipher;
         SslClientAsync(){
             mbedtls_ssl_init(&ssl);
             mbedtls_ssl_config_init(&conf);
@@ -75,37 +123,30 @@ namespace pxprpc_txikijs{
             mbedtls_ssl_set_bio(&ssl, this, __mbedtls_ssl_send_client, __mbedtls_ssl_recv_client, NULL);
             return nullptr;
         }
-        virtual int cipherSend(const unsigned char *buf,size_t len){
-            std::pair<int,unsigned char *> pack;
-            pack.second=new unsigned char[len];
-            pack.first=len;
-            memcpy(pack.second,buf,len);
-            this->C2SCipher.push_back(pack);
+        virtual int tlsWriteCipherSendBuffer(const unsigned char *buf,size_t len){
+            this->C2SCipher.write(buf,len);
             return len;
         }
-        virtual int cipherRecv(unsigned char *buf,size_t len){
-            if(this->S2CCipher.size()==0){
+        virtual int tlsReadCipherRecvBuffer(unsigned char *buf,size_t len){
+            if(this->S2CCipher.empty()){
                 return MBEDTLS_ERR_SSL_WANT_READ;
             }
-            auto& pack=this->S2CCipher.front();
-            if(len<pack.first){
-                memmove(buf,pack.second,len);
-                auto newbuf=new unsigned char[pack.first-len];
-                memmove(pack.second,pack.second+len,pack.first-len);
-                pack.first=pack.first-len;
-                return len;
-            }else{
-                memmove(buf,pack.second,pack.first);
-                len=pack.first;
-                delete[] pack.second;
-                this->S2CCipher.pop_front();
-                return len;
-            }
+            return this->S2CCipher.read(buf,len);
         }
-        virtual int plainSend(const unsigned char *buf,int len){
+        virtual int readCipherSendBuffer(unsigned char *buf,size_t len){
+            if(this->C2SCipher.empty()){
+                return 0;
+            }
+            return this->C2SCipher.read(buf,len);
+        }
+        virtual int writeCipherRecvBuffer(unsigned char *buf,size_t len){
+            this->S2CCipher.write(buf,len);
+            return len;
+        }
+        virtual int writePlain(const unsigned char *buf,int len){
             return mbedtls_ssl_write(&ssl,buf,len);
         }
-        virtual int plainRecv(unsigned char *buf,int len){
+        virtual int readPlain(unsigned char *buf,int len){
             return mbedtls_ssl_read(&ssl,buf,len);
         }
         virtual void deinitAndDelete(){
@@ -114,24 +155,18 @@ namespace pxprpc_txikijs{
             mbedtls_ssl_config_free(&conf);
             mbedtls_ctr_drbg_free(&ctr_drbg);
             mbedtls_entropy_free(&entropy);
-            for(auto it : this->C2SCipher){
-                delete[] it.second;
-            }
-            for(auto it : this->S2CCipher){
-                delete[] it.second;
-            }
             delete this;
         }
     };
 
     int __mbedtls_ssl_send_client(void *ctx,const unsigned char *buf,size_t len){
         auto cppctx=static_cast<SslClientAsync *>(ctx);
-        return cppctx->cipherSend(buf,len);
+        return cppctx->tlsWriteCipherSendBuffer(buf,len);
     }
 
     int __mbedtls_ssl_recv_client(void *ctx,unsigned char *buf,size_t len){
         auto cppctx=static_cast<SslClientAsync *>(ctx);
-        return cppctx->cipherRecv(buf,len);
+        return cppctx->tlsReadCipherRecvBuffer(buf,len);
     }
 
     class SslClient:public pxprpc::PxpObject{
@@ -147,10 +182,10 @@ namespace pxprpc_txikijs{
         }
     };
 
-    void mbedtlsInit(){
+    void init(){
         pxprpc::defaultFuncMap.add(
             (new pxprpc::NamedFunctionPPImpl1())
-                ->init("pxprpc_txikijs.NewSslClientContext", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
+                ->init("pxprpc_txikijs.mbedtls.ssl.newSslClient", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
                 pxprpc_rtbridge_host::threadPoolRun([para,ret]()-> void {
                     auto hostname=para->nextString();
                     auto ctx=new SslClient();
@@ -166,39 +201,36 @@ namespace pxprpc_txikijs{
             })
         ).add(
             (new pxprpc::NamedFunctionPPImpl1())
-                ->init("pxprpc_txikijs.SslClientPopCipherSend", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
+                ->init("pxprpc_txikijs.mbedtls.ssl.readCipherSendBuffer", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
                 pxprpc_rtbridge_host::threadPoolRun([para,ret]()-> void {
                     auto ctx=static_cast<SslClient *>(para->nextObject());
-                    if(ctx->value->C2SCipher.size()>0){
-                        auto front=ctx->value->C2SCipher.front();
-                        ctx->value->C2SCipher.pop_front();
-                        pxprpc_rtbridge_host::resolveTS(ret,(void *)front.second,front.first);
-                        delete[] front.second;
-                    }else{
-                        char buf[1];
-                        pxprpc_rtbridge_host::resolveTS(ret,buf,0);
-                    }
+                    struct pxprpc_buffer_part buf;
+                    buf.next_part=nullptr;
+                    buf.bytes.length=ctx->value->C2SCipher.available();
+                    buf.bytes.base=new uint8_t[buf.bytes.length];
+                    ctx->value->readCipherSendBuffer(static_cast<uint8_t*>(buf.bytes.base),buf.bytes.length);
+                    pxprpc_rtbridge_host::resolveTS(ret,buf,[buf]()-> void {
+                        delete[] static_cast<uint8_t *>(buf.bytes.base);
+                    });
                 });
             })
         ).add(
             (new pxprpc::NamedFunctionPPImpl1())
-                ->init("pxprpc_txikijs.SslClientPushCipherRecv", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
+                ->init("pxprpc_txikijs.mbedtls.ssl.writeCipherRecvBuffer", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
                 pxprpc_rtbridge_host::threadPoolRun([para,ret]()-> void {
                     auto ctx=static_cast<SslClient *>(para->nextObject());
                     auto buf=para->nextBytes();
-                    auto copy=new uint8_t[std::get<0>(buf)];
-                    memmove(copy,std::get<1>(buf),std::get<0>(buf));
-                    ctx->value->S2CCipher.push_back({std::get<0>(buf),copy});
+                    ctx->value->writeCipherRecvBuffer(std::get<1>(buf),std::get<0>(buf));
                     pxprpc_rtbridge_host::resolveTS(ret);
                 });
             })
         ).add(
             (new pxprpc::NamedFunctionPPImpl1())
-                ->init("pxprpc_txikijs.SslClientWritePlain", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
+                ->init("pxprpc_txikijs.mbedtls.ssl.writePlain", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
                 pxprpc_rtbridge_host::threadPoolRun([para,ret]()-> void {
                     auto ctx=static_cast<SslClient *>(para->nextObject());
                     auto buf=para->nextBytes();
-                    auto writeCount=ctx->value->plainSend(std::get<1>(buf),std::get<0>(buf));
+                    auto writeCount=ctx->value->writePlain(std::get<1>(buf),std::get<0>(buf));
                     if(writeCount==MBEDTLS_ERR_SSL_WANT_WRITE || writeCount==MBEDTLS_ERR_SSL_WANT_READ){
                         pxprpc_rtbridge_host::resolveTS(ret,0);
                     }else if(writeCount>=0){
@@ -210,11 +242,11 @@ namespace pxprpc_txikijs{
             })
         ).add(
             (new pxprpc::NamedFunctionPPImpl1())
-                ->init("pxprpc_txikijs.SslClientReadPlain", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
+                ->init("pxprpc_txikijs.mbedtls.ssl.readPlain", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
                 pxprpc_rtbridge_host::threadPoolRun([para,ret]()->void {
                     auto ctx=static_cast<SslClient *>(para->nextObject());
                     auto buf=new uint8_t[4096];
-                    auto readCount=ctx->value->plainRecv(buf,4096);
+                    auto readCount=ctx->value->readPlain(buf,4096);
                     if(readCount==MBEDTLS_ERR_SSL_WANT_READ || readCount==MBEDTLS_ERR_SSL_WANT_WRITE){
                         pxprpc_rtbridge_host::resolveTS(ret,buf,0);
                     }else if(readCount>=0){
@@ -227,7 +259,7 @@ namespace pxprpc_txikijs{
             })
         ).add(
             (new pxprpc::NamedFunctionPPImpl1())
-                ->init("pxprpc_txikijs.MbedtlsDigest", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
+                ->init("pxprpc_txikijs.mbedtls.digest", [](pxprpc::NamedFunctionPPImpl1::Parameter *para, AsyncReturn *ret) -> void {
                 pxprpc_rtbridge_host::threadPoolRun([para,ret]()->void {
                     auto alg=para->nextString();
                     auto input=para->nextBytes();
@@ -269,5 +301,70 @@ namespace pxprpc_txikijs{
                 });
             })
         );
+        embedtlsSslFunc2026List.push_back([](TjsRuntimeWrap *thisWrap,JSContext *ctx,int argc,JSValue *argv) -> JSValue{
+            //0 getSizeOfFuncList
+            return JS_NewInt32(ctx,embedtlsSslFunc2026List.size());
+        });
+        embedtlsSslFunc2026List.push_back([](TjsRuntimeWrap *thisWrap,JSContext *ctx,int argc,JSValue *argv) -> JSValue{
+            //1 mbedtls.newSslClient
+            auto r=new SslClient();
+            auto err=r->value->configure();
+            if(err!=nullptr){
+                return JS_NewPlainError(ctx, "%s",err);
+            }
+            return JS_NewInt32(ctx,thisWrap->saveObject(r));
+        });
+        embedtlsSslFunc2026List.push_back([](TjsRuntimeWrap *thisWrap,JSContext *ctx,int argc,JSValue *argv) -> JSValue{
+            //2 mbedtls.readCipherSendBuffer
+            int32_t i1;
+            JS_ToInt32(ctx, &i1, argv[1]);
+            auto ssl=static_cast<SslClient *>(thisWrap->objStore[i1]);
+            JSValue ret=JS_UNDEFINED;
+            size_t maxSize=0;
+            auto buf=JS_GetUint8Array(ctx, &maxSize, argv[2]);
+            ret=JS_NewInt32(ctx,ssl->value->readCipherSendBuffer(buf,maxSize));
+            return ret;
+        });
+        embedtlsSslFunc2026List.push_back([](TjsRuntimeWrap *thisWrap,JSContext *ctx,int argc,JSValue *argv) -> JSValue{
+            //3 mbedtls.writeCipherRecvBuffer
+            int32_t i1;
+            JS_ToInt32(ctx, &i1, argv[1]);
+            auto ssl=static_cast<SslClient *>(thisWrap->objStore[i1]);
+            size_t size;
+            auto buf=JS_GetUint8Array(ctx,&size,argv[2]);
+            int32_t ret=ssl->value->writeCipherRecvBuffer(buf,size);
+            return JS_NewInt32(ctx, ret);
+        });
+        embedtlsSslFunc2026List.push_back([](TjsRuntimeWrap *thisWrap,JSContext *ctx,int argc,JSValue *argv) -> JSValue{
+            //4 mbedtls.ssl.writePlain
+            int32_t i1;
+            JS_ToInt32(ctx, &i1, argv[1]);
+            auto ssl=static_cast<SslClient *>(thisWrap->objStore[i1]);
+            size_t size;
+            auto buf=JS_GetUint8Array(ctx,&size,argv[2]);
+            auto writeCount=ssl->value->writePlain(buf,size);
+            if(writeCount==MBEDTLS_ERR_SSL_WANT_WRITE || writeCount==MBEDTLS_ERR_SSL_WANT_READ){
+                return JS_NewInt32(ctx,0);
+            }else if(writeCount>=0){
+                return JS_NewInt32(ctx,writeCount);
+            }else{
+                return JS_NewPlainError(ctx, "mbedtls error code: %d",writeCount);
+            }
+        });
+        embedtlsSslFunc2026List.push_back([](TjsRuntimeWrap *thisWrap,JSContext *ctx,int argc,JSValue *argv) -> JSValue{
+            //5 mbedtls.ssl.readPlain
+            int32_t i1;
+            JS_ToInt32(ctx, &i1, argv[1]);
+            auto ssl=static_cast<SslClient *>(thisWrap->objStore[i1]);
+            size_t size;
+            auto buf=JS_GetUint8Array(ctx, &size, argv[2]);
+            auto readCount=ssl->value->readPlain(buf,size);
+            if(readCount==MBEDTLS_ERR_SSL_WANT_WRITE || readCount==MBEDTLS_ERR_SSL_WANT_READ){
+                return JS_NewInt32(ctx,0);
+            }else{
+                return JS_NewInt32(ctx, readCount);
+            }
+        });
     }
+}
 }

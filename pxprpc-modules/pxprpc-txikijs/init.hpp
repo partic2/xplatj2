@@ -10,7 +10,7 @@ extern "C"{
 #include <tjs.h>
 }
 
-#include "mbedtls.hpp"
+
 
 #include <pxprpc_pp.hpp>
 #include <pxprpc_ext.hpp>
@@ -19,6 +19,8 @@ extern "C"{
 #include <vector>
 #include <set>
 
+
+
 namespace pxprpc_txikijs{
     
     int inited=0;
@@ -26,6 +28,18 @@ namespace pxprpc_txikijs{
     class TjsRuntimeWrap;
 
     using AsyncReturn=pxprpc::NamedFunctionPPImpl1::AsyncReturn;
+
+    static std::string qjsToCppString(JSContext *ctx,JSValue jv){
+        auto ps=JS_ToCString(ctx, jv);
+        std::string str(ps);
+        JS_FreeCString(ctx,ps);
+        return str;
+    }
+
+    namespace __embedtlsBinding{
+        static JSValue embedtlsSslFunc2026(JSContext *ctx,JSValue this_val, int argc, JSValue *argv);
+        static void init();
+    }
 
     namespace __pxprpc4tjs{
         static JSClassID classId=0;
@@ -41,6 +55,8 @@ namespace pxprpc_txikijs{
         static JSValue ioClose(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
         static JSValue accessMemory(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
         static JSValue ioReceiveBlock(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) ;
+        static JSValue freeObjStore(JSContext *ctx,JSValue this_val,int argc,JSValue *argv);
+        
         static const JSCFunctionListEntry props[] = {
             {
                 "pipeConnect", JS_PROP_C_W_E, JS_DEF_CFUNC, 0, {                                            
@@ -71,20 +87,27 @@ namespace pxprpc_txikijs{
                 "ioReceiveBlock", JS_PROP_C_W_E, JS_DEF_CFUNC, 0, {                                            
                     .func = { 1, JS_CFUNC_generic, { .generic = ioReceiveBlock } }        
                 }
+            },{
+                "freeObjStore", JS_PROP_C_W_E, JS_DEF_CFUNC, 0, {                                            
+                    .func = { 1, JS_CFUNC_generic, { .generic = freeObjStore } } 
+                }
+            },{
+                "embedtlsSslFunc2026", JS_PROP_C_W_E, JS_DEF_CFUNC, 0, {                                            
+                    .func = { 1, JS_CFUNC_generic, { .generic = __embedtlsBinding::embedtlsSslFunc2026 } }        
+                }
             }
         };
         void bindRpcBridge(JSContext *ctx,void *opaque){
             JS_NewClassID(JS_GetRuntime(ctx),&classId);
             JS_NewClass(JS_GetRuntime(ctx),classId,&classDef);
             auto inst = JS_NewObjectClass(ctx,classId);
-            JS_SetPropertyFunctionList(ctx,inst,props,5);
+            JS_SetPropertyFunctionList(ctx,inst,props,8);
             JSValue gobj=JS_GetGlobalObject(ctx);
             JS_DefinePropertyValueStr(ctx, gobj, "__pxprpc4tjs__", inst, JS_PROP_C_W_E);
             JS_FreeValue(ctx,gobj);
             JS_SetOpaque(inst, opaque);
         }
     }
-
 
     class TjsRuntimeWrap{
         public:
@@ -96,6 +119,8 @@ namespace pxprpc_txikijs{
         JSValue jsonevent=JS_UNDEFINED;
         int32_t refCount=1;
         std::set<struct pxprpc_abstract_io *> openedConn;
+        std::vector<pxprpc::PxpObject *> objStore;
+        std::vector<int32_t> freeObjStore;
         
         TjsRuntimeWrap(){
             uv_mutex_init(&jobsMutex);
@@ -165,6 +190,24 @@ namespace pxprpc_txikijs{
             refCount--;
             if(refCount<=0){
                 delete this;
+            }
+        }
+        virtual int32_t saveObject(pxprpc::PxpObject *obj){
+            if(!freeObjStore.empty()){
+                int32_t slot=freeObjStore.back();
+                freeObjStore.pop_back();
+                objStore[slot]=obj;
+                return slot;
+            }else{
+                objStore.push_back(obj);
+                return objStore.size()-1;
+            }
+        }
+        virtual void freeObject(int32_t index){
+            if(objStore[index]!=nullptr){
+                delete objStore[index];
+                objStore[index]=nullptr;
+                freeObjStore.push_back(index);
             }
         }
     };
@@ -297,6 +340,13 @@ namespace pxprpc_txikijs{
                 return jsBuffer;
             }
         }
+        static JSValue freeObjStore(JSContext *ctx, JSValue this_val, int argc, JSValue *argv){
+            auto thisWrap=static_cast<TjsRuntimeWrap *>(JS_GetOpaque(this_val,classId));
+            int32_t i;
+            JS_ToInt32(ctx,&i,argv[0]);
+            thisWrap->freeObject(i);
+            return JS_UNDEFINED;
+        }
     }
 
     void SetTjsStartupDir(const std::string &startupDir){
@@ -336,7 +386,10 @@ namespace pxprpc_txikijs{
                 ret->resolve();
             })
         );
-        mbedtlsInit();
+        __embedtlsBinding::init();
         inited=1;
     }
 }
+
+
+#include <pxprpc-txikijs/mbedtls.hpp>
