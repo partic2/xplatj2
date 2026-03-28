@@ -2,8 +2,8 @@
 
 c.desktopBuildToolchains={
     "MINGW-x86_32":{
-        "CC":"C:\\mingw32\\bin\\gcc",
-        "CXX":"C:\\mingw32\\bin\\g++",
+        "CC":"C:\\mingw32\\bin\\gcc.exe",
+        "CXX":"C:\\mingw32\\bin\\g++.exe",
         "APPENDENV":{
             "PATH":["C:\\mingw32\\bin"]
         }
