@@ -308,6 +308,9 @@ namespace pxprpc_txikijs{
         embedtlsSslFunc2026List.push_back([](TjsRuntimeWrap *thisWrap,JSContext *ctx,int argc,JSValue *argv) -> JSValue{
             //1 mbedtls.newSslClient
             auto r=new SslClient();
+            auto hostnameC=JS_ToCString(ctx,argv[1]);
+            r->value->hostname=string(hostnameC);
+            JS_FreeCString(ctx,hostnameC);
             auto err=r->value->configure();
             if(err!=nullptr){
                 return JS_NewPlainError(ctx, "%s",err);
