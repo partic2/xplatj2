@@ -28,6 +28,14 @@ android {
 	lintOptions{
 	 abortOnError false
 	}
+	splits {
+		abi {
+			enable true
+			reset()
+			include 'armeabi-v7a', 'arm64-v8a'
+			universalApk true
+		}
+	}
 	defaultConfig {
 		//Android Studio need this to pack .so file for install debug.
 		ndk {
