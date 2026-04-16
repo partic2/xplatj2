@@ -7,7 +7,9 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.view.Window;
+import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import lib.pursuer.simplewebserver.XplatHTTPDServer;
@@ -114,8 +116,6 @@ public class MainActivity extends Activity {
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
                 handler.proceed();
             }
-
-
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 if(MainActivity.this.startScript!=null){
@@ -123,9 +123,14 @@ public class MainActivity extends Activity {
                 }
                 super.onPageStarted(view, url, favicon);
             }
-
-
         });
+        wv.setWebChromeClient(new WebChromeClient(){
+            @Override
+            public void onPermissionRequest(PermissionRequest request) {
+                request.grant(request.getResources());
+            }
+        });
+        wv.getSettings().setMediaPlaybackRequiresUserGesture(false);
         wv.getSettings().setAllowFileAccess(true);
         wv.getSettings().setAllowContentAccess(true);
         wv.getSettings().setAllowUniversalAccessFromFileURLs(true);
