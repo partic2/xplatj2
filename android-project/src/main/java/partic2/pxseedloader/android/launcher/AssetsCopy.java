@@ -81,7 +81,7 @@ public class AssetsCopy {
 			FileOutputStream fos = new FileOutputStream(new File(newPath));
 			new File(newPath).setReadable(true,false);
 			new File(newPath).setWritable(true,false);
-			byte[] buffer = new byte[1024];
+			byte[] buffer = new byte[64*1024];
 			int byteCount=0;
 			while((byteCount=is.read(buffer))!=-1) {
 				fos.write(buffer, 0, byteCount);

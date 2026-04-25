@@ -82,6 +82,7 @@
     <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <!--
     System app permission
     <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED"/>

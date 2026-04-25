@@ -2,9 +2,12 @@ package partic2.pxseedloader.android.launcher;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 import pxprpc.base.Serializer2;
@@ -18,10 +21,6 @@ import java.util.Random;
 
 public class MainSysShareReceiver extends Activity {
 
-    public static class Item{
-        String uri;
-        String fileName;
-    }
     void saveFile(Uri uri){
         CloseableGroup toClose=new CloseableGroup();
         try {
@@ -39,7 +38,7 @@ public class MainSysShareReceiver extends Activity {
                 }
             }
             FileOutputStream s2 = new FileOutputStream(receiveDir + File.separator + filename + ".data");
-            new StreamTransmit().start(null,s1,s2,0x10000000,0x400,null);
+            new StreamTransmit().start(null,s1,s2,0x10000000,64*1024,null);
             ByteBuffer meta = new Serializer2().prepareSerializing(64)
                     .putBytes(ByteBuffer.allocate(0))
                     .putString(Intent.ACTION_SEND)
@@ -93,6 +92,15 @@ public class MainSysShareReceiver extends Activity {
             throw new RuntimeException(e);
         }
         finish();
+    }
+
+    @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        if (Build.VERSION.SDK_INT >= 34 && getApplicationInfo().targetSdkVersion >= 34) {
+            return super.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED);
+        } else {
+            return super.registerReceiver(receiver, filter);
+        }
     }
 
 }

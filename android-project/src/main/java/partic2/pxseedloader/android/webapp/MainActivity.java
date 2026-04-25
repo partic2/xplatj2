@@ -12,53 +12,13 @@ import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import lib.pursuer.simplewebserver.XplatHTTPDServer;
-import org.nanohttpd.protocols.http.NanoHTTPD;
 
 
 import partic2.pxseedloader.android.launcher.ApiServer;
-import partic2.pxseedloader.android.launcher.AssetsCopy;
 import xplatj.javaplat.partic2.util.PlatCoreConfig;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
 
 public class MainActivity extends Activity {
-    protected void bgThread() {
-        initWebServer();
-    }
-    public static volatile NanoHTTPD httpd;
-    public static int httpdPort = 2080;
-    public static int[] httpdPortRange=new int[]{2080,2095};
-    public void initWebServer() {
-        try {
-            if (httpd == null) {
-                partic2.pxseedloader.android.launcher.MainActivity.ensureStartOpts();
-
-                String hostname="127.0.0.1";
-                if(PlatCoreConfig.debugMode){
-                    hostname="0.0.0.0";
-                }
-                //check port available
-                for(httpdPort=httpdPortRange[0];httpdPort<httpdPortRange[1];httpdPort++){
-                    try{
-                        ServerSocket ss = new ServerSocket(httpdPort, 1, InetAddress.getByName(hostname));
-                        ss.close();
-                        break;
-                    }catch(Exception ex){}
-                }
-                if(httpdPort>=httpdPortRange[1]){
-                    throw new RuntimeException("No available tcp port.");
-                }
-                httpd = new XplatHTTPDServer(hostname, httpdPort);
-                httpd.start(60 * 60 * 1000);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void openSystemWebBrowser(String url) {
         Intent intent = new Intent();
@@ -81,20 +41,8 @@ public class MainActivity extends Activity {
         Intent intent=this.getIntent();
         this.startupUrl=intent.getStringExtra("url");
         if(this.startupUrl==null){
-            try {
-                this.startupUrl="http://127.0.0.1:" + httpdPort +XplatHTTPDServer.urlPathForFile(new File(AssetsCopy.assetsDir + "/index.html"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            this.startupUrl="http://127.0.0.1:2081";
         }
-        PlatCoreConfig.get().executor.execute(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        MainActivity.this.bgThread();
-                    }
-                }
-        );
         initWebView();
         //PlatCoreConfig.get().executor.execute(()->TestCode.do2());
     }
@@ -134,13 +82,6 @@ public class MainActivity extends Activity {
         wv.getSettings().setAllowFileAccess(true);
         wv.getSettings().setAllowContentAccess(true);
         wv.getSettings().setAllowUniversalAccessFromFileURLs(true);
-        while(httpd==null){
-            //race condition
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-            }
-        }
         mainWebView.loadUrl(this.startupUrl);
     }
     protected void deinitWebView(){
@@ -162,15 +103,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         deinitWebView();
-       PlatCoreConfig.get().executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                if(httpd!=null){
-                    httpd.stop();
-                    httpd = null;
-                }
-            }
-        });
         super.onDestroy();
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

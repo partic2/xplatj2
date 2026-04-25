@@ -21,6 +21,7 @@ public class Power2 extends PxprpcBroadcastReceiverAdapter implements Closeable 
         pm = (PowerManager) ApiServer.defaultAndroidContext.getSystemService(Service.POWER_SERVICE);
         bm = (BatteryManager) ApiServer.defaultAndroidContext.getSystemService(Service.BATTERY_SERVICE);
         i=this;
+        this.setEventDumpType(DUMP_TYPE_ACTION);
     }
 
     public PowerManager.WakeLock cpuWake;

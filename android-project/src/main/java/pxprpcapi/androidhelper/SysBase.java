@@ -13,7 +13,9 @@ import android.os.Bundle;
 import partic2.pxseedloader.android.launcher.ApiServer;
 import partic2.pxseedloader.android.launcher.AssetsCopy;
 import partic2.pxseedloader.android.launcher.MainActivity;
+import partic2.pxseedloader.android.launcher.PxprpcService;
 import pxprpc.base.Utils;
+import pxprpc.extend.EventDispatcher;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
 import pxprpc.extend.TypeDeclParser;
@@ -36,7 +38,7 @@ public class SysBase implements Closeable{
 		pm=ApiServer.defaultAndroidContext.getPackageManager();
 	}
 
-	public BroadcastReceiver newBroadcastReceiver() {
+	public PxprpcBroadcastReceiverAdapter newBroadcastReceiver() {
 		return new PxprpcBroadcastReceiverAdapter();
 	}
 
@@ -52,6 +54,15 @@ public class SysBase implements Closeable{
 		getDefaultContext().unregisterReceiver(receiver);
 	}
 
+	public EventDispatcher registerPxprpcBroadcastReceiver(String filter){
+		PxprpcBroadcastReceiverAdapter receiver = newBroadcastReceiver();
+		return receiver.autoUnregisterEventDispatcher(getDefaultContext(),filter);
+	}
+
+	public EventDispatcher registerServicePxprpcBroadcastReceiver(String filter){
+		PxprpcBroadcastReceiverAdapter receiver = newBroadcastReceiver();
+		return receiver.autoUnregisterEventDispatcher(PxprpcService.current,filter);
+	}
 
 	public Object getService(String name) {
 		return getDefaultContext().getSystemService(name);
@@ -93,6 +104,8 @@ public class SysBase implements Closeable{
 			Object val=b.get(key);
 			if(TypeDeclParser.jtypeToValueInfo(val.getClass())!='o'){
 				bundleData.put(key,val);
+			}else{
+				bundleData.put(key,val.toString());
 			}
 		}
 		ArrayList<Map<String, Object>> t1 = new ArrayList<Map<String, Object>>();

@@ -147,14 +147,18 @@ public class SurfaceManager implements Closeable{
     }
 
     public ByteBuffer describePlanesInfo(ImageOrBitmap img){
-        TableSerializer ser = new TableSerializer().setColumnsInfo("iii",
-                new String[]{"pixelStride","rowStride","planeDataSize"});
+        TableSerializer ser = new TableSerializer().setColumnsInfo("iiilii",
+                new String[]{"pixelStride","rowStride","planeDataSize",
+                        "buffer.base","buffer.offset","buffer.capacity"});
         if(img.image!=null){
             for(Image.Plane e:img.image.getPlanes()){
+                long base=0;
+                if(e.getBuffer().isDirect()){
+                    base=NativeHelper.directBufferProperty(e.getBuffer(),0);
+                }
                 ser.addRow(new Object[]{
-                        e.getPixelStride()
-                        ,e.getRowStride()
-                        ,e.getBuffer().remaining()});
+                        e.getPixelStride(),e.getRowStride(),e.getBuffer().remaining()
+                        ,base,e.getBuffer().position(),e.getBuffer().capacity()});
             }
         }else if(img.bitmap!=null){
             Bitmap.Config bcfg = img.bitmap.getConfig();
@@ -164,20 +168,31 @@ public class SurfaceManager implements Closeable{
             }else if(bcfg==Bitmap.Config.RGB_565 || bcfg==Bitmap.Config.ARGB_4444){
                 pixelStride=16;
             }
-            ser.addRow(new Object[]{pixelStride,img.bitmap.getWidth()*pixelStride});
+            ser.addRow(new Object[]{pixelStride,img.bitmap.getWidth()*pixelStride,img.bitmap.getByteCount(),
+                0,0,0});
         }
         return ser.build();
     }
 
     public ByteBuffer getPlaneBufferData(ImageOrBitmap img,int planeIndex){
-        ByteBuffer buf1 = img.image.getPlanes()[planeIndex].getBuffer();
-        return buf1;
+        if(img.image!=null){
+            ByteBuffer buf1 = img.image.getPlanes()[planeIndex].getBuffer();
+            return buf1;
+        }else if(img.bitmap!=null){
+            ByteBuffer buf1=ByteBuffer.allocate(img.bitmap.getByteCount());
+            img.bitmap.copyPixelsToBuffer(buf1);
+            Utils.flip(buf1);
+            return buf1;
+        }else{
+            throw new RuntimeException("Unsupported image");
+        }
     }
+    //return buffer.base,buffer.offset,buffer.capacity
     @MethodTypeDecl("oi->lii")
     public Object[] getPlaneBufferDataProps(ImageOrBitmap img,int planeIndex){
         ByteBuffer buf1 = img.image.getPlanes()[planeIndex].getBuffer();
         if(buf1.isDirect()){
-            return new Object[]{NativeHelper.directBufferProperty(buf1,1),buf1.position(),buf1.remaining()};
+            return new Object[]{NativeHelper.directBufferProperty(buf1,0),buf1.position(),buf1.capacity()};
         }else{
             return new Object[]{(long)0,0,0};
         }

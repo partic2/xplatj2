@@ -3,6 +3,7 @@ package pxprpcapi.androidhelper;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.bluetooth.*;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -12,8 +13,10 @@ import partic2.pxseedloader.android.launcher.ApiServer;
 import partic2.pxseedloader.android.launcher.PxprpcService;
 import pxprpc.base.Serializer2;
 import pxprpc.base.Utils;
+import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.BuiltInFuncList;
 import pxprpc.extend.TableSerializer;
+import xplatj.javaplat.partic2.util.PlatCoreConfig;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -32,6 +35,7 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     public Bluetooth2(){
         initDefault();
         i=this;
+        this.setEventDumpType(DUMP_TYPE_ACTION);
     }
     protected void initDefault(){
         if(adapter==null){
@@ -51,7 +55,6 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
                 throw new UnsupportedOperationException("Not support yet");
             }
         }
-        this.dispatcher.setEventType(String.class);
     }
     public void close(){
         try{
@@ -157,7 +160,6 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
                 t.device.setPairingConfirmation(true);
             }
         }
-        super.onReceive(context,intent);
     }
 
     public HashMap<String,DiscoveryResult> discovered =new HashMap<String,DiscoveryResult>();
@@ -241,8 +243,18 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     public BluetoothServerSocket listenL2capSecure() throws IOException {
         return adapter.listenUsingL2capChannel();
     }
-    public BluetoothSocket socketAccept(BluetoothServerSocket s,int timeout) throws IOException {
-        return s.accept(timeout);
+    public BluetoothSocket socketAccept(AsyncReturn<BluetoothSocket> ret,BluetoothServerSocket s, int timeout) {
+        PlatCoreConfig.get().executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ret.resolve(s.accept(timeout));
+                } catch (Exception e) {
+                    ret.reject(e);
+                }
+            }
+        });
+        return null;
     }
     public ByteBuffer socketRead(BluetoothSocket s) throws IOException {
         byte[] b = new byte[4096];

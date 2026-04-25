@@ -1,6 +1,5 @@
 package partic2.pxseedloader.javase.backend.jse;
 
-import lib.pursuer.simplewebserver.XplatHTTPDServer;
 import partic2.pxseedloader.javase.backend.jse.ApiServer;
 import partic2.pxseedloader.javase.backend.jse.PlatApiImpl;
 import pxprpc.base.AbstractIo;
@@ -15,6 +14,8 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.Scanner;
 
+
+//Deprecated, Only for test.
 public class JMain {
 	static int orientation = 1;
 	public static boolean[] startOptsParsed=new boolean[]{false};
@@ -52,39 +53,6 @@ public class JMain {
 		try{
 			JseIo.i.dataDir=new File("data").getCanonicalPath()+"/";
 		}catch(IOException e){};
-		if("webapp".equals(selectedBackend)) {
-			startWebAppBackend();
-		}
-	}
-	public static XplatHTTPDServer httpd;
-	static int httpdPort = 2080;
-	public static void startWebAppBackend() {
-		File cd = new File("");
-		String absPath = cd.getAbsolutePath();
-		if(PlatCoreConfig.debugMode) {
-			httpd=new XplatHTTPDServer("0.0.0.0",httpdPort);
-		}else {
-			httpd=new XplatHTTPDServer("127.0.0.1",httpdPort);
-		}
-		try {
-			httpd.start(60*60*1000);
-			String entryUrl=XplatHTTPDServer.urlPathForFile(new File(cd.getAbsoluteFile()+"/data/index.html"));
-			entryUrl="http://127.0.0.1:"+httpdPort+(entryUrl.startsWith("/")?"":"/")+entryUrl;
-			System.out.println("Open url "+entryUrl+" in browser.");
-			if(System.getProperty("os.name").contains("Windows")) {
-				Runtime.getRuntime().exec("explorer "+entryUrl);
-			}
-			System.out.println("stdin wait for coommand, input \"exit\" to exit.");
-			Scanner scanin = new Scanner(System.in);
-			while(true) {
-				String cmd = scanin.nextLine();
-				if("exit".equals(cmd)) {
-					return;
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	public static void testPxprpcServe() throws IOException {
 		PipeServer serv = new PipeServer("test pipe server 1");

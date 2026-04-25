@@ -3,13 +3,16 @@ package partic2.pxseedloader.android.launcher;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import pxprpc.base.ClientContext;
 import pxprpc.base.RemoteError;
@@ -160,7 +163,7 @@ public class MainActivity extends Activity {
 			"android.permission.READ_SMS","android.permission.RECEIVE_WAP_PUSH","android.permission.RECEIVE_MMS",
 			"android.permission.READ_EXTERNAL_STORAGE","android.permission.WRITE_EXTERNAL_STORAGE","android.permission.MANAGE_EXTERNAL_STORAGE",
 			"android.permission.SYSTEM_ALERT_WINDOW","android.permission.SYSTEM_OVERLAY_WINDOW","android.permission.ACCESS_COARSE_LOCATION",
-			"android.permission.BLUETOOTH_SCAN"};
+			"android.permission.BLUETOOTH_SCAN","android.permission.POST_NOTIFICATIONS"};
 
 
 
@@ -231,5 +234,14 @@ public class MainActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		ApiServer.onActivityResult(requestCode,resultCode,data);
 		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+	@Override
+	public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+		if (Build.VERSION.SDK_INT >= 34 && getApplicationInfo().targetSdkVersion >= 34) {
+			return super.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED);
+		} else {
+			return super.registerReceiver(receiver, filter);
+		}
 	}
 }

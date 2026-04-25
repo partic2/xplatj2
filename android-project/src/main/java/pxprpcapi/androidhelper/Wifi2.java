@@ -47,6 +47,7 @@ public class Wifi2 extends PxprpcBroadcastReceiverAdapter implements Closeable {
         if2.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         PxprpcService.current.registerReceiver(this, if2);
         i=this;
+        this.setEventDumpType(DUMP_TYPE_ACTION);
     }
     public void close(){
         if(i==this)i=null;

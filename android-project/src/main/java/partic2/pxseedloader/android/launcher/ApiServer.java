@@ -62,9 +62,6 @@ public class ApiServer {
                 if(Intent2.i==null){
                     new Intent2();
                 }
-                if(IntentReceiver.i==null){
-                    new IntentReceiver();
-                }
                 if(Sensor2.i==null){
                     new Sensor2();
                 }
@@ -105,7 +102,6 @@ public class ApiServer {
                 putModule(DisplayManager2.PxprpcNamespace,DisplayManager2.i);
                 putModule(AndroidUIBase.PxprpcNamespace,AndroidUIBase.i);
                 putModule(JseIo.PxprpcNamespace,JseIo.i);
-                putModule(IntentReceiver.PxprpcNamespace,IntentReceiver.i);
                 try {
                     Class<?> extendMain = Class.forName("pxprpcapi.androidhelperex.Main");
                     Method register = extendMain.getMethod("registerPxprpcApi");
