@@ -45,6 +45,7 @@ public class SysBase implements Closeable{
 	public Context getDefaultContext() {
 		return ApiServer.defaultAndroidContext;
 	}
+	public Context getServiceContext(){return PxprpcService.current;}
 
 	public void registerBroadcastReceiver(BroadcastReceiver receiver, String filter) {
 		getDefaultContext().registerReceiver(receiver, new IntentFilter(filter));

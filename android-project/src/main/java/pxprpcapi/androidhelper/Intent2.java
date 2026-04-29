@@ -13,7 +13,6 @@ import android.provider.Settings;
 import android.webkit.MimeTypeMap;
 import de.cketti.fileprovider.PublicFileProvider;
 import partic2.pxseedloader.android.launcher.ApiServer;
-import partic2.pxseedloader.android.launcher.MainActivity;
 import pxprpc.extend.AsyncReturn;
 
 import java.io.Closeable;
@@ -84,6 +83,13 @@ public class Intent2 implements Closeable {
         }
         intent.setAction(action);
         ApiServer.defaultAndroidContext.startActivity(intent);
+    }
+    public void requestStartService(String packageName,String componentName,String action){
+        Intent intent=new Intent();
+        ComponentName cn=new ComponentName(packageName,componentName);
+        intent.setComponent(cn);
+        intent.setAction(action);
+        ApiServer.defaultAndroidContext.startService(intent);
     }
     @SuppressLint("MissingPermission")
     public void requestEnableBluetooth(){
@@ -184,6 +190,12 @@ public class Intent2 implements Closeable {
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
 
+    public void openStorageManagePermissionSetting(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+            ApiServer.defaultAndroidContext.startActivity(intent);
+        }
+    }
     @Override
     public void close() throws IOException {
         if(i==this)i=null;
