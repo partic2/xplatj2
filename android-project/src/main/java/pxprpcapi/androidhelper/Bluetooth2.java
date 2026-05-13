@@ -137,7 +137,10 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         if(BluetoothDevice.ACTION_FOUND.equals(intent.getAction())){
             DiscoveryResult t = new DiscoveryResult();
             BluetoothDevice dev = (BluetoothDevice) intent.getExtras().get(BluetoothDevice.EXTRA_DEVICE);
-            String addr = dev.getAddress();
+            String addr="";
+            if(dev!=null){
+                addr = dev.getAddress();
+            }
             if(discovered.containsKey(addr)){
                 t=discovered.get(addr);
             }else{
@@ -148,7 +151,10 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         }else if(BluetoothDevice.ACTION_PAIRING_REQUEST.equals(intent.getAction())){
             DiscoveryResult t = new DiscoveryResult();
             BluetoothDevice dev = (BluetoothDevice) intent.getExtras().get(BluetoothDevice.EXTRA_DEVICE);
-            String addr = t.device.getAddress();
+            String addr = "";
+            if(dev!=null){
+                addr=dev.getAddress();
+            }
             if(discovered.containsKey(addr)){
                 t=discovered.get(addr);
             }else{
@@ -157,7 +163,9 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
             t.device= dev;
             t.pairingRequest=true;
             if(allowNoConfirmPairing){
-                t.device.setPairingConfirmation(true);
+                try{
+                    t.device.setPairingConfirmation(true);
+                }catch(Exception ex){}
             }
         }
     }
