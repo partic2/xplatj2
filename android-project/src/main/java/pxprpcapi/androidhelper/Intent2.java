@@ -34,11 +34,17 @@ public class Intent2 implements Closeable {
     public void requestOpenTelephone(String tel){
         Uri uri=Uri.parse("tel:"+tel);
         Intent intent=new Intent(Intent.ACTION_DIAL,uri);
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
     public void requestSendShortMessage(String tel,String body){
         Uri uri=Uri.parse("smsto:"+tel);
         Intent intent=new Intent(Intent.ACTION_SENDTO,uri);
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         intent.putExtra("sms_body",body);
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
@@ -48,6 +54,9 @@ public class Intent2 implements Closeable {
             mime=getMimeTypeFromUri(uri.toString());
         }
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         shareIntent.setType("text/plain");
         shareIntent.putExtra(Intent.EXTRA_STREAM, uri.toString());
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Share");
@@ -56,10 +65,16 @@ public class Intent2 implements Closeable {
     public void requestOpenByDefaultHandler(String uris){
         Uri uri=Uri.parse(uris);
         Intent intent=new Intent(Intent.ACTION_VIEW,uri);
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
     public void requestOpenSetting(String setting){
         Intent intent=new Intent("android.settings."+setting);
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
     public String[] getSettingProviderList(){
@@ -76,6 +91,9 @@ public class Intent2 implements Closeable {
     }
     public void requestOpenApplication(String packageName,String componentName,String action){
         Intent intent=new Intent();
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         ComponentName cn=new ComponentName(packageName,componentName);
         intent.setComponent(cn);
         if("".equals(action)){
@@ -94,20 +112,29 @@ public class Intent2 implements Closeable {
     @SuppressLint("MissingPermission")
     public void requestEnableBluetooth(){
         Intent intent=new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
     @SuppressLint("MissingPermission")
     public void requestBluetoothDicoverable(int durationSec){
         Intent intent=new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,durationSec);
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
     public int requestImageCapture(final AsyncReturn<Integer> ret,String imagePath){
         Uri uri= Uri.parse(getUriForFile(imagePath));
         Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         intent.putExtra(MediaStore.EXTRA_OUTPUT,uri);
         int reqCode= (int)System.currentTimeMillis();
-        if(ApiServer.defaultAndroidContext instanceof Activity){
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
             ApiServer.onActivityResultCallback.put(reqCode,(param)->{
                 ApiServer.onActivityResultCallback.remove(reqCode);
                 ApiServer.resolveAsync(ret,(Integer)param[1]);
@@ -142,6 +169,9 @@ public class Intent2 implements Closeable {
                 return true;
             }
             Intent intent=new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
             intent.setData(Uri.parse("package:"+ApiServer.defaultAndroidContext.getPackageName()));
             int reqCode= (int)System.currentTimeMillis();
             ApiServer.onActivityResultCallback.put(reqCode,(args)->{
@@ -174,6 +204,9 @@ public class Intent2 implements Closeable {
 
     public void startActivity(String activityName,String packageName) throws ClassNotFoundException {
         Intent intent = new Intent();
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         if(packageName.equals("")) {
             intent.setClass(ApiServer.defaultAndroidContext,Class.forName(activityName));
             ApiServer.defaultAndroidContext.startActivity(intent);
@@ -185,6 +218,9 @@ public class Intent2 implements Closeable {
 
     public void openHttpUrl(String url,String flags) throws ClassNotFoundException {
         Intent intent = new Intent();
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         intent.setClass(ApiServer.defaultAndroidContext,Class.forName("partic2.pxseedloader.android.webapp.MainActivity"));
         intent.putExtra("url",url);
         ApiServer.defaultAndroidContext.startActivity(intent);

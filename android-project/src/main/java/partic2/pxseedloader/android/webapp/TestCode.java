@@ -3,6 +3,7 @@ package partic2.pxseedloader.android.webapp;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.hardware.camera2.CameraAccessException;
+import android.os.Handler;
 import android.view.Surface;
 import android.view.TextureView;
 import partic2.pxseedloader.android.launcher.ApiServer;
@@ -90,7 +91,7 @@ public class TestCode {
         AndroidCamera2.CameraWrap1[] openCam=new AndroidCamera2.CameraWrap1[1];
         ByteBuffer[] pngData = new ByteBuffer[1];
         TextureView[] camOutput=new TextureView[1];
-        AndroidUIBase.i.mainTaskQueue.post(()->{
+        new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(()->{
             Activity acti=((Activity) ApiServer.defaultAndroidContext);
             TextureView cameraOutput=new TextureView(acti);
             camOutput[0]=cameraOutput;

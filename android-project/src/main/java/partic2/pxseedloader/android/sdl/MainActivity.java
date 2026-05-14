@@ -3,6 +3,7 @@ import android.content.Intent;
 import android.os.*;
 import org.libsdl.app.*;
 import partic2.pxseedloader.android.launcher.ApiServer;
+import pxprpcapi.androidhelper.AndroidUIBase;
 
 public class MainActivity extends SDLActivity
 {
@@ -16,6 +17,21 @@ public class MainActivity extends SDLActivity
 	@Override
 	protected void onResume() {
 		super.onResume();
+		ApiServer.defaultAndroidContext = this;
+		if(AndroidUIBase.i!=null){
+			AndroidUIBase.i.extraEvent.fireEvent("sdl.onResume");
+		}
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		if(ApiServer.defaultAndroidContext==this){
+			ApiServer.defaultAndroidContext=getApplicationContext();
+		}
+		if(AndroidUIBase.i!=null){
+			AndroidUIBase.i.extraEvent.fireEvent("sdl.onStop");
+		}
 	}
 
 	@Override

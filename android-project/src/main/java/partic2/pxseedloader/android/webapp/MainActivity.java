@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.view.Window;
+import android.webkit.JsResult;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
@@ -15,6 +16,7 @@ import android.webkit.WebViewClient;
 
 
 import partic2.pxseedloader.android.launcher.ApiServer;
+import pxprpcapi.androidhelper.AndroidUIBase;
 import xplatj.javaplat.partic2.util.PlatCoreConfig;
 
 
@@ -51,6 +53,20 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         ApiServer.defaultAndroidContext=this;
+        if(AndroidUIBase.i!=null){
+            AndroidUIBase.i.extraEvent.fireEvent("webapp.onResume");
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(ApiServer.defaultAndroidContext==this){
+            ApiServer.defaultAndroidContext=getApplicationContext();
+        }
+        if(AndroidUIBase.i!=null){
+            AndroidUIBase.i.extraEvent.fireEvent("webapp.onStop");
+        }
     }
 
     protected void initWebView() {
@@ -72,6 +88,7 @@ public class MainActivity extends Activity {
                 super.onPageStarted(view, url, favicon);
             }
         });
+
         wv.setWebChromeClient(new WebChromeClient(){
             @Override
             public void onPermissionRequest(PermissionRequest request) {
@@ -99,6 +116,20 @@ public class MainActivity extends Activity {
         wv.evaluateJavascript("javascript:"+jscode,null);
     }
 
+    @Override
+    public void onBackPressed() {
+        if(AndroidUIBase.i!=null){
+            AndroidUIBase.i.extraEvent.fireEvent("backPressed");
+        }
+        if (mainWebView.canGoBack()) {
+            mainWebView.goBack();
+        }else{
+            if(!AndroidUIBase.interceptBackPressed){
+                super.onBackPressed();
+                this.finish();
+            }
+        }
+    }
 
     @Override
     protected void onDestroy() {

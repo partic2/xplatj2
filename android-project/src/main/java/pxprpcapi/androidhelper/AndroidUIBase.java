@@ -22,13 +22,15 @@ import java.nio.ByteBuffer;
 public class AndroidUIBase implements Closeable {
     public static final String PxprpcNamespace="AndroidHelper.AndroidUIBase";
     public static AndroidUIBase i;
-    public Handler mainTaskQueue;
+
+
     public AndroidUIBase(){
         i=this;
-        mainTaskQueue=new Handler(ApiServer.defaultAndroidContext.getMainLooper());
+        this.extraEvent=new EventDispatcher();
+        this.extraEvent.setEventType(String.class);
     }
     public void dispatchKeyEvent(int action,int code){
-        mainTaskQueue.post(()-> {
+        new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(()-> {
             Activity activity = (Activity) ApiServer.defaultAndroidContext;
             KeyEvent keyEvent = new KeyEvent(action, code);
             activity.dispatchKeyEvent(keyEvent);
@@ -73,7 +75,7 @@ public class AndroidUIBase implements Closeable {
         return r;
     }
     public void dispatchTouchEvent(int action,TouchPointers touchPointers){
-        mainTaskQueue.post(()->{
+        new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(()->{
             Activity activity = (Activity) ApiServer.defaultAndroidContext;
             MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis(),
                     action,touchPointers.coords.length,touchPointers.props,touchPointers.coords,
@@ -86,7 +88,7 @@ public class AndroidUIBase implements Closeable {
         activity.setWebviewStartScript(script);
     }
     public void webViewRunJs(String script){
-        mainTaskQueue.post(()-> {
+        new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(()-> {
             MainActivity activity=(MainActivity)ApiServer.defaultAndroidContext;
             activity.webviewRunJs(script);
         });
@@ -101,7 +103,7 @@ public class AndroidUIBase implements Closeable {
         return dialogEvent;
     }
     public void dialogSet(AlertDialog dialog,String msg,boolean show){
-        mainTaskQueue.post(()->{
+        new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(()->{
             dialog.setMessage(msg);
             if(show && !dialog.isShowing()){
                 dialog.show();
@@ -115,7 +117,7 @@ public class AndroidUIBase implements Closeable {
         return new Object[]{dialog.isShowing()};
     }
     public void dialogNew(AsyncReturn<AlertDialog> aret,String btn1,String id1,String btn2,String id2){
-        mainTaskQueue.post(()-> {
+        new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(()-> {
             Activity activity = (Activity) ApiServer.defaultAndroidContext;
             AlertDialog.Builder builder = new AlertDialog.Builder(activity);
             builder.setMessage("");
@@ -133,5 +135,17 @@ public class AndroidUIBase implements Closeable {
         });
     }
 
+    public static boolean interceptBackPressed=false;
+    public void setIntercepptOnBackPressed(boolean b){
+        AndroidUIBase.interceptBackPressed=b;
+    }
+    public EventDispatcher extraEvent;
+    public EventDispatcher getExtraUIEvent(){
+        if(this.extraEvent==null || this.extraEvent.closed){
+            this.extraEvent=new EventDispatcher();
+            this.extraEvent.setEventType(String.class);
+        }
+        return extraEvent;
+    }
 
 }

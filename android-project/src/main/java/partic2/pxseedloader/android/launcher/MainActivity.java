@@ -18,6 +18,7 @@ import pxprpc.base.ClientContext;
 import pxprpc.base.RemoteError;
 import pxprpc.extend.RpcExtendClientCallable;
 import pxprpc.runtimebridge.RuntimeBridgeUtils;
+import pxprpcapi.androidhelper.AndroidUIBase;
 import pxprpcapi.androidhelper.Intent2;
 import pxprpcapi.jsehelper.JseIo;
 import xplatj.javaplat.partic2.util.PlatCoreConfig;
@@ -37,9 +38,7 @@ public class MainActivity extends Activity {
 
 	public static HashSet<String> startupOpts=new HashSet<String>();
 	public static Integer currentTaskId=null;
-
 	public static RpcExtendClientCallable rtbVarOnChange;
-
 	public static void ensureStartOpts(){
 
 		synchronized (startupOpts){
@@ -65,6 +64,7 @@ public class MainActivity extends Activity {
 	}
 	
 	MulticastLock multicastLock;
+
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -126,6 +126,9 @@ public class MainActivity extends Activity {
 									if("pxseed_sdlloader.event.SDL_RunMain".equals(r[0])){
 										try {
 											Intent intent = new Intent();
+											if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+												intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+											}
 											intent.setClass(ApiServer.defaultAndroidContext,Class.forName("partic2.pxseedloader.android.sdl.MainActivity"));
 											ApiServer.defaultAndroidContext.startActivity(intent);
 										} catch (ClassNotFoundException e) {
@@ -183,6 +186,7 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		currentTaskId=getTaskId();
+		ApiServer.defaultAndroidContext=this;
 		if(uiProcessInited.tryAcquire()){
 			uiProcessInited.release();
 			new Thread(new Runnable() {
@@ -195,34 +199,50 @@ public class MainActivity extends Activity {
 					}
 				}
 			}).start();
-		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			String[] reqPerms=getPermissionNotGranted();
-			if(reqPerms.length>0){
-				this.requestPermissions(reqPerms,1);
-			}else{
+		}else{
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+				String[] reqPerms=getPermissionNotGranted();
+				if(reqPerms.length>0){
+					this.requestPermissions(reqPerms,1);
+				}else{
+					initEnviron();
+				}
+			} else {
 				initEnviron();
 			}
-		} else {
-			initEnviron();
 		}
-
 	}
 
 	@Override
 	public void onBackPressed() {
-		this.finish();
+		if(AndroidUIBase.i!=null){
+			AndroidUIBase.i.extraEvent.fireEvent("backPressed");
+		}
+		if(!AndroidUIBase.interceptBackPressed){
+			super.onBackPressed();
+			this.finish();
+		}
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 		ApiServer.defaultAndroidContext = this;
+		if(AndroidUIBase.i!=null){
+			AndroidUIBase.i.extraEvent.fireEvent("launcher.onResume");
+		}
 	}
 
 	@Override
-	protected void onPause() {
-		super.onPause();
+	protected void onStop() {
+		super.onStop();
+		if(ApiServer.defaultAndroidContext==this){
+			ApiServer.defaultAndroidContext=getApplicationContext();
+		}
+		if(AndroidUIBase.i!=null){
+			AndroidUIBase.i.extraEvent.fireEvent("launcher.onStop");
+		}
+		this.finish();
 	}
 
 	@Override
