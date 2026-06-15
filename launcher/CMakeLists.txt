@@ -7,6 +7,14 @@ enable_language(ASM)
 set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_CMAKE_SHARED_LINKER_FLAGS_RELEASE} -s")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -s")
 
+set(CMAKE_PLATFORM_NO_VERSIONED_SONAME TRUE)
+if(LINUX AND NOT ANDROID)
+  set(CMAKE_SKIP_BUILD_RPATH FALSE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+  set(CMAKE_INSTALL_RPATH "$ORIGIN")
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+endif()
+
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif()
@@ -20,8 +28,6 @@ set(BUILD_TESTING OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-message("!!!Compiling Note!!!")
-message("If you failed to compile with libffi, you can rename/remove \"./libffi\" directory to diable libffi relative feature.")
 
 #Seemed shared object on linux require this options to build shared object.
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
@@ -51,8 +57,9 @@ set(PXPRPC_RTBRIDGE_BUILD_EXE OFF)
 
 add_executable(launcher launcher.c)
 
+
 if(LINUX AND NOT ANDROID)
-target_link_libraries(launcher dl)
+  target_link_libraries(launcher dl)
 endif()
 
 add_subdirectory(${DEPS_SOURCE_DIRS}/SDL ./build-sdl EXCLUDE_FROM_ALL)
