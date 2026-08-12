@@ -9,3 +9,4 @@
 /*.iml
 /src/main/jniLibs
 /bin/
+/build-options.properties

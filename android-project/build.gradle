@@ -8,7 +8,8 @@
 
 buildscript {
     repositories {
-        jcenter()
+
+		maven { url 'https://maven.aliyun.com/repository/public/' }
 		google()
     }
     dependencies {
@@ -17,6 +18,12 @@ buildscript {
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
+}
+
+def buildOpts = new Properties()
+def propsFile = file('build-options.properties')
+if (propsFile.exists()) {
+	buildOpts.load(new FileInputStream(propsFile))
 }
 
 
@@ -59,8 +66,11 @@ android {
 				srcDirs '../deps/PxpRpc/java/src'
 				srcDirs '../deps/PxpRpc/runtime_bridge/java'
 				srcDirs '../deps/SDL/android-project/app/src/main/java'
-				if(!"minimal".equals(System.getenv("XPLATJ_BUILD_VARIANTS"))){
+				if(!"true".equals(buildOpts.getProperty("noExtend"))){
 					srcDirs+="src/extend/java"
+				}
+				if("true".equals(buildOpts.getProperty("enableGeckoView"))){
+					srcDirs+="src/geckoview/java"
 				}
 			}
 			resources{
@@ -86,15 +96,23 @@ android {
 	aaptOptions{
 		 ignoreAssetsPattern = ''
 	}
+
 }
+
 
 dependencies {
 	api fileTree(dir:'src/main/jar',include:['*.jar']);
+	if ("true".equals(buildOpts.getProperty("enableGeckoView"))) {
+		implementation "org.mozilla.geckoview:geckoview:110.0.20230227191043"
+	}
 }
 
 // In this section you declare where to find the dependencies of your project
 repositories {
     // Use jcenter for resolving your dependencies.
-    jcenter()
+	maven { url 'https://maven.aliyun.com/repository/public/' }
+	maven {
+		url "https://maven.mozilla.org/maven2/"
+	}
 	google()
 }
