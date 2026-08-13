@@ -218,10 +218,14 @@ public class Intent2 implements Closeable {
 
     public void openHttpUrl(String url,String flags) throws ClassNotFoundException {
         Intent intent = new Intent();
+        Class<?> webviewClass=Class.forName("partic2.pxseedloader.android.webapp.MainActivity");
+        if(flags.contains("use-gecko")){
+            webviewClass=Class.forName("partic2.pxseedloader.android.webapp.GeckoViewActivity");
+        }
         if(!(ApiServer.defaultAndroidContext instanceof Activity)){
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
-        intent.setClass(ApiServer.defaultAndroidContext,Class.forName("partic2.pxseedloader.android.webapp.MainActivity"));
+        intent.setClass(ApiServer.defaultAndroidContext,webviewClass);
         intent.putExtra("url",url);
         ApiServer.defaultAndroidContext.startActivity(intent);
     }
