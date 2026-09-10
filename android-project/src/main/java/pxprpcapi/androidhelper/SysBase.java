@@ -15,6 +15,7 @@ import partic2.pxseedloader.android.launcher.AssetsCopy;
 import partic2.pxseedloader.android.launcher.MainActivity;
 import partic2.pxseedloader.android.launcher.PxprpcService;
 import pxprpc.base.Utils;
+import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.EventDispatcher;
 import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
@@ -112,6 +113,22 @@ public class SysBase implements Closeable{
 		ArrayList<Map<String, Object>> t1 = new ArrayList<Map<String, Object>>();
 		t1.add(bundleData);
 		return new TableSerializer().fromMapArray(t1).build();
+	}
+
+	public String copyAssets(final AsyncReturn<String> ret,final String sourceDir,final String destinationDir){
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+                try {
+                    AssetsCopy.CopyFiles(sourceDir,destinationDir);
+					ret.resolve("");
+                } catch (IOException e) {
+                    ret.reject(e);
+                }
+
+            }
+		}).start();
+		return "";
 	}
 
 	@Override
