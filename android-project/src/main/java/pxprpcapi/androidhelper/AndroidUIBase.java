@@ -2,12 +2,15 @@ package pxprpcapi.androidhelper;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import partic2.pxseedloader.android.launcher.ApiServer;
 import partic2.pxseedloader.android.webapp.MainActivity;
 import pxprpc.extend.AsyncReturn;
@@ -18,6 +21,7 @@ import pxprpc.extend.TableSerializer;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Locale;
 
 public class AndroidUIBase implements Closeable {
     public static final String PxprpcNamespace="AndroidHelper.AndroidUIBase";
@@ -147,5 +151,33 @@ public class AndroidUIBase implements Closeable {
         }
         return extraEvent;
     }
+    long lastBackTime=0;
+    long exitInterval=2000;
+    public boolean _backPressed(){
+        extraEvent.fireEvent("backPressed");
+        if(!AndroidUIBase.interceptBackPressed){
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastBackTime < exitInterval) {
+                return true;
+            } else {
+                lastBackTime = currentTime;
+                String tips="Press again to exit";
+                Configuration config = ApiServer.defaultAndroidContext.getResources().getConfiguration();
+                Locale locale;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    locale = config.getLocales().get(0);
+                } else {
+                    locale = config.locale;
+                }
+                if(locale.getLanguage().equals("zh")){
+                    tips="再按一次退出应用";
+                }
+                Toast.makeText(ApiServer.defaultAndroidContext, tips, Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        }else{
+            return false;
+        }
 
+    }
 }

@@ -119,15 +119,11 @@ public class MainActivity extends Activity {
     @Override
     public void onBackPressed() {
         if(AndroidUIBase.i!=null){
-            AndroidUIBase.i.extraEvent.fireEvent("backPressed");
-        }
-        if (mainWebView.canGoBack()) {
-            mainWebView.goBack();
-        }else{
-            if(!AndroidUIBase.interceptBackPressed){
+            if(AndroidUIBase.i._backPressed()){
                 super.onBackPressed();
-                this.finish();
             }
+        }else{
+            super.onBackPressed();
         }
     }
 

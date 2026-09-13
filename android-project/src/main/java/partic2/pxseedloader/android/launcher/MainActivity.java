@@ -212,15 +212,15 @@ public class MainActivity extends Activity {
 			}
 		}
 	}
-
+    long lastBackTime=0;
 	@Override
 	public void onBackPressed() {
 		if(AndroidUIBase.i!=null){
-			AndroidUIBase.i.extraEvent.fireEvent("backPressed");
-		}
-		if(!AndroidUIBase.interceptBackPressed){
+			if(AndroidUIBase.i._backPressed()){
+				super.onBackPressed();
+			}
+		}else{
 			super.onBackPressed();
-			this.finish();
 		}
 	}
 
