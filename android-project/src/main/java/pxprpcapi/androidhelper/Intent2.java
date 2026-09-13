@@ -57,7 +57,7 @@ public class Intent2 implements Closeable {
         if(!(ApiServer.defaultAndroidContext instanceof Activity)){
             shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
-        shareIntent.setType("text/plain");
+        shareIntent.setType(mime);
         shareIntent.putExtra(Intent.EXTRA_STREAM, uri.toString());
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Share");
         ApiServer.defaultAndroidContext.startActivity(Intent.createChooser(shareIntent, chooserTitle));
@@ -232,8 +232,15 @@ public class Intent2 implements Closeable {
 
     public void openStorageManagePermissionSetting(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-            ApiServer.defaultAndroidContext.startActivity(intent);
+            Intent intent;
+            try {
+                intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + ApiServer.defaultAndroidContext.getPackageName()));
+                ApiServer.defaultAndroidContext.startActivity(intent);
+            } catch (Exception e) {
+                intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                ApiServer.defaultAndroidContext.startActivity(intent);
+            }
         }
     }
     @Override
