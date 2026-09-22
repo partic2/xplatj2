@@ -315,8 +315,8 @@ namespace pxprpc_txikijs{
             int32_t len;
             JS_ToBigInt64(ctx,&base,argv[0]);
             JS_ToInt32(ctx, &len, argv[1]);
-            return JS_NewArrayBuffer(ctx, reinterpret_cast<uint8_t*>(base), len,
-                 [](JSRuntime *rt, void *opaque, void *ptr)-> void {}, nullptr, true);
+            return JS_NewArrayBuffer(ctx, reinterpret_cast<uint8_t*>(base), len, len,
+                 [](JSRuntime *rt, void *opaque, void *ptr, size_t size)-> void * {return nullptr;}, nullptr, true);
         }
         static JSValue ioReceiveBlock(JSContext *ctx, JSValue this_val, int argc, JSValue *argv){
             if(JS_IsUndefined(this_val)){
