@@ -87,8 +87,7 @@ public class GeckoViewActivity extends Activity {
         this.webviewSession.loadUri(this.startupUrl);
     }
     protected void deinitWebView(){
-        this.webviewSession.open(geckoRuntime);
-
+        this.webviewSession.close();
     }
     protected String startScript=null;
     public void setWebviewStartScript(String jscode){
@@ -101,11 +100,11 @@ public class GeckoViewActivity extends Activity {
     @Override
     public void onBackPressed() {
         if(AndroidUIBase.i!=null){
-            AndroidUIBase.i.extraEvent.fireEvent("backPressed");
-        }
-        if(!AndroidUIBase.interceptBackPressed){
+            if(AndroidUIBase.i._backPressed()){
+                super.onBackPressed();
+            }
+        }else{
             super.onBackPressed();
-            this.finish();
         }
     }
 
