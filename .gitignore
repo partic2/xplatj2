@@ -1,2 +1,4 @@
-/SDL/*
 /.vscode
+/commonj/src/main/assets/res/pxseed
+/commonj/src/main/assets/res/tjs-initialize
+/commonj/src/main/assets/res/pxseedloader-flags.txt

@@ -92,12 +92,12 @@ namespace pxprpc_PxseedLoader{
             })
         );
 
-        #ifdef __WIN32
-        hostFlags+="__WIN32 ";
+        #ifdef _WIN32
+        hostFlags+="_WIN32 ";
         #endif
 
-        #ifdef __WIN64
-        hostFlags+="__WIN64 ";
+        #ifdef _WIN64
+        hostFlags+="_WIN64 ";
         #endif
 
         #ifdef __linux__
@@ -106,6 +106,19 @@ namespace pxprpc_PxseedLoader{
 
         #ifdef __ANDROID__
         hostFlags+="__ANDROID__ ";
+        #endif 
+
+        #ifdef __APPLE__
+            hostFlags += "__APPLE__ ";
+            #ifdef __MACH__
+                hostFlags += "__MACH__ ";
+            #endif
+            #if TARGET_OS_IPHONE
+                hostFlags += "__IOS__ ";
+            #endif
+        #endif
+
+        #ifdef __ANDROID__
         pxprpc::defaultFuncMap.add(
             (new pxprpc::NamedFunctionPPImpl1())
                 ->init("pxprpc_PxseedLoader.setAndroidInitInfo", [](Parameter *para, AsyncReturn *ret) -> void {

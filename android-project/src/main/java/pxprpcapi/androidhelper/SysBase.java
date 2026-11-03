@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.os.Build;
 import android.os.Bundle;
 import partic2.pxseedloader.android.launcher.ApiServer;
@@ -21,8 +22,12 @@ import pxprpc.extend.MethodTypeDecl;
 import pxprpc.extend.TableSerializer;
 import pxprpc.extend.TypeDeclParser;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -130,6 +135,26 @@ public class SysBase implements Closeable{
 		}).start();
 		return "";
 	}
+
+	public static String readApkAssetAsText(String fileName) throws IOException {
+		Context context = ApiServer.defaultAndroidContext;
+		InputStream is=null;
+		try {
+			is = context.getAssets().open(fileName);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream() ;
+			byte[] buffer = new byte[8192];
+			int len;
+			while ((len = is.read(buffer)) != -1) {
+				baos.write(buffer, 0, len);
+			}
+			return baos.toString("utf-8");
+		}finally{
+			if(is!=null){
+				is.close();
+			}
+		}
+	}
+
 
 	@Override
 	public void close() throws IOException {
