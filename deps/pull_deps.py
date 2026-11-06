@@ -71,7 +71,6 @@ def main():
     runpy.run_path(os.path.join(targetdir,'runtime_bridge','deps','pull_deps.py'),run_name='__main__')
 
     pull('SDL','https://gitcode.com/GitHub_Trending/sd/SDL.git','release-3.4.x')
-    pull('webview','https://gitee.com/partic/webview-mirror.git','master')
     
     pull('txiki.js','https://gitee.com/partic/txiki.js-partic.git','master')
 

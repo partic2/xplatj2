@@ -21,6 +21,7 @@ extern "C"{
 
 
 
+
 namespace pxprpc_txikijs{
     
     int inited=0;
@@ -36,8 +37,17 @@ namespace pxprpc_txikijs{
         return str;
     }
 
+    namespace __pwartBinding{
+        static JSValue pwartFunc2026(JSContext *ctx,JSValue this_val, int argc, JSValue *argv);
+        static void init();
+    }
+
     namespace __embedtlsBinding{
         static JSValue embedtlsSslFunc2026(JSContext *ctx,JSValue this_val, int argc, JSValue *argv);
+        static void init();
+    }
+
+    namespace __embedtlsRpc{
         static void init();
     }
 
@@ -95,7 +105,11 @@ namespace pxprpc_txikijs{
                 "embedtlsSslFunc2026", JS_PROP_C_W_E, JS_DEF_CFUNC, 0, {                                            
                     .func = { 1, JS_CFUNC_generic, { .generic = __embedtlsBinding::embedtlsSslFunc2026 } }        
                 }
-            }
+            },{
+                "pwartFunc2026", JS_PROP_C_W_E, JS_DEF_CFUNC, 0, {                                            
+                    .func = { 1, JS_CFUNC_generic, { .generic = __pwartBinding::pwartFunc2026 } }        
+                }
+            },
         };
         void bindRpcBridge(JSContext *ctx,void *opaque){
             JS_NewClassID(JS_GetRuntime(ctx),&classId);
@@ -386,10 +400,13 @@ namespace pxprpc_txikijs{
                 ret->resolve();
             })
         );
+        __pwartBinding::init();
         __embedtlsBinding::init();
+        __embedtlsRpc::init();
         inited=1;
     }
 }
 
-
+#include <pxprpc-txikijs/pwart.hpp>
 #include <pxprpc-txikijs/mbedtls.hpp>
+#include <pxprpc-txikijs/mbedtls4rpc.hpp>
