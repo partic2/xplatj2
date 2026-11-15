@@ -30,25 +30,29 @@ static JSValue pwartFunc2026(JSContext *ctx, JSValue this_val, int argc,
   int32_t i32;
   JS_ToInt32(ctx, &i32, argv[0]);
   if (i32 >= 0 && i32 < (int)pwartFunc2026List.size()) {
+    auto classId=JS_GetClassID(this_val);
+    if(classId==JS_INVALID_CLASS_ID){
+        return JS_EXCEPTION;
+    }
     auto thisWrap = static_cast<TjsRuntimeWrap *>(
-        JS_GetOpaque(this_val, __pxprpc4tjs::classId));
+        JS_GetOpaque(this_val, classId));
     return pwartFunc2026List[i32](thisWrap, ctx, argc, argv);
   } else {
     return JS_UNDEFINED;
   }
 }
 
+
+
 class WrtNamespace : public pxprpc::PxpObject {
 public:
   pwart_namespace ns;
   WrtNamespace() : ns(pwart_namespace_new()) {}
   virtual ~WrtNamespace() {
-    if (ns) {
-      pwart_namespace_delete(ns);
-      ns = nullptr;
-    }
+    if (ns) { pwart_namespace_delete(ns); ns = nullptr; }
   }
 };
+
 
 class WrtModuleState : public pxprpc::PxpObject {
 public:
@@ -68,8 +72,66 @@ public:
   WrtMemory(pwart_wasm_memory *m) : mem(m) {}
 };
 
+class WrtTable : public pxprpc::PxpObject {
+public:
+  pwart_wasm_table *tb;
+  WrtTable(pwart_wasm_table *t) : tb(t) {}
+};
+
 static inline uint64_t pwartMemBytes(struct pwart_wasm_memory *m) {
   return (uint64_t)m->pages * 65536ULL;
+}
+
+
+static JSValue pwartWrapSymbolResult(TjsRuntimeWrap *thisWrap, JSContext *ctx,
+                                     uint32_t kind, void *result) {
+  if (!result) return JS_NULL;
+  switch (kind) {
+  case PWART_KIND_FUNCTION: {
+    auto r = new WrtFunction((pwart_wasm_function)result);
+    return JS_NewInt32(ctx, thisWrap->saveObject(r));
+  }
+  case PWART_KIND_MEMORY: {
+    auto r = new WrtMemory((struct pwart_wasm_memory *)result);
+    return JS_NewInt32(ctx, thisWrap->saveObject(r));
+  }
+  case PWART_KIND_TABLE: {
+    auto r = new WrtTable((struct pwart_wasm_table *)result);
+    return JS_NewInt32(ctx, thisWrap->saveObject(r));
+  }
+  case PWART_KIND_GLOBAL:
+    return JS_NewBigInt64(ctx, (int64_t)(intptr_t)result);
+  default:
+    return JS_NULL;
+  }
+}
+
+
+static JSValue pwartResolveSymbolImpl(TjsRuntimeWrap *thisWrap, JSContext *ctx,
+                                      pwart_namespace ns,
+                                      const char *moduleName,
+                                      const char *fieldName, uint32_t kind,
+                                      const char *importerName,
+                                      const char **errOut) {
+  if (errOut) *errOut = nullptr;
+  if (!ns) {
+    if (errOut) *errOut = "invalid namespace";
+    return JS_NULL;
+  }
+  struct pwart_symbol_resolver *resolver = pwart_namespace_resolver(ns);
+  if (!resolver || !resolver->resolve) {
+    if (errOut) *errOut = "namespace has no resolver";
+    return JS_NULL;
+  }
+  struct pwart_symbol_resolve_request req;
+  memset(&req, 0, sizeof(req));
+  req.import_module = moduleName;
+  req.import_field = fieldName;
+  req.importer_name = importerName ? importerName : "";
+  req.kind = kind;
+  req.result = nullptr;
+  resolver->resolve(resolver, &req);
+  return pwartWrapSymbolResult(thisWrap, ctx, kind, req.result);
 }
 
 void init() {
@@ -165,7 +227,6 @@ void init() {
   });
 
   // 6: pwart.callFunction(fnId, argTypes, argsArray, resultTypes) -> results[]
-  //    argTypes / resultTypes: 'i'=i32, 'l'=i64, 'f'=f32, 'd'=f64, 'r'=ref(以 i64 表示)
   pwartFunc2026List.push_back([](TjsRuntimeWrap *thisWrap, JSContext *ctx,
                                  int argc, JSValue *argv) -> JSValue {
     int32_t fnId;
@@ -209,36 +270,16 @@ void init() {
     for (int i = 0; i < argCount; i++) {
       JSValue v = JS_GetPropertyUint32(ctx, argv[3], (uint32_t)i);
       switch (argTypes[i]) {
-      case 'i': {
-        int32_t x = 0;
-        JS_ToInt32(ctx, &x, v);
-        pwart_rstack_put_i32(&sp, x);
-        break;
-      }
-      case 'l': {
-        int64_t x = 0;
-        JS_ToInt64(ctx, &x, v);
-        pwart_rstack_put_i64(&sp, (long long)x);
-        break;
-      }
-      case 'f': {
-        double x = 0;
-        JS_ToFloat64(ctx, &x, v);
-        pwart_rstack_put_f32(&sp, (float)x);
-        break;
-      }
-      case 'd': {
-        double x = 0;
-        JS_ToFloat64(ctx, &x, v);
-        pwart_rstack_put_f64(&sp, x);
-        break;
-      }
-      case 'r': {
-        int64_t x = 0;
-        JS_ToInt64(ctx, &x, v);
-        pwart_rstack_put_ref(&sp, (void *)(intptr_t)x);
-        break;
-      }
+      case 'i': { int32_t x = 0; JS_ToInt32(ctx, &x, v);
+                  pwart_rstack_put_i32(&sp, x); break; }
+      case 'l': { int64_t x = 0; JS_ToInt64(ctx, &x, v);
+                  pwart_rstack_put_i64(&sp, (long long)x); break; }
+      case 'f': { double x = 0; JS_ToFloat64(ctx, &x, v);
+                  pwart_rstack_put_f32(&sp, (float)x); break; }
+      case 'd': { double x = 0; JS_ToFloat64(ctx, &x, v);
+                  pwart_rstack_put_f64(&sp, x); break; }
+      case 'r': { int64_t x = 0; JS_ToInt64(ctx, &x, v);
+                  pwart_rstack_put_ref(&sp, (void *)(intptr_t)x); break; }
       default:
         JS_FreeValue(ctx, v);
         pwart_free_stack(stackBase);
@@ -255,22 +296,12 @@ void init() {
     for (int i = 0; i < resultCount; i++) {
       JSValue v = JS_UNDEFINED;
       switch (resultTypes[i]) {
-      case 'i':
-        v = JS_NewInt32(ctx, pwart_rstack_get_i32(&sp));
-        break;
-      case 'l':
-        v = JS_NewBigInt64(ctx, (int64_t)pwart_rstack_get_i64(&sp));
-        break;
-      case 'f':
-        v = JS_NewFloat64(ctx, (double)pwart_rstack_get_f32(&sp));
-        break;
-      case 'd':
-        v = JS_NewFloat64(ctx, pwart_rstack_get_f64(&sp));
-        break;
-      case 'r':
-        v = JS_NewBigInt64(ctx,
-                           (int64_t)(intptr_t)pwart_rstack_get_ref(&sp));
-        break;
+      case 'i': v = JS_NewInt32(ctx, pwart_rstack_get_i32(&sp)); break;
+      case 'l': v = JS_NewBigInt64(ctx, (int64_t)pwart_rstack_get_i64(&sp)); break;
+      case 'f': v = JS_NewFloat64(ctx, (double)pwart_rstack_get_f32(&sp)); break;
+      case 'd': v = JS_NewFloat64(ctx, pwart_rstack_get_f64(&sp)); break;
+      case 'r': v = JS_NewBigInt64(ctx,
+                                    (int64_t)(intptr_t)pwart_rstack_get_ref(&sp)); break;
       }
       JS_SetPropertyUint32(ctx, results, (uint32_t)i, v);
     }
@@ -342,7 +373,7 @@ void init() {
     return JS_UNDEFINED;
   });
 
-  // 10: pwart.getMemorySize(memId) -> i64 (bytes)
+  // 10: pwart.getMemorySize(memId) -> BigInt (bytes)
   pwartFunc2026List.push_back([](TjsRuntimeWrap *thisWrap, JSContext *ctx,
                                  int argc, JSValue *argv) -> JSValue {
     int32_t id;
@@ -351,6 +382,75 @@ void init() {
     if (!mem || !mem->mem) return JS_NewBigInt64(ctx, 0);
     return JS_NewBigInt64(ctx, (int64_t)pwartMemBytes(mem->mem));
   });
+
+
+  pwartFunc2026List.push_back([](TjsRuntimeWrap *thisWrap, JSContext *ctx,
+                                 int argc, JSValue *argv) -> JSValue {
+    int32_t nsId;
+    if (JS_ToInt32(ctx, &nsId, argv[1]) < 0) return JS_NULL;
+    auto ns = static_cast<WrtNamespace *>(thisWrap->objStore[nsId]);
+    if (!ns || !ns->ns) return JS_NewPlainError(ctx, "invalid namespace");
+    const char *moduleName = JS_ToCString(ctx, argv[2]);
+    const char *fieldName = JS_ToCString(ctx, argv[3]);
+    if (!moduleName || !fieldName) {
+      if (moduleName) JS_FreeCString(ctx, moduleName);
+      if (fieldName) JS_FreeCString(ctx, fieldName);
+      return JS_NewPlainError(ctx, "invalid module/field name");
+    }
+    uint32_t kind = 0;
+    JS_ToUint32(ctx, &kind, argv[4]);
+    const char *importerName = nullptr;
+    if (argc > 5 && !JS_IsUndefined(argv[5]) && !JS_IsNull(argv[5]))
+      importerName = JS_ToCString(ctx, argv[5]);
+    const char *err = nullptr;
+    JSValue ret = pwartResolveSymbolImpl(thisWrap, ctx, ns->ns, moduleName,
+                                         fieldName, kind, importerName, &err);
+    JS_FreeCString(ctx, moduleName);
+    JS_FreeCString(ctx, fieldName);
+    if (importerName) JS_FreeCString(ctx, importerName);
+    if (err) return JS_NewPlainError(ctx, "%s", err);
+    return ret;
+  });
+
+  // 12: pwart.namespaceResolveFunction(nsId, moduleName, fieldName[, importerName])
+  // 13: pwart.namespaceResolveTable(nsId, moduleName, fieldName[, importerName])
+  // 14: pwart.namespaceResolveMemory(nsId, moduleName, fieldName[, importerName])
+  // 15: pwart.namespaceResolveGlobal(nsId, moduleName, fieldName[, importerName])
+#define _TXIKIJS_PWART_PUSH_RESOLVE_SHORTCUT(kindVal)                                  \
+  pwartFunc2026List.push_back(                                                \
+      [](TjsRuntimeWrap *thisWrap, JSContext *ctx, int argc,                  \
+         JSValue *argv) -> JSValue {                                          \
+        int32_t nsId;                                                        \
+        if (JS_ToInt32(ctx, &nsId, argv[1]) < 0) return JS_NULL;              \
+        auto ns = static_cast<WrtNamespace *>(thisWrap->objStore[nsId]);      \
+        if (!ns || !ns->ns)                                                   \
+          return JS_NewPlainError(ctx, "invalid namespace");                  \
+        const char *moduleName = JS_ToCString(ctx, argv[2]);                  \
+        const char *fieldName = JS_ToCString(ctx, argv[3]);                   \
+        if (!moduleName || !fieldName) {                                      \
+          if (moduleName) JS_FreeCString(ctx, moduleName);                    \
+          if (fieldName) JS_FreeCString(ctx, fieldName);                      \
+          return JS_NewPlainError(ctx, "invalid module/field name");          \
+        }                                                                     \
+        const char *importerName = nullptr;                                   \
+        if (argc > 4 && !JS_IsUndefined(argv[4]) && !JS_IsNull(argv[4]))      \
+          importerName = JS_ToCString(ctx, argv[4]);                          \
+        const char *err = nullptr;                                            \
+        JSValue ret = pwartResolveSymbolImpl(thisWrap, ctx, ns->ns,            \
+                                             moduleName, fieldName,           \
+                                             (kindVal), importerName, &err);  \
+        JS_FreeCString(ctx, moduleName);                                      \
+        JS_FreeCString(ctx, fieldName);                                       \
+        if (importerName) JS_FreeCString(ctx, importerName);                  \
+        if (err) return JS_NewPlainError(ctx, "%s", err);                     \
+        return ret;                                                           \
+      });
+
+  _TXIKIJS_PWART_PUSH_RESOLVE_SHORTCUT(PWART_KIND_FUNCTION);  // 12
+  _TXIKIJS_PWART_PUSH_RESOLVE_SHORTCUT(PWART_KIND_TABLE);     // 13
+  _TXIKIJS_PWART_PUSH_RESOLVE_SHORTCUT(PWART_KIND_MEMORY);    // 14
+  _TXIKIJS_PWART_PUSH_RESOLVE_SHORTCUT(PWART_KIND_GLOBAL);    // 15
+#undef _TXIKIJS_PWART_PUSH_RESOLVE_SHORTCUT
 }
 } // namespace __pwartBinding
 } // namespace pxprpc_txikijs

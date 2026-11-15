@@ -52,7 +52,6 @@ namespace pxprpc_txikijs{
     }
 
     namespace __pxprpc4tjs{
-        static JSClassID classId=0;
         static const JSClassDef classDef={
             .class_name="__pxprpc4tjs__",
             .gc_mark=[](JSRuntime *rt, JSValueConst val,
@@ -112,6 +111,7 @@ namespace pxprpc_txikijs{
             },
         };
         void bindRpcBridge(JSContext *ctx,void *opaque){
+            JSClassID classId=0;
             JS_NewClassID(JS_GetRuntime(ctx),&classId);
             JS_NewClass(JS_GetRuntime(ctx),classId,&classDef);
             auto inst = JS_NewObjectClass(ctx,classId);
@@ -166,8 +166,8 @@ namespace pxprpc_txikijs{
             JS_FreeValue(TJS_GetJSContext(rt),jv);
         }
         void runPendingJobs(){
-            auto queueCopy=this->jobs;
             uv_mutex_lock(&jobsMutex);
+            auto queueCopy=this->jobs;
             this->jobs.clear();
             uv_mutex_unlock(&jobsMutex);
             for(auto it : queueCopy){
@@ -242,6 +242,10 @@ namespace pxprpc_txikijs{
             if(JS_IsUndefined(this_val)){
                 return JS_EXCEPTION;
             }
+            auto classId=JS_GetClassID(this_val);
+            if(classId==JS_INVALID_CLASS_ID){
+                return JS_EXCEPTION;
+            }
             auto thisWrap=static_cast<TjsRuntimeWrap *>(JS_GetOpaque(this_val,classId));
             if(thisWrap==nullptr){
                 return JS_EXCEPTION;
@@ -256,6 +260,10 @@ namespace pxprpc_txikijs{
         }
         static JSValue ioSend(JSContext *ctx, JSValue this_val, int argc, JSValue *argv){
             if(JS_IsUndefined(this_val)){
+                return JS_EXCEPTION;
+            }
+            auto classId=JS_GetClassID(this_val);
+            if(classId==JS_INVALID_CLASS_ID){
                 return JS_EXCEPTION;
             }
             auto thisWrap=static_cast<TjsRuntimeWrap *>(JS_GetOpaque(this_val,classId));
@@ -279,6 +287,10 @@ namespace pxprpc_txikijs{
         }
         static JSValue ioReceive(JSContext *ctx, JSValue this_val, int argc, JSValue *argv) {
             if(JS_IsUndefined(this_val)){
+                return JS_EXCEPTION;
+            }
+            auto classId=JS_GetClassID(this_val);
+            if(classId==JS_INVALID_CLASS_ID){
                 return JS_EXCEPTION;
             }
             auto thisWrap=static_cast<TjsRuntimeWrap *>(JS_GetOpaque(this_val,classId));
@@ -315,7 +327,11 @@ namespace pxprpc_txikijs{
             if(JS_IsUndefined(this_val)){
                 return JS_EXCEPTION;
             }
-            auto thisWrap=static_cast<TjsRuntimeWrap *>(JS_GetOpaque(this_val,0));
+            auto classId=JS_GetClassID(this_val);
+            if(classId==JS_INVALID_CLASS_ID){
+                return JS_EXCEPTION;
+            }
+            auto thisWrap=static_cast<TjsRuntimeWrap *>(JS_GetOpaque(this_val,classId));
             if(thisWrap==nullptr)return JS_EXCEPTION;
             int64_t i64;
             JS_ToBigInt64(ctx, &i64, argv[0]);
@@ -334,6 +350,10 @@ namespace pxprpc_txikijs{
         }
         static JSValue ioReceiveBlock(JSContext *ctx, JSValue this_val, int argc, JSValue *argv){
             if(JS_IsUndefined(this_val)){
+                return JS_EXCEPTION;
+            }
+            auto classId=JS_GetClassID(this_val);
+            if(classId==JS_INVALID_CLASS_ID){
                 return JS_EXCEPTION;
             }
             auto thisWrap=static_cast<TjsRuntimeWrap *>(JS_GetOpaque(this_val,classId));
@@ -355,6 +375,10 @@ namespace pxprpc_txikijs{
             }
         }
         static JSValue freeObjStore(JSContext *ctx, JSValue this_val, int argc, JSValue *argv){
+            auto classId=JS_GetClassID(this_val);
+            if(classId==JS_INVALID_CLASS_ID){
+                return JS_EXCEPTION;
+            }
             auto thisWrap=static_cast<TjsRuntimeWrap *>(JS_GetOpaque(this_val,classId));
             int32_t i;
             JS_ToInt32(ctx,&i,argv[0]);

@@ -65,12 +65,16 @@ std::vector<std::function<JSValue(TjsRuntimeWrap *thisWrap, JSContext *ctx,
 
 static JSValue embedtlsSslFunc2026(JSContext *ctx, JSValue this_val, int argc,
                                    JSValue *argv) {
-  int32_t i32;
-  int index = JS_ToInt32(ctx, &i32, argv[0]);
+  int32_t index=0;
+  int ok = JS_ToInt32(ctx, &index, argv[0]);
+  auto classId=JS_GetClassID(this_val);
+            if(classId==JS_INVALID_CLASS_ID){
+                return JS_EXCEPTION;
+            }
   if (index < embedtlsSslFunc2026List.size()) {
     auto thisWrap = static_cast<TjsRuntimeWrap *>(
-        JS_GetOpaque(this_val, __pxprpc4tjs::classId));
-    return embedtlsSslFunc2026List[i32](thisWrap, ctx, argc, argv);
+        JS_GetOpaque(this_val, classId));
+    return embedtlsSslFunc2026List[index](thisWrap, ctx, argc, argv);
   } else {
     return JS_UNDEFINED;
   }
@@ -320,6 +324,7 @@ void init() {
     JS_FreeCString(ctx, hostnameC);
     auto err = r->value->configure();
     if (err != nullptr) {
+      delete r;
       return JS_NewPlainError(ctx, "%s", err);
     }
     return JS_NewInt32(ctx, thisWrap->saveObject(r));
@@ -330,6 +335,7 @@ void init() {
     int32_t i1;
     JS_ToInt32(ctx, &i1, argv[1]);
     auto ssl = static_cast<SslClient *>(thisWrap->objStore[i1]);
+    if(ssl==nullptr)return JS_EXCEPTION;
     JSValue ret = JS_UNDEFINED;
     size_t maxSize = 0;
     auto buf = JS_GetUint8Array(ctx, &maxSize, argv[2]);
@@ -342,6 +348,7 @@ void init() {
     int32_t i1;
     JS_ToInt32(ctx, &i1, argv[1]);
     auto ssl = static_cast<SslClient *>(thisWrap->objStore[i1]);
+    if(ssl==nullptr)return JS_EXCEPTION;
     size_t size;
     auto buf = JS_GetUint8Array(ctx, &size, argv[2]);
     int32_t ret = ssl->value->writeCipherRecvBuffer(buf, size);
@@ -353,6 +360,7 @@ void init() {
     int32_t i1;
     JS_ToInt32(ctx, &i1, argv[1]);
     auto ssl = static_cast<SslClient *>(thisWrap->objStore[i1]);
+    if(ssl==nullptr)return JS_EXCEPTION;
     size_t size;
     auto buf = JS_GetUint8Array(ctx, &size, argv[2]);
     auto writeCount = ssl->value->writePlain(buf, size);
@@ -371,6 +379,7 @@ void init() {
     int32_t i1;
     JS_ToInt32(ctx, &i1, argv[1]);
     auto ssl = static_cast<SslClient *>(thisWrap->objStore[i1]);
+    if(ssl==nullptr)return JS_EXCEPTION;
     size_t size;
     auto buf = JS_GetUint8Array(ctx, &size, argv[2]);
     auto readCount = ssl->value->readPlain(buf, size);
@@ -409,6 +418,7 @@ void init() {
     int32_t i1;
     JS_ToInt32(ctx, &i1, argv[1]);
     auto ssl = static_cast<SslServer *>(thisWrap->objStore[i1]);
+    if(ssl==nullptr)return JS_EXCEPTION;
     size_t maxSize = 0;
     auto buf = JS_GetUint8Array(ctx, &maxSize, argv[2]);
     int ret = ssl->value->readCipherToClient(buf, maxSize);
@@ -421,6 +431,7 @@ void init() {
     int32_t i1;
     JS_ToInt32(ctx, &i1, argv[1]);
     auto ssl = static_cast<SslServer *>(thisWrap->objStore[i1]);
+    if(ssl==nullptr)return JS_EXCEPTION;
     size_t size = 0;
     auto buf = JS_GetUint8Array(ctx, &size, argv[2]);
     int ret = ssl->value->writeCipherFromClient(buf, size);
@@ -433,6 +444,7 @@ void init() {
     int32_t i1;
     JS_ToInt32(ctx, &i1, argv[1]);
     auto ssl = static_cast<SslServer *>(thisWrap->objStore[i1]);
+    if(ssl==nullptr)return JS_EXCEPTION;
     size_t size = 0;
     auto buf = JS_GetUint8Array(ctx, &size, argv[2]);
     auto writeCount = ssl->value->writePlain(buf, size);
@@ -452,6 +464,7 @@ void init() {
     int32_t i1;
     JS_ToInt32(ctx, &i1, argv[1]);
     auto ssl = static_cast<SslServer *>(thisWrap->objStore[i1]);
+    if(ssl==nullptr)return JS_EXCEPTION;
     size_t size = 0;
     auto buf = JS_GetUint8Array(ctx, &size, argv[2]);
     auto readCount = ssl->value->readPlain(buf, size);
@@ -469,6 +482,7 @@ void init() {
     int32_t i1;
     JS_ToInt32(ctx, &i1, argv[1]);
     auto ssl = static_cast<SslServer *>(thisWrap->objStore[i1]);
+    if(ssl==nullptr)return JS_EXCEPTION;
     int ret = ssl->value->handshake();
     if (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE) {
       return JS_NewInt32(ctx, 0);
