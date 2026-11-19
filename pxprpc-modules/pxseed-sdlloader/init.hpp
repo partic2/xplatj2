@@ -98,7 +98,7 @@ void start(){
 
     }
     
-    SDL_Log("pxseed_sdlloader:.wasm exit\n");
+    SDL_Log("pxseed_sdlloader: exit\n");
     if(logfile!=NULL){
         fclose(logfile);
         logfile=NULL;
@@ -131,14 +131,7 @@ using AsyncReturn=pxprpc::NamedFunctionPPImpl1::AsyncReturn;
 void init(){
     if(inited)return;
     inited=1;
-    pxprpc::defaultFuncMap.add((new pxprpc::NamedFunctionPPImpl1())->init("pxseed_sdlloader.RunBoot0Wasm",
-        [](Parameter* para,AsyncReturn* ret)->void{
-            pxprpc_rtbridge_host::runInNewThread([ret]()-> void {
-                start();
-                ret->resolve();
-            });
-        })
-    ).add((new pxprpc::NamedFunctionPPImpl1())->init("pxseed_sdlloader.SDL_RunMain",
+    pxprpc::defaultFuncMap.add((new pxprpc::NamedFunctionPPImpl1())->init("pxseed_sdlloader.SDL_RunMain",
         [](Parameter* para,AsyncReturn* ret)->void{
             //On android , We just send event, handled by Java side, before we implement pxprpc client for C.
             #ifndef __ANDROID__
@@ -165,6 +158,9 @@ void init(){
 }
 
 extern "C"{
+    void pxseed_sdlloader_set_sdl_event_handler(void (*handler)(SDL_Event *)){
+        pxseed_sdlloader::sdlEventHandle=handler;
+    }
     //Use SDL_main instead of replaced main.
     extern int SDL_main(int argc, char *argv[]){
         SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_EVENTS|SDL_INIT_CAMERA|SDL_INIT_SENSOR);
