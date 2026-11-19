@@ -38,7 +38,6 @@ if(XPLATJ_GUESS_TOOLCHAIN_VARIABLE)
 include(guess_by_compiler.toolchain.cmake)
 endif()
 
-set(PWART_SYSLIB_ENABLED ON)
 
 if("${DEPS_SOURCE_DIRS}" STREQUAL "")
   if(NOT ("$ENV{DEPS_SOURCE_DIRS}" STREQUAL ""))
@@ -63,8 +62,9 @@ if(LINUX AND NOT ANDROID)
 endif()
 
 add_subdirectory(${DEPS_SOURCE_DIRS}/SDL ./build-sdl EXCLUDE_FROM_ALL)
-add_subdirectory(${DEPS_SOURCE_DIRS}/pwart ./build-pwart EXCLUDE_FROM_ALL)
+add_subdirectory(${DEPS_SOURCE_DIRS}/widcc-jit ./build-widcc-jit EXCLUDE_FROM_ALL)
 add_subdirectory(${DEPS_SOURCE_DIRS}/txiki.js ./build-txiki.js EXCLUDE_FROM_ALL)
+add_subdirectory(${DEPS_SOURCE_DIRS}/simpleffi ./build-simpleffi.js EXCLUDE_FROM_ALL)
 
 list(APPEND PXPRPC_RTBIRDGE_MODULES_DIRS ${CMAKE_CURRENT_LIST_DIR}/../pxprpc-modules)
 add_subdirectory(${DEPS_SOURCE_DIRS}/PxpRpc/runtime_bridge ./build-pxprpc_rtbridge)

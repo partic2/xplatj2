@@ -3,6 +3,6 @@
 if(TARGET SDL3-shared)
 
 pxprpc_rtbridge_add_module(pxseed_sdlloader::init init.hpp)
-pxprpc_rtbridge_add_link_library(SDL3-shared pwart_syslib pwart tjs)
+pxprpc_rtbridge_add_link_library(SDL3-shared tjs)
 
 endif()

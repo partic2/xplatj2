@@ -37,8 +37,8 @@ namespace pxprpc_txikijs{
         return str;
     }
 
-    namespace __pwartBinding{
-        static JSValue pwartFunc2026(JSContext *ctx,JSValue this_val, int argc, JSValue *argv);
+    namespace __widccjitBinding{
+        static JSValue widccjitFunc2026(JSContext *ctx,JSValue this_val, int argc, JSValue *argv);
         static void init();
     }
 
@@ -105,8 +105,8 @@ namespace pxprpc_txikijs{
                     .func = { 1, JS_CFUNC_generic, { .generic = __embedtlsBinding::embedtlsSslFunc2026 } }        
                 }
             },{
-                "pwartFunc2026", JS_PROP_C_W_E, JS_DEF_CFUNC, 0, {                                            
-                    .func = { 1, JS_CFUNC_generic, { .generic = __pwartBinding::pwartFunc2026 } }        
+                "widccjitFunc2026", JS_PROP_C_W_E, JS_DEF_CFUNC, 0, {                                            
+                    .func = { 1, JS_CFUNC_generic, { .generic = __widccjitBinding::widccjitFunc2026 } }        
                 }
             },
         };
@@ -115,7 +115,7 @@ namespace pxprpc_txikijs{
             JS_NewClassID(JS_GetRuntime(ctx),&classId);
             JS_NewClass(JS_GetRuntime(ctx),classId,&classDef);
             auto inst = JS_NewObjectClass(ctx,classId);
-            JS_SetPropertyFunctionList(ctx,inst,props,8);
+            JS_SetPropertyFunctionList(ctx,inst,props,sizeof(props)/sizeof(props[0]));
             JSValue gobj=JS_GetGlobalObject(ctx);
             JS_DefinePropertyValueStr(ctx, gobj, "__pxprpc4tjs__", inst, JS_PROP_C_W_E);
             JS_FreeValue(ctx,gobj);
@@ -424,13 +424,13 @@ namespace pxprpc_txikijs{
                 ret->resolve();
             })
         );
-        __pwartBinding::init();
+        __widccjitBinding::init();
         __embedtlsBinding::init();
         __embedtlsRpc::init();
         inited=1;
     }
 }
 
-#include <pxprpc-txikijs/pwart.hpp>
+#include <pxprpc-txikijs/widccjit.hpp>
 #include <pxprpc-txikijs/mbedtls.hpp>
 #include <pxprpc-txikijs/mbedtls4rpc.hpp>

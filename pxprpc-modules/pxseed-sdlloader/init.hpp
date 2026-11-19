@@ -6,7 +6,8 @@
 #include <pxprpc_rtbridge_base/init.hpp>
 
 extern "C"{
-#include "uv.h"
+#include <uv.h>
+#include <widcc_jit.h>
 #ifdef __ANDROID__
 #define SDL_DISABLE_IMMINTRIN_H 1
 #endif
@@ -20,8 +21,6 @@ extern "C"{
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <pwart.h>
-#include <pwart_syslib.h>
 #include <string.h>
 }
 
@@ -54,26 +53,15 @@ FILE *logfile=NULL;
 
 typedef void *(*entry_func)(void *);
 
-char* cmd_argv[]={NULL,NULL};
+
 
 const char *wasmnames[]={"set_sdl_event_handler"};
 
-pwart_wasm_function sdlEventHandle=nullptr;
+void (*sdlEventHandle)(SDL_Event *)=nullptr;
 
-void __wasm_set_sdl_event_handler(void *fp){
-    void *sp=fp;
-    sdlEventHandle=pwart_rstack_get_ref(&sp);
-}
+WidccRT *wcrt=nullptr;
 
-const pwart_host_function_c wasmfuncs[]={&__wasm_set_sdl_event_handler};
-
-pwart_namespace ns=nullptr;
 void start(){
-    if(ns!=nullptr){
-        //Only start once.
-        return;
-    }
-    cmd_argv[0]=const_cast<char *>(get_data_path("/wasi-stub").c_str());
     SDL_Log("pxseed_sdlloader:SDLLoader startup");
     {
         //to init wasi module on windows, maybe changed in future.
@@ -90,70 +78,24 @@ void start(){
         }else{
             setvbuf(fh, NULL, _IONBF, 0);
         }
-        std::string modpath=get_data_path("/boot0.wasm");
-        void *stackbase = pwart_allocate_stack(4096);
-        char *err=NULL;
-        long filesize;
-        FILE *f;
-        int len;
+        std::string modpath=get_data_path("/boot0.c");
+        const char *err=NULL;
 
-        pwart_wasi_module_set_wasiargs(1,cmd_argv);
-        f = fopen(modpath.c_str(), "rb");
+        wcrt=widcc_rt_new();
+        widcc_rt_add_var(wcrt,"pxseed_sdlloader_crt",wcrt);
+        err=widcc_rt_load_code_file(wcrt,modpath.c_str(),nullptr);
+        if(err!=NULL){
+            SDL_Log("pxseed_sdlloader:warning:%s\n",err);
+            return;
+        }
         
-        if(f==NULL){
-            SDL_Log("pxseed_sdlloader:.wasm file open failed.");
-            return;
-        }else{
-            SDL_Log("pxseed_sdlloader:.wasm file opened.");
+        void (*pxseed_main)();
+        pxseed_main=reinterpret_cast<void (*)()>(widcc_rt_lookup(wcrt,"pxseedloader_sdlmain"));
+
+        if(pxseed_main==nullptr){
+            SDL_Log("pxseed_sdlloader:warning:%s\n","'pxseedloader_sdlmain' function not found. ");
         }
 
-        fseek(f,0,SEEK_END);
-        filesize=ftell(f);
-
-        if(filesize>1024*1024*1024){
-            SDL_Log("pxseed_sdlloader:.wasm file too large(>1GB)");
-            fclose(f);
-            return;
-        }
-        fseek(f,0,SEEK_SET);
-
-        char *data = (char *)malloc(filesize);
-
-        ns=pwart_namespace_new();
-        auto hostmod=pwart_namespace_new_host_module(&wasmnames[0],const_cast<pwart_host_function_c *>(&wasmfuncs[0]),1);
-        pwart_namespace_define_host_module(ns,"xplat-sdlloader",hostmod);
-        SDL_Log("pxseed_sdlloader:pwart namespace created.");
-        pwart_syslib_load(ns);
-        SDL_Log("pxseed_sdlloader:syslib initialized.");
-        len = fread(data, 1, filesize, f);
-        SDL_Log("pxseed_sdlloader:.wasm data readed.");
-        fclose(f);
-        pwart_module_state stat=pwart_namespace_define_wasm_module(ns,const_cast<char *>("__main__"),data,len,&err);
-        free(data);
-        if(err!=NULL){
-            SDL_Log("pxseed_sdlloader:error occur:%s\n",err);
-            return;
-        }
-        SDL_Log("pxseed_sdlloader:.wasm module compiled.");
-        struct pwart_wasm_memory *mem=pwart_get_export_memory(stat,const_cast<char *>("memory"));
-        pwart_wasi_module_set_wasimemory(mem);
-        SDL_Log("pxseed_sdlloader:wasi initialzed.");
-        err=pwart_wasi_module_init();
-        if(err!=NULL){
-            SDL_Log("pxseed_sdlloader:warning:%s uvwasi will not load",err);
-        }
-        pwart_wasm_function fn=pwart_get_start_function(stat);
-        if(fn!=NULL){
-            pwart_call_wasm_function(fn,stackbase);
-        }
-        fn=pwart_get_export_function(stat,const_cast<char *>("_start"));
-        if(fn!=NULL){
-            pwart_call_wasm_function(fn,stackbase);
-        }else{
-            SDL_Log("pxseed_sdlloader:%s\n","'_start' function not found. ");
-        }
-        SDL_Log("pxseed_sdlloader:%s\n",".wasm._start exited. ");
-        pwart_free_stack(stackbase);
     }
     
     SDL_Log("pxseed_sdlloader:.wasm exit\n");
@@ -164,21 +106,16 @@ void start(){
 }
 
 void sdlloop(){
-    int quit=0;
     SDL_Event event;
-    void *fp=pwart_allocate_stack(4096);
     while (SDL_WaitEvent(&event) != 0) {
         if(sdlEventHandle==nullptr){
             if (event.type == SDL_EVENT_QUIT) {
                 break;
             }
         }else{
-            void *sp=fp;
-            pwart_rstack_put_ref(&sp,&event);
-            pwart_call_wasm_function(sdlEventHandle,fp);
+            sdlEventHandle(&event);
         }
     }
-    pwart_free_stack(fp);
 }
 
 int inited=0;
@@ -215,9 +152,9 @@ void init(){
             ret->resolve();
         })
     ).add((new pxprpc::NamedFunctionPPImpl1())->init("pxseed_sdlloader.SetWasmSdlEventHandler",
-        [](Parameter* para,AsyncReturn* ret)->void{
-            auto wasmfn=para->nextLong();
-            sdlEventHandle=reinterpret_cast<pwart_wasm_function>(wasmfn);
+        [](Parameter* para,AsyncReturn* ret)->void {
+            auto handler=para->nextLong();
+            sdlEventHandle=reinterpret_cast<void (*)(SDL_Event *)>(handler);
             ret->resolve();
         })
     );

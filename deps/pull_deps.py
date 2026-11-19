@@ -62,10 +62,11 @@ def pull(dep_name, repo_url, branch="main"):
 
 def main():
     import runpy
-    pull('libuv','https://gitee.com/partic/libuv-patched','v1.x')
+    pull('libuv','https://gitee.com/partic/libuv-patched.git','v1.x')
 
-    targetdir=pull('pwart','https://gitee.com/partic/pwart','main')
-    runpy.run_path(os.path.join(targetdir,'deps','pull_deps.py'),run_name='__main__')
+    targetdir=pull('widcc-jit','https://gitee.com/partic/widcc-jit','main')
+
+    targetdir=pull('simpleffi','https://gitee.com/partic/simpleffi','main')
 
     targetdir=pull('PxpRpc','https://gitee.com/partic/PxpRpc','main')
     runpy.run_path(os.path.join(targetdir,'runtime_bridge','deps','pull_deps.py'),run_name='__main__')
