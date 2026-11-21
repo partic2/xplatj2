@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import partic2.pxseedloader.android.launcher.ApiServer;
 import pxprpc.extend.AsyncReturn;
 import pxprpc.extend.BuiltInFuncList;
@@ -38,42 +39,56 @@ public class DisplayManager2 implements Closeable {
         });
         for(Display d:displays){
             Point size=new Point();
-            DisplayMetrics dm=new DisplayMetrics();
+            DisplayMetrics dmetrics=new DisplayMetrics();
             d.getSize(size);
-            d.getRealMetrics(dm);
+            d.getRealMetrics(dmetrics);
             ser.addRow(new Object[]{
                     d.getDisplayId(),d.getName(),size.x,size.y,d.getState(),d.getRefreshRate(),
-                    dm.widthPixels,dm.heightPixels,dm.xdpi,dm.ydpi,
+                    dmetrics.widthPixels,dmetrics.heightPixels,dmetrics.xdpi,dmetrics.ydpi,
             });
-            d.getName();
         }
         return ser.build();
     }
     @MethodTypeDecl("->ii")
     public Object[] getCurrentDisplaySize(){
-        Display dm2 = dm.getDisplays()[getCurrentDisplayDevice()];
+        Display d=getDefaultDisplay();
         Point size=new Point();
-        dm2.getSize(size);
+        d.getSize(size);
         return new Object[]{size.x,size.y};
     }
+    //Display ids are not guaranteed to be array indexes of getDisplays().
+    private Display getDefaultDisplay(){
+        WindowManager wm=(WindowManager)ApiServer.defaultAndroidContext.getSystemService(Context.WINDOW_SERVICE);
+        return wm.getDefaultDisplay();
+    }
     public int getCurrentDisplayDevice(){
-        return ((Activity)ApiServer.defaultAndroidContext).getWindow().getWindowManager().getDefaultDisplay().getDisplayId();
+        return getDefaultDisplay().getDisplayId();
     }
 
     public SurfaceManager.ImageOrBitmap viewReadPixels(AsyncReturn<SurfaceManager.ImageOrBitmap> ret,View v){
         new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(new Runnable(){
             @Override
             public void run() {
-                SurfaceManager.ImageOrBitmap img = new SurfaceManager.ImageOrBitmap();
-                img.bitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
-                Canvas cvs = new Canvas(img.bitmap);
-                v.draw(cvs);
-                ApiServer.resolveAsync(ret,img);
+                try{
+                    if(v==null || v.getWidth()<=0 || v.getHeight()<=0){
+                        throw new IllegalStateException("View is not laid out yet");
+                    }
+                    SurfaceManager.ImageOrBitmap img = new SurfaceManager.ImageOrBitmap();
+                    img.bitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas cvs = new Canvas(img.bitmap);
+                    v.draw(cvs);
+                    ApiServer.resolveAsync(ret,img);
+                }catch(Exception ex){
+                    ApiServer.rejectAsync(ret,ex);
+                }
             }
         });
         return null;
     }
     public View getCurrentMainView(){
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            throw new IllegalStateException("defaultAndroidContext is not an Activity");
+        }
         Activity at = (Activity) ApiServer.defaultAndroidContext;
         return at.getWindow().getDecorView();
     }

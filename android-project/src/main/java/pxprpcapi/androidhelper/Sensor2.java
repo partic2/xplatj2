@@ -7,14 +7,15 @@ import android.os.Build;
 import partic2.pxseedloader.android.launcher.ApiServer;
 import pxprpc.base.Serializer2;
 import pxprpc.extend.EventDispatcher;
+import pxprpc.extend.TableSerializer;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE)
 public class Sensor2 extends EventDispatcher implements SensorEventListener, Closeable {
@@ -54,9 +55,13 @@ public class Sensor2 extends EventDispatcher implements SensorEventListener, Clo
     public Sensor2 self(){
         return this;
     }
-    public Map<Sensor,Integer> runningSensor=new HashMap<Sensor,Integer>();
+    //Accessed from both the sensor and RPC threads.
+    public Map<Sensor,Integer> runningSensor=new ConcurrentHashMap<Sensor,Integer>();
     protected int lastRunningSensorId=0;
-    public int sensorStart(Sensor sensor,int samplePeriod) {
+    public synchronized int sensorStart(Sensor sensor,int samplePeriod) {
+        if(sensor==null){
+            throw new IllegalArgumentException("sensor is null");
+        }
         //int SENSOR_DELAY_FASTEST = 0;
         //int SENSOR_DELAY_GAME = 1;
         //int SENSOR_DELAY_UI = 2;
@@ -66,11 +71,14 @@ public class Sensor2 extends EventDispatcher implements SensorEventListener, Clo
         runningSensor.put(sensor,lastRunningSensorId);
         return lastRunningSensorId;
     }
-    public void sensorStop(Sensor sensor){
+    public synchronized void sensorStop(Sensor sensor){
+        if(sensor==null){
+            return;
+        }
         smgr.unregisterListener(this,sensor);
         runningSensor.remove(sensor);
     }
-    public void sensorStopAll(){
+    public synchronized void sensorStopAll(){
         for(Sensor s:runningSensor.keySet()){
             smgr.unregisterListener(this,s);
         }
@@ -93,11 +101,24 @@ public class Sensor2 extends EventDispatcher implements SensorEventListener, Clo
     }
 
     public ByteBuffer packSensorEvent(SensorEvent event){
+        if(event==null || event.sensor==null){
+            throw new IllegalArgumentException("sensor event is null");
+        }
         Serializer2 ser = new Serializer2().prepareSerializing(64);
-        ser.putInt(runningSensor.get(event.sensor));
+        Integer id=runningSensor.get(event.sensor);
+        //The sensor may have been stopped before the queued event is serialized.
+        ser.putInt(id==null?-1:id);
         ser.putInt(event.values.length);
         for(int i=0;i<event.values.length;i++){
             ser.putFloat(event.values[i]);
+        }
+        return ser.build();
+    }
+    public ByteBuffer describeRunningSensors(){
+        TableSerializer ser = new TableSerializer().setColumnsInfo("isis",new String[]{"id","name","type","vendor"});
+        for(Map.Entry<Sensor,Integer> e:runningSensor.entrySet()){
+            Sensor s=e.getKey();
+            ser.addRow(new Object[]{e.getValue(),s.getName(),s.getType(),s.getVendor()});
         }
         return ser.build();
     }
@@ -109,5 +130,7 @@ public class Sensor2 extends EventDispatcher implements SensorEventListener, Clo
     public void close() throws IOException {
         if(i==this)i=null;
         this.sensorStopAll();
+        this.runningSensor.clear();
+        super.close();
     }
 }

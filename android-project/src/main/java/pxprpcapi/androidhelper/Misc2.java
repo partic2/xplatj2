@@ -27,6 +27,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class Misc2 implements Closeable{
@@ -63,6 +64,8 @@ public class Misc2 implements Closeable{
 			new AndroidCamera2();
 		}
 		initCameraFlashLight();
+		//Must be created before posting, otherwise notifications on Android 8+ are dropped.
+		initNotifyChannel();
 		i=this;
 	}
 
@@ -73,7 +76,7 @@ public class Misc2 implements Closeable{
 			camList = camSrv.getCameraIdList();
 			for (String camId : camList) {
 				CameraCharacteristics info = camSrv.getCameraCharacteristics(camId);
-				if (info.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)) {
+				if (Boolean.TRUE.equals(info.get(CameraCharacteristics.FLASH_INFO_AVAILABLE))) {
 					Light2 tl = new Light2();
 					tl.id = lights.size();
 					tl.desc = "flash for cameara " + camId;
@@ -89,7 +92,7 @@ public class Misc2 implements Closeable{
 	protected void initNotifyChannel(){
 		if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
 			this.notificationChannelId=ApiServer.defaultAndroidContext.getPackageName() + ":pxprpc";
-			NotificationChannel chan = new NotificationChannel(this.notificationChannelId+":"+ApiServer.defaultAndroidContext.getClass().getName(),
+			NotificationChannel chan = new NotificationChannel(this.notificationChannelId,
 					"pxprpc channel",
 					NotificationManager.IMPORTANCE_DEFAULT);
 			nm.createNotificationChannel(chan);
@@ -113,10 +116,12 @@ public class Misc2 implements Closeable{
 
 	public String getClipboardText() {
 		ClipData cb = cbm.getPrimaryClip();
-		if (cb.getItemCount() > 0) {
-			return cb.getItemAt(0).getText().toString();
+		if (cb != null && cb.getItemCount() > 0) {
+			CharSequence text=cb.getItemAt(0).getText();
+			//Never return null: a null String cannot be serialized by the RPC layer.
+			return text==null?"":text.toString();
 		}
-		return null;
+		return "";
 	}
 
 	public void setClipboardText(String text) {
@@ -139,6 +144,9 @@ public class Misc2 implements Closeable{
 		return lm.getLastKnownLocation(provider);
 	}
 	public ByteBuffer packLocation(Location location,boolean tableSer){
+		if(location==null){
+			throw new IllegalArgumentException("location is null");
+		}
 		if (tableSer) {
 			return new TableSerializer().setColumnsInfo("ldddddd", new String[]{
 							"time","latitude", "longitude", "speed", "bearing", "altitude", "accuracy"})
@@ -160,12 +168,23 @@ public class Misc2 implements Closeable{
 	}
 	@SuppressLint("MissingPermission")
 	public Location requestLocationUpdate(final AsyncReturn<Location> ret,final String provider) {
-		if (this.lastLocationListener != null)
-			this.cancelLocationUpdate();
-		this.lastLocationListener = new LocationListener() {
+		if(lm==null){
+			throw new IllegalStateException("LocationManager is not available");
+		}
+		if(!lm.isProviderEnabled(provider)){
+			throw new IllegalStateException("Location provider is disabled: "+provider);
+		}
+		cancelLocationUpdate();
+		final AtomicBoolean done=new AtomicBoolean(false);
+		final LocationListener listener = new LocationListener() {
 			@Override
 			public void onLocationChanged(Location location) {
-				ret.resolve(location);
+				if(done.compareAndSet(false,true)){
+					synchronized(Misc2.this){
+						if(lastLocationListener==this)lastLocationListener=null;
+					}
+					ret.resolve(location);
+				}
 			}
 
 			@Override
@@ -178,17 +197,27 @@ public class Misc2 implements Closeable{
 
 			@Override
 			public void onProviderDisabled(String provider) {
-				Misc2.this.cancelLocationUpdate();
-				ret.reject(new IOException("User disable the provider "+provider));
+				if(done.compareAndSet(false,true)){
+					synchronized(Misc2.this){
+						if(lastLocationListener==this)lastLocationListener=null;
+					}
+					ret.reject(new IOException("User disable the provider "+provider));
+				}
 			}
 		};
-		lm.requestSingleUpdate(provider, this.lastLocationListener,
+		synchronized(this){
+			this.lastLocationListener=listener;
+		}
+		lm.requestSingleUpdate(provider, listener,
 				ApiServer.getHandler().getLooper());
 		return null;
 	}
 
-	public void cancelLocationUpdate() {
-		lm.removeUpdates(this.lastLocationListener);
+	public synchronized void cancelLocationUpdate() {
+		if(this.lastLocationListener!=null){
+			lm.removeUpdates(this.lastLocationListener);
+			this.lastLocationListener=null;
+		}
 	}
 	public String getLocationProviders(){
 		return Utils.stringJoin("\n",lm.getAllProviders());
@@ -206,56 +235,85 @@ public class Misc2 implements Closeable{
 		public Camera wrap;
 		public Camera1Wrap(Camera wrap){
 			this.wrap=wrap;
-			AndroidCamera2.i.openedResource.add(this);
+			if(AndroidCamera2.i!=null){
+				AndroidCamera2.i.openedResource.add(this);
+			}
 		}
 		@Override
 		public void close() throws IOException {
-			wrap.release();
-			AndroidCamera2.i.openedResource.remove(this);
+			Camera cur=this.wrap;
+			this.wrap=null;
+			if(cur!=null){
+				cur.release();
+			}
+			if(AndroidCamera2.i!=null){
+				AndroidCamera2.i.openedResource.remove(this);
+			}
 		}
 	}
 	public void turnOnLight(int id) throws CameraAccessException {
+		if(id<0 || id>=this.lights.size()){
+			throw new IndexOutOfBoundsException("light id:"+id);
+		}
 		final Light2 l = this.lights.get(id);
 		final CameraManager camSrv = AndroidCamera2.i.camSrv;
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			camSrv.setTorchMode(l.camId, true);
 		} else {
+			if(l.cam1dev!=null){
+				return;
+			}
 			//we suppose cameraid is just string format of id of old camera api, It's seemed work.
 			Camera dev = Camera.open(Integer.parseInt(l.camId));
-			l.cam1dev=new Camera1Wrap(dev);
-			Camera.Parameters p = dev.getParameters();
-			p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-			dev.setParameters(p);
-			dev.startPreview();
+			try{
+				Camera.Parameters p = dev.getParameters();
+				p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+				dev.setParameters(p);
+				dev.startPreview();
+				l.cam1dev=new Camera1Wrap(dev);
+			}catch(RuntimeException ex){
+				dev.release();
+				throw ex;
+			}
 		}
 
 	}
 
 	public void turnOffLight(int id) throws CameraAccessException {
+		if(id<0 || id>=this.lights.size()){
+			throw new IndexOutOfBoundsException("light id:"+id);
+		}
 		final Light2 l = this.lights.get(id);
 		CameraManager camSrv = AndroidCamera2.i.camSrv;
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			camSrv.setTorchMode(l.camId, false);
 		} else if(l.cam1dev!=null){
-			l.cam1dev.wrap.stopPreview();
-			Camera.Parameters p = l.cam1dev.wrap.getParameters();
-			p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-			l.cam1dev.wrap.setParameters(p);
-			ApiServer.closeQuietly(l.cam1dev);
+			Camera1Wrap dev=l.cam1dev;
 			l.cam1dev=null;
+			try{
+				dev.wrap.stopPreview();
+				Camera.Parameters p = dev.wrap.getParameters();
+				p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+				dev.wrap.setParameters(p);
+			}catch(RuntimeException ignored){
+			}finally{
+				ApiServer.closeQuietly(dev);
+			}
 		}
 	}
 
 	public void postNotification(int notifyId,String title,String content){
 		Notification.Builder nb;
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+			initNotifyChannel();
 			nb = new Notification.Builder(ApiServer.defaultAndroidContext,this.notificationChannelId);
 		}else{
 			nb = new Notification.Builder(ApiServer.defaultAndroidContext);
 		}
-		Notification noti=nb.setDefaults(Notification.DEFAULT_ALL).setContentTitle(title).setContentTitle(content).
-				setTicker(title).setWhen(System.currentTimeMillis()).setSmallIcon(android.R.drawable.alert_light_frame).build();
+		Notification noti=nb.setDefaults(Notification.DEFAULT_ALL).setContentTitle(title).setContentText(content).
+				setTicker(title).setWhen(System.currentTimeMillis()).setAutoCancel(true).
+				setSmallIcon(android.R.drawable.alert_light_frame).build();
 		this.nm.notify(notifyId,noti);
 	}
 }

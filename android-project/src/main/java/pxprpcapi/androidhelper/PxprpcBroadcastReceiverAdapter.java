@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import pxprpc.extend.EventDispatcher;
 import xplatj.javaplat.partic2.util.PlatCoreConfig;
@@ -11,11 +12,22 @@ import xplatj.javaplat.partic2.util.PlatCoreConfig;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class PxprpcBroadcastReceiverAdapter extends BroadcastReceiver implements Closeable {
-    protected HashSet<EventDispatcher> dispatcher=new HashSet<EventDispatcher>();
+    //CopyOnWriteArraySet: dispatchers can be added/closed from RPC threads while
+    //onReceive iterates them from the main thread.
+    protected Set<EventDispatcher> dispatcher=new CopyOnWriteArraySet<EventDispatcher>();
+
+    //targetSdk 34 requires an explicit export flag for non-system broadcasts.
+    public static Intent registerReceiverCompat(Context c, BroadcastReceiver receiver, IntentFilter filter){
+        if(Build.VERSION.SDK_INT>=34){
+            return c.registerReceiver(receiver,filter,Context.RECEIVER_EXPORTED);
+        }else{
+            return c.registerReceiver(receiver,filter);
+        }
+    }
 
     public final static int DUMP_TYPE_ACTION=1;
     public final static int DUMP_TYPE_EXTRA=2;
@@ -47,7 +59,7 @@ public class PxprpcBroadcastReceiverAdapter extends BroadcastReceiver implements
     public EventDispatcher autoUnregisterEventDispatcher(Context c, String filter){
         if(this.autoUnregisterContexts==null){
             this.autoUnregisterContexts=c;
-            c.registerReceiver(this,new IntentFilter(filter));
+            registerReceiverCompat(c,this,new IntentFilter(filter));
             EventDispatcher ep=new EventDispatcher(){
                 @Override
                 public void close() throws IOException {
@@ -65,14 +77,16 @@ public class PxprpcBroadcastReceiverAdapter extends BroadcastReceiver implements
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        if(this.dispatcher.isEmpty()){
+            return;
+        }
         if(this.dumpType==DUMP_TYPE_EXTRA){
-            Bundle[] bundle = new Bundle[1];
-            bundle[0]=intent.getExtras();
-            if(bundle[0]==null){
-                bundle[0]=new Bundle();
+            Bundle bundle=intent.getExtras();
+            if(bundle==null){
+                bundle=new Bundle();
             }
-            bundle[0].putString("_intentAction",intent.getAction());
-            final ByteBuffer result=SysBase.i.dumpBundle(bundle[0]);
+            bundle.putString("_intentAction",intent.getAction());
+            final ByteBuffer result=SysBase.dumpBundle(bundle);
             PlatCoreConfig.get().executor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -97,8 +111,18 @@ public class PxprpcBroadcastReceiverAdapter extends BroadcastReceiver implements
 
     @Override
     public void close() throws IOException {
+        //Reject pending calls before the receiver stops producing events.
+        for(EventDispatcher e:this.dispatcher){
+            try{
+                e.close();
+            }catch(Exception ex){}
+        }
+        this.dispatcher.clear();
         if(this.autoUnregisterContexts!=null){
-            this.autoUnregisterContexts.unregisterReceiver(this);
+            try{
+                this.autoUnregisterContexts.unregisterReceiver(this);
+            }catch(Exception ex){}
+            this.autoUnregisterContexts=null;
         }
     }
 }

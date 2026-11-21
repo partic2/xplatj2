@@ -54,7 +54,7 @@ public class SysBase implements Closeable{
 	public Context getServiceContext(){return PxprpcService.current;}
 
 	public void registerBroadcastReceiver(BroadcastReceiver receiver, String filter) {
-		getDefaultContext().registerReceiver(receiver, new IntentFilter(filter));
+		PxprpcBroadcastReceiverAdapter.registerReceiverCompat(getDefaultContext(), receiver, new IntentFilter(filter));
 	}
 
 	public void unregisterBroadcastReceiver(BroadcastReceiver receiver) {
@@ -105,10 +105,16 @@ public class SysBase implements Closeable{
 		return ApiServer.defaultAndroidContext.getPackageName();
 	}
 
-	public ByteBuffer dumpBundle(Bundle b){
+	public static ByteBuffer dumpBundle(Bundle b){
 		HashMap<String,Object> bundleData=new HashMap<String,Object>();
 		for(String key:b.keySet()){
 			Object val=b.get(key);
+			//Bundle values can legitimately be null; keep a placeholder so that
+			//TableSerializer's type guessing (which reads getClass()) never NPEs.
+			if(val==null){
+				bundleData.put(key,"null");
+				continue;
+			}
 			if(TypeDeclParser.jtypeToValueInfo(val.getClass())!='o'){
 				bundleData.put(key,val);
 			}else{
@@ -127,7 +133,7 @@ public class SysBase implements Closeable{
                 try {
                     AssetsCopy.CopyFiles(sourceDir,destinationDir);
 					ret.resolve("");
-                } catch (IOException e) {
+                } catch (Exception e) {
                     ret.reject(e);
                 }
 

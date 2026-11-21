@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.ParcelUuid;
 import partic2.pxseedloader.android.launcher.ApiServer;
 import partic2.pxseedloader.android.launcher.PxprpcService;
@@ -23,15 +24,16 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements BluetoothAdapter.LeScanCallback,Closeable {
     public static final String PxprpcNamespace="AndroidHelper.Bluetooth";
     public static Bluetooth2 i;
     public BluetoothAdapter adapter;
+    protected Context registeredContext;
     public Bluetooth2(){
         initDefault();
         i=this;
@@ -40,7 +42,8 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     protected void initDefault(){
         if(adapter==null){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                adapter=((BluetoothManager) ApiServer.defaultAndroidContext.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
+                BluetoothManager bm=(BluetoothManager) ApiServer.defaultAndroidContext.getSystemService(Context.BLUETOOTH_SERVICE);
+                adapter=bm==null?null:bm.getAdapter();
                 IntentFilter if2 = new IntentFilter();
 
                 if2.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
@@ -50,7 +53,14 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
                 if2.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
                 if2.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
 
-                PxprpcService.current.registerReceiver(this, if2);
+                //Prefer the long-lived service context; fall back to the default context.
+                Context ctx=PxprpcService.current!=null?PxprpcService.current:ApiServer.defaultAndroidContext;
+                try{
+                    registerReceiverCompat(ctx,this,if2);
+                    registeredContext=ctx;
+                }catch(Exception ex){
+                    ex.printStackTrace();
+                }
             }else{
                 throw new UnsupportedOperationException("Not support yet");
             }
@@ -59,7 +69,11 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     public void close(){
         try{
             if(i==this)i=null;
-            ApiServer.defaultAndroidContext.unregisterReceiver(this);
+            if(registeredContext!=null){
+                registeredContext.unregisterReceiver(this);
+                registeredContext=null;
+            }
+            super.close();
         }catch(Exception e){}
     }
 
@@ -88,24 +102,33 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     }
 
     public void requestBluetoothDicoverable(int durationSec){
-        ((Intent2)ApiServer.getModule("AndroidHelper-Intent")).requestBluetoothDicoverable(durationSec);
+        requireIntentModule().requestBluetoothDicoverable(durationSec);
     }
 
     public void requestEnableBluetooth(){
-        ((Intent2)ApiServer.getModule("AndroidHelper-Intent")).requestEnableBluetooth();
+        requireIntentModule().requestEnableBluetooth();
+    }
+    protected Intent2 requireIntentModule(){
+        //Previously looked up a non-existent namespace ("AndroidHelper-Intent").
+        if(Intent2.i==null){
+            throw new IllegalStateException("AndroidHelper.Intent module is not initialized");
+        }
+        return Intent2.i;
     }
 
     public boolean createBond(String address){
-        if(discovered.containsKey(address)){
-            return discovered.get(address).device.createBond();
+        DiscoveryResult r=discovered.get(address);
+        if(r!=null && r.device!=null){
+            return r.device.createBond();
         }else{
             return false;
         }
     }
 
     public boolean removeBond(String address) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        if(discovered.containsKey(address)){
-            BluetoothDevice dev = this.discovered.get(address).device;
+        DiscoveryResult r=discovered.get(address);
+        if(r!=null && r.device!=null){
+            BluetoothDevice dev = r.device;
             Method removeBondMethod = BluetoothDevice.class.getMethod("removeBond");
             return (Boolean) removeBondMethod.invoke(dev);
 
@@ -121,7 +144,11 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
 
     @SuppressLint("MissingPermission")
     public boolean setPairPin(String address, ByteBuffer pin){
-        return discovered.get(address).device.setPin(Utils.toBytes(pin));
+        DiscoveryResult r=discovered.get(address);
+        if(r==null || r.device==null){
+            return false;
+        }
+        return r.device.setPin(Utils.toBytes(pin));
     }
 
 
@@ -134,43 +161,46 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Bundle extras=intent.getExtras();
         if(BluetoothDevice.ACTION_FOUND.equals(intent.getAction())){
-            DiscoveryResult t = new DiscoveryResult();
-            BluetoothDevice dev = (BluetoothDevice) intent.getExtras().get(BluetoothDevice.EXTRA_DEVICE);
+            DiscoveryResult t = null;
+            BluetoothDevice dev = extras==null?null:(BluetoothDevice) extras.get(BluetoothDevice.EXTRA_DEVICE);
             String addr="";
             if(dev!=null){
                 addr = dev.getAddress();
             }
-            if(discovered.containsKey(addr)){
-                t=discovered.get(addr);
-            }else{
+            t=discovered.get(addr);
+            if(t==null){
+                t=new DiscoveryResult();
                 discovered.put(addr,t);
             }
             t.device= dev;
-            t.rssi= intent.getShortExtra(BluetoothDevice.EXTRA_RSSI,(short)0);
+            t.rssi= extras==null?0:extras.getShort(BluetoothDevice.EXTRA_RSSI,(short)0);
         }else if(BluetoothDevice.ACTION_PAIRING_REQUEST.equals(intent.getAction())){
-            DiscoveryResult t = new DiscoveryResult();
-            BluetoothDevice dev = (BluetoothDevice) intent.getExtras().get(BluetoothDevice.EXTRA_DEVICE);
+            BluetoothDevice dev = extras==null?null:(BluetoothDevice) extras.get(BluetoothDevice.EXTRA_DEVICE);
             String addr = "";
             if(dev!=null){
                 addr=dev.getAddress();
             }
-            if(discovered.containsKey(addr)){
-                t=discovered.get(addr);
-            }else{
+            DiscoveryResult t=discovered.get(addr);
+            if(t==null){
+                t=new DiscoveryResult();
                 discovered.put(addr,t);
             }
             t.device= dev;
             t.pairingRequest=true;
-            if(allowNoConfirmPairing){
+            if(allowNoConfirmPairing && dev!=null){
                 try{
-                    t.device.setPairingConfirmation(true);
+                    dev.setPairingConfirmation(true);
                 }catch(Exception ex){}
             }
         }
+        //Still deliver the raw action/extra events to registered dispatchers.
+        super.onReceive(context,intent);
     }
 
-    public HashMap<String,DiscoveryResult> discovered =new HashMap<String,DiscoveryResult>();
+    //Written from the receiver/handler threads and read from RPC threads.
+    public Map<String,DiscoveryResult> discovered =new ConcurrentHashMap<String,DiscoveryResult>();
     @SuppressLint("MissingPermission")
     public void startDiscovery(){
         bluetoothAdapter().startDiscovery();
@@ -190,9 +220,13 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
                 "address", "class", "name", "rssi", "type", "bondState","scanRecord"});
         for(Map.Entry<String,DiscoveryResult> e:this.discovered.entrySet()){
             DiscoveryResult v = e.getValue();
+            BluetoothDevice dev=v.device;
+            if(dev==null){
+                continue;
+            }
             ser.addRow(new Object[]{
-                    e.getKey(),v.device.getBluetoothClass().getDeviceClass(),v.device.getName(),
-                    v.rssi,v.device.getType(),v.device.getBondState(),v.scanRecord!=null?ByteBuffer.wrap(v.scanRecord):ByteBuffer.allocate(0)});
+                    e.getKey(),dev.getBluetoothClass()==null?0:dev.getBluetoothClass().getDeviceClass(),dev.getName(),
+                    v.rssi,dev.getType(),dev.getBondState(),v.scanRecord!=null?ByteBuffer.wrap(v.scanRecord):ByteBuffer.allocate(0)});
         }
         return ser.build();
     }
@@ -200,21 +234,27 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     public ByteBuffer describeDiscoveredDevice(String address){
         TableSerializer ser = new TableSerializer().setColumnsInfo("sisiii", new String[]{"address", "class", "name", "rssi", "type", "bondState"});
         DiscoveryResult dr = this.discovered.get(address);
-        if(dr!=null){
+        if(dr!=null && dr.device!=null){
             ser.addRow(new Object[]{
-                    address,dr.device.getBluetoothClass().getDeviceClass(),dr.device.getName(),
+                    address,dr.device.getBluetoothClass()==null?0:dr.device.getBluetoothClass().getDeviceClass(),dr.device.getName(),
                     dr.rssi,dr.device.getType(),dr.device.getBondState()});
         }
         return ser.build();
     }
     @Override
     public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] scanRecord) {
-        DiscoveryResult t = new DiscoveryResult();
+        if(bluetoothDevice==null){
+            return;
+        }
+        String addr=bluetoothDevice.getAddress();
+        DiscoveryResult t = discovered.get(addr);
+        if(t==null){
+            t=new DiscoveryResult();
+            discovered.put(addr,t);
+        }
         t.device = bluetoothDevice;
-        t.pairingRequest=false;
         t.rssi=rssi;
         t.scanRecord=scanRecord;
-        discovered.put(bluetoothDevice.getAddress(),t);
     }
 
     public BluetoothServerSocket listenRfcomm(String name, String uuid) throws IOException {
@@ -224,32 +264,49 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
         return adapter.listenUsingRfcommWithServiceRecord(name, UUID.fromString(uuid));
     }
     public BluetoothSocket connectRfcomm(String address,String uuid) throws IOException {
-        BluetoothSocket s = this.discovered.get(address).device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(uuid));
+        DiscoveryResult r=this.discovered.get(address);
+        if(r==null || r.device==null){
+            throw new IOException("Unknown device: "+address+", run a discovery first.");
+        }
+        BluetoothSocket s = r.device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(uuid));
         s.connect();
         return s;
     }
     public BluetoothSocket connectRfcommSecure(String address,String uuid) throws IOException {
-        BluetoothSocket s = this.discovered.get(address).device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(uuid));
+        DiscoveryResult r=this.discovered.get(address);
+        if(r==null || r.device==null){
+            throw new IOException("Unknown device: "+address+", run a discovery first.");
+        }
+        BluetoothSocket s = r.device.createRfcommSocketToServiceRecord(UUID.fromString(uuid));
         s.connect();
         return s;
     }
     public ByteBuffer querySupportUuids(String address){
-        BluetoothDevice dev = discovered.get(address).device;
-        ParcelUuid[] uuids = dev.getUuids();
+        DiscoveryResult r=this.discovered.get(address);
+        ParcelUuid[] uuids = r==null || r.device==null?null:r.device.getUuids();
         Serializer2 ser=new Serializer2().prepareSerializing(32);
-        ser.putVarint(uuids.length);
-        for(ParcelUuid e:uuids){
-            ser.putString(e.getUuid().toString());
+        ser.putVarint(uuids==null?0:uuids.length);
+        if(uuids!=null){
+            for(ParcelUuid e:uuids){
+                ser.putString(e.getUuid().toString());
+            }
         }
         return ser.build();
     }
     @TargetApi(Build.VERSION_CODES.Q)
     public BluetoothServerSocket listenL2cap() throws IOException {
+        ensureL2capSupported();
         return adapter.listenUsingInsecureL2capChannel();
     }
     @TargetApi(Build.VERSION_CODES.Q)
     public BluetoothServerSocket listenL2capSecure() throws IOException {
+        ensureL2capSupported();
         return adapter.listenUsingL2capChannel();
+    }
+    protected void ensureL2capSupported(){
+        if(Build.VERSION.SDK_INT<Build.VERSION_CODES.Q){
+            throw new UnsupportedOperationException("L2CAP CoC requires Android 10 (API 29)");
+        }
     }
     public BluetoothSocket socketAccept(AsyncReturn<BluetoothSocket> ret,BluetoothServerSocket s, int timeout) {
         PlatCoreConfig.get().executor.execute(new Runnable() {
@@ -267,6 +324,10 @@ public class Bluetooth2 extends PxprpcBroadcastReceiverAdapter implements Blueto
     public ByteBuffer socketRead(BluetoothSocket s) throws IOException {
         byte[] b = new byte[4096];
         int read=s.getInputStream().read(b);
+        if(read<0){
+            //EOF: an empty buffer lets the caller detect the closed stream.
+            return ByteBuffer.allocate(0);
+        }
         return ByteBuffer.wrap(b,0,read);
     }
     public void socketWrite(BluetoothSocket s,ByteBuffer b) throws IOException {

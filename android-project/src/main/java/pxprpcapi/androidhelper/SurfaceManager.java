@@ -71,12 +71,22 @@ public class SurfaceManager implements Closeable{
     public ImageReader newImageReader(int width,int height,int format){
         return ImageReader.newInstance(width,height,format,2);
     }
+    //ImageReader only implements AutoCloseable, so freeing its pxprpc reference
+    //does not close it. Call this explicitly to release camera/display buffers.
+    public void closeImageReader(ImageReader reader){
+        if(reader!=null){
+            reader.close();
+        }
+    }
     @MethodTypeDecl("o->iiis")
     public Object[] getImageInfo2(ImageOrBitmap img){
         int format=0;
         int width=0;
         int height=0;
         String androidClass="";
+        if(img==null){
+            return new Object[]{format,width,height,androidClass};
+        }
         if(img.image!=null){
             format=img.image.getFormat();
             width=img.image.getWidth();
@@ -123,6 +133,10 @@ public class SurfaceManager implements Closeable{
     }
 
     public Boolean waitForImageAvailable(AsyncReturn<Boolean> aret,ImageReader reader){
+        if(reader==null){
+            aret.reject(new IllegalStateException("ImageReader is null"));
+            return false;
+        }
         reader.setOnImageAvailableListener((reader2)->{
             reader2.setOnImageAvailableListener(null,null);
             aret.resolve(true);
@@ -150,31 +164,37 @@ public class SurfaceManager implements Closeable{
         TableSerializer ser = new TableSerializer().setColumnsInfo("iiilii",
                 new String[]{"pixelStride","rowStride","planeDataSize",
                         "buffer.base","buffer.offset","buffer.capacity"});
+        if(img==null){
+            throw new IllegalArgumentException("image is null");
+        }
         if(img.image!=null){
             for(Image.Plane e:img.image.getPlanes()){
                 long base=0;
-                if(e.getBuffer().isDirect()){
-                    base=NativeHelper.directBufferProperty(e.getBuffer(),0);
+                ByteBuffer planeBuf=e.getBuffer();
+                if(planeBuf.isDirect()){
+                    base=NativeHelper.directBufferProperty(planeBuf,0);
                 }
+                //'l' columns require Long objects; ByteBuffer.remaining()/getByteCount() are int.
                 ser.addRow(new Object[]{
-                        e.getPixelStride(),e.getRowStride(),e.getBuffer().remaining()
-                        ,base,e.getBuffer().position(),e.getBuffer().capacity()});
+                        e.getPixelStride(),e.getRowStride(),(long)planeBuf.remaining()
+                        ,base,planeBuf.position(),planeBuf.capacity()});
             }
         }else if(img.bitmap!=null){
             Bitmap.Config bcfg = img.bitmap.getConfig();
-            int pixelStride = 0;
-            if(bcfg==Bitmap.Config.ARGB_8888){
-                pixelStride=32;
-            }else if(bcfg==Bitmap.Config.RGB_565 || bcfg==Bitmap.Config.ARGB_4444){
-                pixelStride=16;
+            int bytesPerPixel = 4;
+            if(bcfg==Bitmap.Config.RGB_565 || bcfg==Bitmap.Config.ARGB_4444){
+                bytesPerPixel=2;
             }
-            ser.addRow(new Object[]{pixelStride,img.bitmap.getWidth()*pixelStride,img.bitmap.getByteCount(),
-                0,0,0});
+            ser.addRow(new Object[]{bytesPerPixel,img.bitmap.getRowBytes(),(long)img.bitmap.getByteCount(),
+                    0L,0,0});
         }
         return ser.build();
     }
 
     public ByteBuffer getPlaneBufferData(ImageOrBitmap img,int planeIndex){
+        if(img==null){
+            throw new IllegalArgumentException("image is null");
+        }
         if(img.image!=null){
             ByteBuffer buf1 = img.image.getPlanes()[planeIndex].getBuffer();
             return buf1;
@@ -190,7 +210,14 @@ public class SurfaceManager implements Closeable{
     //return buffer.base,buffer.offset,buffer.capacity
     @MethodTypeDecl("oi->lii")
     public Object[] getPlaneBufferDataProps(ImageOrBitmap img,int planeIndex){
-        ByteBuffer buf1 = img.image.getPlanes()[planeIndex].getBuffer();
+        if(img==null || img.image==null){
+            return new Object[]{0L,0,0};
+        }
+        Image.Plane[] planes=img.image.getPlanes();
+        if(planeIndex<0 || planeIndex>=planes.length){
+            return new Object[]{0L,0,0};
+        }
+        ByteBuffer buf1 = planes[planeIndex].getBuffer();
         if(buf1.isDirect()){
             return new Object[]{NativeHelper.directBufferProperty(buf1,0),buf1.position(),buf1.capacity()};
         }else{
@@ -198,11 +225,22 @@ public class SurfaceManager implements Closeable{
         }
     }
     public ByteBuffer getPlaneBufferDataRange(ImageOrBitmap img,int planeIndex,int offset,int len){
-        ByteBuffer buf1 = img.image.getPlanes()[planeIndex].getBuffer();
-        buf1=buf1.duplicate();
-        int pos=buf1.position();
-        Utils.setPos(buf1,pos+offset);
-        Utils.setLimit(buf1,pos+offset+len);
+        if(img==null || img.image==null){
+            throw new IllegalStateException("Not an Image");
+        }
+        Image.Plane[] planes=img.image.getPlanes();
+        if(planeIndex<0 || planeIndex>=planes.length){
+            throw new IndexOutOfBoundsException("planeIndex:"+planeIndex);
+        }
+        ByteBuffer buf1=planes[planeIndex].getBuffer().duplicate();
+        int base=buf1.position();
+        int avail=buf1.remaining();
+        if(offset<0)offset=0;
+        if(offset>avail)offset=avail;
+        if(len<0)len=0;
+        if(offset+len>avail)len=avail-offset;
+        buf1.position(base+offset);
+        buf1.limit(base+offset+len);
         return buf1;
     }
     public ByteBuffer packPlaneData(List<Image.Plane> planes){
@@ -220,62 +258,85 @@ public class SurfaceManager implements Closeable{
         PlatCoreConfig.get().executor.execute(new Runnable() {
             @Override
             public void run() {
-                if(img.bitmap==null && img.image!=null){
-                    if(img.image.getFormat()==PixelFormat.RGBA_8888){
-                        Image.Plane[] planes=img.image.getPlanes();
-                        int pixelStride = planes[0].getPixelStride();
-                        int rowStride = planes[0].getRowStride();
-                        int rowPadding = rowStride - pixelStride * img.image.getWidth();
-
-                        img.bitmap = Bitmap.createBitmap(img.image.getWidth() + rowPadding / pixelStride, img.image.getHeight(),
-                                Bitmap.Config.ARGB_8888);
-                        img.bitmap.copyPixelsFromBuffer(planes[0].getBuffer());
-                    }else if(img.image.getFormat()==ImageFormat.YUV_420_888){
-                        Image.Plane[] planes=img.image.getPlanes();
-                        ByteBuffer yp = planes[0].getBuffer();
-                        int ystride=planes[0].getRowStride();
-                        ByteBuffer up = planes[1].getBuffer();
-                        int ustride=planes[1].getRowStride();
-                        int upstride=planes[1].getPixelStride();
-                        ByteBuffer vp = planes[2].getBuffer();
-                        int vstride=planes[2].getRowStride();
-                        int vpstride=planes[2].getPixelStride();
-                        int w=img.image.getWidth();
-                        int h=img.image.getHeight();
-                        //Caution: pixels is in SRGB, different from PixelFormat.ARGB8888
-                        int[] pixels=new int[w*h];
-                        try{
-                            for(int y1=0;y1<h;y1++){
-                                for(int x1=0;x1<w;x1++){
-                                    int y2=(yp.get(yp.position()+x1+y1*ystride)&0xff);
-                                    int u2=(up.get(up.position()+(x1>>1)*upstride+(y1/2)*ustride)&0xff);
-                                    int v2=(vp.get(vp.position()+(x1>>1)*vpstride+(y1/2)*vstride)&0xff);
-                                    int r=(298*(y2-16)+409*(v2-128))>>8;
-                                    int g=(298*(y2-16)-100*(u2-128)-208*(v2-128))>>8;
-                                    int b=(298*(y2-16)+517*(u2-128))>>8;
-                                    if(r>255)r=255;
-                                    if(g>255)g=255;
-                                    if(b>255)b=255;
-                                    if(r<0)r=0;
-                                    if(g<0)g=0;
-                                    if(b<0)b=0;
-                                    pixels[y1*w+x1]=(0xff << 24) | (r<< 16) | (g<< 8) | b;
-                                }
-                            }
-                        }catch(IndexOutOfBoundsException e){
-                            /* UV Buffer size is smaller than image size on XiaoMi 8 (WHAT?).
-                                In this case, we can only discard the last pixel. */
-                        }
-                        img.bitmap = Bitmap.createBitmap(pixels,w , h, Bitmap.Config.ARGB_8888);
-                    }else{
-                        throw new Error("only RGBA_8888 or YUV_420_888 Image are supported");
+                try{
+                    if(img==null || (img.bitmap==null && img.image==null)){
+                        throw new IllegalStateException("No image data");
                     }
+                    if(img.bitmap==null){
+                        img.bitmap=imageToBitmap(img.image);
+                    }
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    if(!img.bitmap.compress(Bitmap.CompressFormat.PNG,quality,out)){
+                        throw new IOException("Bitmap.compress failed");
+                    }
+                    pngData.resolve(ByteBuffer.wrap(out.toByteArray()));
+                }catch(Exception ex){
+                    pngData.reject(ex);
                 }
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                img.bitmap.compress(Bitmap.CompressFormat.PNG,quality,out);
-                pngData.resolve(ByteBuffer.wrap(out.toByteArray()));
             }
         });
         return null;
+    }
+    protected Bitmap imageToBitmap(Image image){
+        int format=image.getFormat();
+        int w=image.getWidth();
+        int h=image.getHeight();
+        if(format==PixelFormat.RGBA_8888 || format==ImageFormat.FLEX_RGBA_8888){
+            Image.Plane[] planes=image.getPlanes();
+            int pixelStride = planes[0].getPixelStride();
+            int rowStride = planes[0].getRowStride();
+            int rowPadding = rowStride - pixelStride * w;
+            //Duplicate so the camera plane's position is not consumed.
+            ByteBuffer src=planes[0].getBuffer().duplicate();
+            src.rewind();
+            Bitmap padded = Bitmap.createBitmap(w + rowPadding / pixelStride, h, Bitmap.Config.ARGB_8888);
+            padded.copyPixelsFromBuffer(src);
+            if(rowPadding==0){
+                return padded;
+            }
+            Bitmap cropped=Bitmap.createBitmap(padded,0,0,w,h);
+            padded.recycle();
+            return cropped;
+        }else if(format==ImageFormat.YUV_420_888){
+            Image.Plane[] planes=image.getPlanes();
+            ByteBuffer yp = planes[0].getBuffer().duplicate();
+            int ybase=yp.position();
+            int ystride=planes[0].getRowStride();
+            ByteBuffer up = planes[1].getBuffer().duplicate();
+            int ubase=up.position();
+            int ustride=planes[1].getRowStride();
+            int upstride=planes[1].getPixelStride();
+            ByteBuffer vp = planes[2].getBuffer().duplicate();
+            int vbase=vp.position();
+            int vstride=planes[2].getRowStride();
+            int vpstride=planes[2].getPixelStride();
+            //Caution: pixels is in SRGB, different from PixelFormat.ARGB8888
+            int[] pixels=new int[w*h];
+            try{
+                for(int y1=0;y1<h;y1++){
+                    for(int x1=0;x1<w;x1++){
+                        int y2=(yp.get(ybase+x1+y1*ystride)&0xff);
+                        int u2=(up.get(ubase+(x1>>1)*upstride+(y1/2)*ustride)&0xff);
+                        int v2=(vp.get(vbase+(x1>>1)*vpstride+(y1/2)*vstride)&0xff);
+                        int r=(298*(y2-16)+409*(v2-128))>>8;
+                        int g=(298*(y2-16)-100*(u2-128)-208*(v2-128))>>8;
+                        int b=(298*(y2-16)+517*(u2-128))>>8;
+                        if(r>255)r=255;
+                        if(g>255)g=255;
+                        if(b>255)b=255;
+                        if(r<0)r=0;
+                        if(g<0)g=0;
+                        if(b<0)b=0;
+                        pixels[y1*w+x1]=(0xff << 24) | (r<< 16) | (g<< 8) | b;
+                    }
+                }
+            }catch(IndexOutOfBoundsException e){
+                /* UV Buffer size is smaller than image size on XiaoMi 8 (WHAT?).
+                    In this case, we can only discard the last pixel. */
+            }
+            return Bitmap.createBitmap(pixels,w , h, Bitmap.Config.ARGB_8888);
+        }else{
+            throw new IllegalArgumentException("only RGBA_8888 or YUV_420_888 Image are supported");
+        }
     }
 }

@@ -35,6 +35,9 @@ public class AndroidUIBase implements Closeable {
     }
     public void dispatchKeyEvent(int action,int code){
         new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(()-> {
+            if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+                return;
+            }
             Activity activity = (Activity) ApiServer.defaultAndroidContext;
             KeyEvent keyEvent = new KeyEvent(action, code);
             activity.dispatchKeyEvent(keyEvent);
@@ -44,19 +47,17 @@ public class AndroidUIBase implements Closeable {
     @Override
     public void close() throws IOException {
         if(i==this)i=null;
+        try{
+            this.extraEvent.close();
+        }catch(Exception ex){}
+        try{
+            this.dialogEvent.close();
+        }catch(Exception ex){}
     }
 
     public static class TouchPointers{
         MotionEvent.PointerProperties[] props;
         MotionEvent.PointerCoords[] coords;
-    }
-    private <T> int indexOf(T[] arr,T val){
-        for(int i=0;i<arr.length;i++){
-            if(val.equals(arr[i])){
-                return i;
-            }
-        }
-        return -1;
     }
     public TouchPointers createTouchPointer(ByteBuffer init){
         TouchPointers r = new TouchPointers();
@@ -68,39 +69,58 @@ public class AndroidUIBase implements Closeable {
         for(int i=0;i<rowCount;i++){
             Object[] row = tab.getRow(i);
             r.props[i]=new MotionEvent.PointerProperties();
-            r.props[i].id=(int)row[0];
+            r.props[i].id=((Number)row[0]).intValue();
+            r.props[i].toolType=MotionEvent.TOOL_TYPE_FINGER;
             r.coords[i]=new MotionEvent.PointerCoords();
-            r.coords[i].x=(int)row[1];
-            r.coords[i].y=(int)row[2];
-            if(row.length>3){
-                r.coords[i].pressure=(int)row[3];
-            }
+            r.coords[i].x=((Number)row[1]).floatValue();
+            r.coords[i].y=((Number)row[2]).floatValue();
+            r.coords[i].pressure=row.length>3?((Number)row[3]).floatValue():1.0f;
+            r.coords[i].size=1.0f;
         }
         return r;
     }
     public void dispatchTouchEvent(int action,TouchPointers touchPointers){
+        if(touchPointers==null || touchPointers.coords==null || touchPointers.coords.length==0){
+            return;
+        }
         new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(()->{
+            if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+                return;
+            }
             Activity activity = (Activity) ApiServer.defaultAndroidContext;
-            MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis(),
+            MotionEvent ev = MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis(),
                     action,touchPointers.coords.length,touchPointers.props,touchPointers.coords,
                     0,0,1.0f,1.0f,0,0,0,0);
+            try{
+                activity.dispatchTouchEvent(ev);
+            }finally{
+                ev.recycle();
+            }
         });
     }
 
-    public void webViewSetStartScript(String script){
-        MainActivity activity=(MainActivity)ApiServer.defaultAndroidContext;
-        activity.setWebviewStartScript(script);
+    public void webViewSetStartScript(final String script){
+        new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(()->{
+            if(ApiServer.defaultAndroidContext instanceof MainActivity){
+                ((MainActivity)ApiServer.defaultAndroidContext).setWebviewStartScript(script);
+            }
+        });
     }
-    public void webViewRunJs(String script){
+    public void webViewRunJs(final String script){
         new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(()-> {
-            MainActivity activity=(MainActivity)ApiServer.defaultAndroidContext;
-            activity.webviewRunJs(script);
+            if(ApiServer.defaultAndroidContext instanceof MainActivity){
+                ((MainActivity)ApiServer.defaultAndroidContext).webviewRunJs(script);
+            }
         });
     }
 
     public View getCurrentMainContent(){
+        if(!(ApiServer.defaultAndroidContext instanceof Activity)){
+            throw new IllegalStateException("defaultAndroidContext is not an Activity");
+        }
         Activity activity = (Activity) ApiServer.defaultAndroidContext;
-        return ((ViewGroup)activity.findViewById(android.R.id.content)).getChildAt(0);
+        ViewGroup content=(ViewGroup)activity.findViewById(android.R.id.content);
+        return content==null?null:content.getChildAt(0);
     }
     EventDispatcher dialogEvent=new EventDispatcher().setEventType(String.class);
     public EventDispatcher dialogEvent(){
@@ -117,8 +137,8 @@ public class AndroidUIBase implements Closeable {
         });
     }
     @MethodTypeDecl("o->c")
-    public Object[] dialogGet(AlertDialog dialog){
-        return new Object[]{dialog.isShowing()};
+    public boolean dialogGet(AlertDialog dialog){
+        return dialog.isShowing();
     }
     public void dialogNew(AsyncReturn<AlertDialog> aret,String btn1,String id1,String btn2,String id2){
         new Handler(ApiServer.defaultAndroidContext.getMainLooper()).post(()-> {
@@ -132,7 +152,7 @@ public class AndroidUIBase implements Closeable {
             }
             if(!btn2.equals("")){
                 builder.setNegativeButton(btn2,(dialog, which)->{
-                    ApiServer.fireEventAsync(dialogEvent,id1);
+                    ApiServer.fireEventAsync(dialogEvent,id2);
                 });
             }
             ApiServer.resolveAsync(aret,builder.create());
@@ -154,7 +174,7 @@ public class AndroidUIBase implements Closeable {
     long lastBackTime=0;
     long exitInterval=2000;
     public boolean _backPressed(){
-        extraEvent.fireEvent("backPressed");
+        getExtraUIEvent().fireEvent("backPressed");
         if(!AndroidUIBase.interceptBackPressed){
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastBackTime < exitInterval) {

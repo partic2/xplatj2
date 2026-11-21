@@ -179,18 +179,18 @@ public class ApiServer {
 
     }
     //map<requestCode,callback:([requestCode,resultCode,data])->void>
-    public static Map<Integer, OneArgFunc<Boolean,Object[]>> onActivityResultCallback =new HashMap<>();
+    //ConcurrentHashMap: entries are put from RPC threads and consumed on the main thread.
+    public static Map<Integer, OneArgFunc<Boolean,Object[]>> onActivityResultCallback = new java.util.concurrent.ConcurrentHashMap<>();
     public static void onActivityResult(int requestCode, int resultCode, Intent data){
-        if(onActivityResultCallback.containsKey(requestCode)){
-            //we should prevent invoke callback on main thread.
-            PlatCoreConfig.get().executor.execute(()->{
-                onActivityResultCallback.get(requestCode).call(new Object[]{requestCode,resultCode,data});
-            });
-        }else{
-            PlatCoreConfig.get().executor.execute(()->{
-                onActivityResultCallback.get(0).call(new Object[]{requestCode,resultCode,data});
-            });
+        //Activity results are one-shot callbacks: remove before dispatch so a repeat
+        //delivery cannot fire a finished request twice, and unknown codes are ignored.
+        final OneArgFunc<Boolean,Object[]> cb = onActivityResultCallback.remove(requestCode);
+        if(cb==null){
+            return;
         }
+        PlatCoreConfig.get().executor.execute(()->{
+            cb.call(new Object[]{requestCode,resultCode,data});
+        });
     }
 
     public static <T> void resolveAsync(AsyncReturn<T> aret, final T result){
